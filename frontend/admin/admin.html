@@ -1,0 +1,786 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Panel - E-Commerce</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #f8f9fa;
+            color: #333;
+        }
+
+        .admin-container {
+            display: grid;
+            grid-template-columns: 250px 1fr;
+            min-height: 100vh;
+        }
+
+        /* Sidebar */
+        .sidebar {
+            background: #2c3e50;
+            color: #fff;
+            padding: 2rem 0;
+        }
+
+        .sidebar-header {
+            padding: 0 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .sidebar-header h2 {
+            font-size: 1.5rem;
+        }
+
+        .sidebar-menu {
+            list-style: none;
+        }
+
+        .sidebar-menu li {
+            padding: 1rem 1.5rem;
+            cursor: pointer;
+            transition: background 0.3s;
+            border-left: 3px solid transparent;
+        }
+
+        .sidebar-menu li:hover,
+        .sidebar-menu li.active {
+            background: #34495e;
+            border-left-color: #3498db;
+        }
+
+        /* Main Content */
+        .main-content {
+            padding: 2rem;
+        }
+
+        .header {
+            background: #fff;
+            padding: 1.5rem;
+            border-radius: 10px;
+            margin-bottom: 2rem;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .header h1 {
+            font-size: 2rem;
+        }
+
+        .back-btn {
+            background: #3498db;
+            color: #fff;
+            padding: 0.75rem 1.5rem;
+            border: none;
+            border-radius: 5px;
+            text-decoration: none;
+            cursor: pointer;
+        }
+
+        /* Stats Cards */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .stat-card {
+            background: #fff;
+            padding: 2rem;
+            border-radius: 10px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .stat-info h3 {
+            font-size: 2rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .stat-info p {
+            color: #7f8c8d;
+        }
+
+        .stat-icon {
+            font-size: 3rem;
+        }
+
+        /* Content Section */
+        .content-section {
+            background: #fff;
+            padding: 2rem;
+            border-radius: 10px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            display: none;
+        }
+
+        .content-section.active {
+            display: block;
+        }
+
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+            padding-bottom: 1rem;
+            border-bottom: 2px solid #ecf0f1;
+        }
+
+        .section-header h2 {
+            font-size: 1.5rem;
+        }
+
+        .btn-primary {
+            background: #27ae60;
+            color: #fff;
+            padding: 0.75rem 1.5rem;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        .btn-primary:hover {
+            background: #229954;
+        }
+
+        /* Table */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        thead {
+            background: #ecf0f1;
+        }
+
+        th, td {
+            padding: 1rem;
+            text-align: left;
+            border-bottom: 1px solid #ecf0f1;
+        }
+
+        tr:hover {
+            background: #f8f9fa;
+        }
+
+        .btn-edit {
+            background: #3498db;
+            color: #fff;
+            padding: 0.5rem 1rem;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-right: 0.5rem;
+        }
+
+        .btn-delete {
+            background: #e74c3c;
+            color: #fff;
+            padding: 0.5rem 1rem;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        .badge {
+            padding: 0.25rem 0.75rem;
+            border-radius: 15px;
+            font-size: 0.9rem;
+        }
+
+        .badge-pending {
+            background: #f39c12;
+            color: #fff;
+        }
+
+        .badge-completed {
+            background: #27ae60;
+            color: #fff;
+        }
+
+        .badge-cancelled {
+            background: #e74c3c;
+            color: #fff;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 3rem;
+        }
+
+        .spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #3498db;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            z-index: 1000;
+        }
+
+        .modal.active {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-content {
+            background: #fff;
+            padding: 2rem;
+            border-radius: 10px;
+            max-width: 500px;
+            width: 90%;
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: bold;
+        }
+
+        .form-group input,
+        .form-group textarea,
+        .form-group select {
+            width: 100%;
+            padding: 0.75rem;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 1rem;
+        }
+
+        .form-actions {
+            display: flex;
+            gap: 1rem;
+            justify-content: flex-end;
+        }
+
+        .btn-cancel {
+            background: #95a5a6;
+            color: #fff;
+            padding: 0.75rem 1.5rem;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <div class="admin-container">
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <h2>⚙️ Admin Panel</h2>
+            </div>
+            <ul class="sidebar-menu">
+                <li class="active" onclick="showSection('dashboard')">📊 Dashboard</li>
+                <li onclick="showSection('products')">📦 Sản phẩm</li>
+                <li onclick="showSection('orders')">🛒 Đơn hàng</li>
+                <li onclick="showSection('users')">👥 Người dùng</li>
+            </ul>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <div class="header">
+                <h1>Quản lý hệ thống</h1>
+                <a href="index.html" class="back-btn">← Về trang chủ</a>
+            </div>
+
+            <!-- Dashboard Section -->
+            <section id="dashboard" class="content-section active">
+                <div class="stats-grid" id="statsGrid">
+                    <div class="loading">
+                        <div class="spinner"></div>
+                        <p>Đang tải thống kê...</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Products Section -->
+            <section id="products" class="content-section">
+                <div class="section-header">
+                    <h2>Quản lý sản phẩm</h2>
+                    <button class="btn-primary" onclick="openProductModal()">+ Thêm sản phẩm</button>
+                </div>
+                <div id="productsTable">
+                    <div class="loading">
+                        <div class="spinner"></div>
+                        <p>Đang tải sản phẩm...</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Orders Section -->
+            <section id="orders" class="content-section">
+                <div class="section-header">
+                    <h2>Quản lý đơn hàng</h2>
+                </div>
+                <div id="ordersTable">
+                    <div class="loading">
+                        <div class="spinner"></div>
+                        <p>Đang tải đơn hàng...</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Users Section -->
+            <section id="users" class="content-section">
+                <div class="section-header">
+                    <h2>Quản lý người dùng</h2>
+                </div>
+                <div id="usersTable">
+                    <div class="loading">
+                        <div class="spinner"></div>
+                        <p>Đang tải người dùng...</p>
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <!-- Product Modal -->
+    <div id="productModal" class="modal">
+        <div class="modal-content">
+            <h2>Thêm sản phẩm mới</h2>
+            <form id="productForm">
+                <div class="form-group">
+                    <label>Tên sản phẩm</label>
+                    <input type="text" name="name" required>
+                </div>
+                <div class="form-group">
+                    <label>Mô tả</label>
+                    <textarea name="description" rows="3"></textarea>
+                </div>
+                <div class="form-group">
+                    <label>Giá</label>
+                    <input type="number" name="price" required>
+                </div>
+                <div class="form-group">
+                    <label>Số lượng</label>
+                    <input type="number" name="stock" required>
+                </div>
+                <div class="form-actions">
+                    <button type="button" class="btn-cancel" onclick="closeProductModal()">Hủy</button>
+                    <button type="submit" class="btn-primary">Lưu</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        const API_URL = 'http://localhost:8000/admin-panel';
+
+        function showSection(sectionId) {
+            // Update sidebar active
+            document.querySelectorAll('.sidebar-menu li').forEach(li => {
+                li.classList.remove('active');
+            });
+            event.target.classList.add('active');
+
+            // Update content section
+            document.querySelectorAll('.content-section').forEach(section => {
+                section.classList.remove('active');
+            });
+            document.getElementById(sectionId).classList.add('active');
+
+            // Load data
+            switch(sectionId) {
+                case 'dashboard':
+                    loadDashboard();
+                    break;
+                case 'products':
+                    loadProducts();
+                    break;
+                case 'orders':
+                    loadOrders();
+                    break;
+                case 'users':
+                    loadUsers();
+                    break;
+            }
+        }
+
+        async function loadDashboard() {
+            try {
+                const response = await fetch(`${API_URL}/dashboard/`);
+                const data = await response.json();
+                
+                if (data.success) {
+                    const stats = data.data;
+                    document.getElementById('statsGrid').innerHTML = `
+                        <div class="stat-card">
+                            <div class="stat-info">
+                                <h3>${stats.total_users || 0}</h3>
+                                <p>Tổng người dùng</p>
+                            </div>
+                            <div class="stat-icon">👥</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-info">
+                                <h3>${stats.total_products || 0}</h3>
+                                <p>Tổng sản phẩm</p>
+                            </div>
+                            <div class="stat-icon">📦</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-info">
+                                <h3>${stats.total_orders || 0}</h3>
+                                <p>Tổng đơn hàng</p>
+                            </div>
+                            <div class="stat-icon">🛒</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-info">
+                                <h3>${parseFloat(stats.total_revenue || 0).toLocaleString('vi-VN')}đ</h3>
+                                <p>Tổng doanh thu</p>
+                            </div>
+                            <div class="stat-icon">💰</div>
+                        </div>
+                    `;
+                }
+            } catch (error) {
+                console.error('Error loading dashboard:', error);
+                document.getElementById('statsGrid').innerHTML = '<p>Lỗi khi tải dữ liệu dashboard</p>';
+            }
+        }
+
+        async function loadProducts() {
+            try {
+                const response = await fetch(`${API_URL}/products/`);
+                const data = await response.json();
+                
+                if (data.success && data.data) {
+                    document.getElementById('productsTable').innerHTML = `
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Tên sản phẩm</th>
+                                    <th>Giá</th>
+                                    <th>Số lượng</th>
+                                    <th>Đánh giá</th>
+                                    <th>Thao tác</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                ${data.data.map(product => `
+                                    <tr>
+                                        <td>${product.id}</td>
+                                        <td>${product.name}</td>
+                                        <td>${parseFloat(product.price).toLocaleString('vi-VN')}đ</td>
+                                        <td>${product.stock || 0}</td>
+                                        <td>⭐ ${product.rating || 0}</td>
+                                        <td>
+                                            <button class="btn-edit" onclick="editProduct(${product.id})">Sửa</button>
+                                            <button class="btn-delete" onclick="deleteProduct(${product.id})">Xóa</button>
+                                        </td>
+                                    </tr>
+                                `).join('')}
+                            </tbody>
+                        </table>
+                    `;
+                }
+            } catch (error) {
+                console.error('Error loading products:', error);
+                document.getElementById('productsTable').innerHTML = '<p>Lỗi khi tải danh sách sản phẩm</p>';
+            }
+        }
+
+        async function loadOrders() {
+            try {
+                const response = await fetch(`${API_URL}/orders/`);
+                const data = await response.json();
+                
+                if (data.success && data.data) {
+                    document.getElementById('ordersTable').innerHTML = `
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Người dùng</th>
+                                    <th>Tổng tiền</th>
+                                    <th>Trạng thái</th>
+                                    <th>Ngày tạo</th>
+                                    <th>Thao tác</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                ${data.data.map(order => `
+                                    <tr>
+                                        <td>${order.id}</td>
+                                        <td>User #${order.user_id}</td>
+                                        <td>${parseFloat(order.total_amount || 0).toLocaleString('vi-VN')}đ</td>
+                                        <td><span class="badge badge-${order.status}">${order.status}</span></td>
+                                        <td>${new Date(order.created_at).toLocaleDateString('vi-VN')}</td>
+                                        <td>
+                                            <button class="btn-edit" onclick="viewOrder(${order.id})">Xem</button>
+                                        </td>
+                                    </tr>
+                                `).join('')}
+                            </tbody>
+                        </table>
+                    `;
+                }
+            } catch (error) {
+                console.error('Error loading orders:', error);
+                document.getElementById('ordersTable').innerHTML = '<p>Lỗi khi tải danh sách đơn hàng</p>';
+            }
+        }
+
+        async function loadUsers() {
+            try {
+                const response = await fetch(`${API_URL}/users/`);
+                const data = await response.json();
+                
+                if (data.success && data.data) {
+                    document.getElementById('usersTable').innerHTML = `
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Email</th>
+                                    <th>Họ tên</th>
+                                    <th>Ngày tạo</th>
+                                    <th>Trạng thái</th>
+                                    <th>Thao tác</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                ${data.data.map(user => `
+                                    <tr>
+                                        <td>${user.id}</td>
+                                        <td>${user.email}</td>
+                                        <td>${user.first_name} ${user.last_name}</td>
+                                        <td>${new Date(user.date_joined).toLocaleDateString('vi-VN')}</td>
+                                        <td>${user.banned ? '🚫 Banned' : '✅ Active'}</td>
+                                        <td>
+                                            <button class="btn-edit" onclick="viewUser(${user.id})">Xem</button>
+                                            <button class="btn-delete" onclick="banUser(${user.id})">Ban</button>
+                                        </td>
+                                    </tr>
+                                `).join('')}
+                            </tbody>
+                        </table>
+                    `;
+                }
+            } catch (error) {
+                console.error('Error loading users:', error);
+                document.getElementById('usersTable').innerHTML = '<p>Lỗi khi tải danh sách người dùng</p>';
+            }
+        }
+
+        function openProductModal() {
+            document.getElementById('productModal').classList.add('active');
+        }
+
+        function closeProductModal() {
+            document.getElementById('productModal').classList.remove('active');
+            document.getElementById('productForm').reset();
+            delete document.getElementById('productForm').dataset.productId;
+            delete document.getElementById('productForm').dataset.mode;
+        }
+
+        // Handle product form submission
+        document.addEventListener('DOMContentLoaded', () => {
+            const productForm = document.getElementById('productForm');
+            productForm.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                
+                const formData = new FormData(productForm);
+                const productData = {
+                    name: formData.get('name'),
+                    description: formData.get('description'),
+                    price: parseFloat(formData.get('price')),
+                    stock: parseInt(formData.get('stock'))
+                };
+                
+                const isEdit = productForm.dataset.mode === 'edit';
+                const productId = productForm.dataset.productId;
+                
+                try {
+                    const url = isEdit 
+                        ? `http://localhost:4002/products/${productId}/`
+                        : 'http://localhost:4002/products/';
+                    
+                    const response = await fetch(url, {
+                        method: isEdit ? 'PATCH' : 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify(productData)
+                    });
+
+                    if (response.ok) {
+                        alert(isEdit ? '✓ Đã cập nhật sản phẩm' : '✓ Đã thêm sản phẩm mới');
+                        closeProductModal();
+                        loadProducts();
+                    } else {
+                        alert('✗ Không thể lưu sản phẩm');
+                    }
+                } catch (error) {
+                    console.error('Error saving product:', error);
+                    alert('✗ Lỗi khi lưu sản phẩm');
+                }
+            });
+        });
+
+        async function editProduct(id) {
+            try {
+                const response = await fetch(`${API_URL}/products/${id}/`);
+                const product = await response.json();
+                
+                // Populate form
+                document.querySelector('[name="name"]').value = product.name;
+                document.querySelector('[name="description"]').value = product.description || '';
+                document.querySelector('[name="price"]').value = product.price;
+                document.querySelector('[name="stock"]').value = product.stock || 0;
+                
+                // Change form submission to update
+                const form = document.getElementById('productForm');
+                form.dataset.productId = id;
+                form.dataset.mode = 'edit';
+                
+                openProductModal();
+            } catch (error) {
+                console.error('Error loading product:', error);
+                alert('Không thể tải thông tin sản phẩm');
+            }
+        }
+
+        async function deleteProduct(id) {
+            if (!confirm('Bạn có chắc muốn xóa sản phẩm này?')) {
+                return;
+            }
+
+            try {
+                const response = await fetch(`http://localhost:4002/products/${id}/`, {
+                    method: 'DELETE'
+                });
+
+                if (response.ok) {
+                    alert('✓ Đã xóa sản phẩm thành công');
+                    loadProducts();
+                } else {
+                    alert('✗ Không thể xóa sản phẩm');
+                }
+            } catch (error) {
+                console.error('Error deleting product:', error);
+                alert('✗ Lỗi khi xóa sản phẩm');
+            }
+        }
+
+        async function viewOrder(id) {
+            try {
+                const response = await fetch(`http://localhost:4003/orders/${id}/`);
+                const order = await response.json();
+                
+                let orderDetails = `
+                    <h3>Chi tiết đơn hàng #${order.id}</h3>
+                    <p><strong>Khách hàng:</strong> User #${order.user_id}</p>
+                    <p><strong>Tổng tiền:</strong> ${parseFloat(order.total_amount || 0).toLocaleString('vi-VN')}đ</p>
+                    <p><strong>Trạng thái:</strong> ${order.status}</p>
+                    <p><strong>Ngày tạo:</strong> ${new Date(order.created_at).toLocaleDateString('vi-VN')}</p>
+                `;
+                
+                if (order.items && order.items.length > 0) {
+                    orderDetails += '<h4>Sản phẩm:</h4><ul>';
+                    order.items.forEach(item => {
+                        orderDetails += `<li>${item.product_name || 'Product #' + item.product_id} - SL: ${item.quantity} - ${parseFloat(item.price).toLocaleString('vi-VN')}đ</li>`;
+                    });
+                    orderDetails += '</ul>';
+                }
+                
+                alert(orderDetails);
+            } catch (error) {
+                console.error('Error viewing order:', error);
+                alert('Không thể xem chi tiết đơn hàng');
+            }
+        }
+
+        async function viewUser(id) {
+            try {
+                const response = await fetch(`http://localhost:4001/users/${id}/`);
+                const user = await response.json();
+                
+                const userDetails = `
+                    Thông tin người dùng #${user.id}
+                    
+                    Email: ${user.email}
+                    Tên: ${user.first_name} ${user.last_name}
+                    Số điện thoại: ${user.phone || 'N/A'}
+                    Ngày tạo: ${new Date(user.date_joined).toLocaleDateString('vi-VN')}
+                    Trạng thái: ${user.banned ? 'Banned' : 'Active'}
+                `;
+                
+                alert(userDetails);
+            } catch (error) {
+                console.error('Error viewing user:', error);
+                alert('Không thể xem chi tiết người dùng');
+            }
+        }
+
+        async function banUser(id) {
+            if (!confirm('Bạn có chắc muốn ban người dùng này?')) {
+                return;
+            }
+
+            try {
+                const response = await fetch(`http://localhost:4001/users/${id}/ban/`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ banned: true })
+                });
+
+                if (response.ok) {
+                    alert('✓ Đã ban người dùng thành công');
+                    loadUsers();
+                } else {
+                    alert('✗ Không thể ban người dùng');
+                }
+            } catch (error) {
+                console.error('Error banning user:', error);
+                alert('✗ Lỗi khi ban người dùng');
+            }
+        }
+
+        // Load dashboard on page load
+        window.addEventListener('DOMContentLoaded', loadDashboard);
+    </script>
+</body>
+</html>

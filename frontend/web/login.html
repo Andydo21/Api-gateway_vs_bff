@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Đăng nhập - E-Shop</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .login-container {
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+            width: 100%;
+            max-width: 400px;
+            padding: 40px;
+        }
+
+        .logo {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .logo h1 {
+            color: #667eea;
+            font-size: 2rem;
+            margin-bottom: 10px;
+        }
+
+        .logo p {
+            color: #6c757d;
+            font-size: 0.9rem;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            color: #333;
+            font-weight: 500;
+            margin-bottom: 8px;
+        }
+
+        input {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: border-color 0.3s;
+        }
+
+        input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .btn-login {
+            width: 100%;
+            padding: 14px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+
+        .btn-login:hover {
+            transform: translateY(-2px);
+        }
+
+        .btn-login:active {
+            transform: translateY(0);
+        }
+
+        .error {
+            background: #fee;
+            color: #c33;
+            padding: 12px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            display: none;
+        }
+
+        .register-link {
+            text-align: center;
+            margin-top: 20px;
+            color: #6c757d;
+        }
+
+        .register-link a {
+            color: #667eea;
+            text-decoration: none;
+            font-weight: 600;
+        }
+
+        .demo-info {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 20px;
+            font-size: 0.85rem;
+            color: #6c757d;
+        }
+
+        .demo-info strong {
+            color: #333;
+        }
+    </style>
+</head>
+<body>
+    <div class="login-container">
+        <div class="logo">
+            <h1>🛒 E-Shop</h1>
+            <p>Đăng nhập để tiếp tục</p>
+        </div>
+
+        <div id="errorMsg" class="error"></div>
+
+        <form id="loginForm">
+            <div class="form-group">
+                <label>Tên đăng nhập</label>
+                <input type="text" id="username" required autocomplete="username">
+            </div>
+
+            <div class="form-group">
+                <label>Mật khẩu</label>
+                <input type="password" id="password" required autocomplete="current-password">
+            </div>
+
+            <button type="submit" class="btn-login">Đăng nhập</button>
+        </form>
+
+        <div class="demo-info">
+            <strong>Tài khoản demo:</strong><br>
+            Username: <code>john_doe</code><br>
+            Password: <code>password123</code>
+        </div>
+
+        <div class="register-link">
+            Chưa có tài khoản? <a href="#">Đăng ký ngay</a>
+        </div>
+    </div>
+
+    <script>
+        const API_BASE = 'http://localhost:8000';
+
+        // Sync guest cart to database after login
+        async function syncGuestCartToDatabase(userId, token) {
+            if (!userId || !token) return;
+
+            const guestCart = JSON.parse(localStorage.getItem('guestCart') || '[]');
+            
+            if (guestCart.length === 0) return; // No guest cart to sync
+
+            console.log('Syncing guest cart to database:', guestCart);
+
+            try {
+                // Add each item from guest cart to database
+                for (const item of guestCart) {
+                    await fetch(`${API_BASE}/web/cart/add/`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({
+                            user_id: userId,
+                            product_id: item.product_id,
+                            product_name: item.product_name,
+                            price: item.price,
+                            quantity: item.quantity
+                        })
+                    });
+                }
+
+                // Clear guest cart after successful sync
+                localStorage.removeItem('guestCart');
+                console.log('Guest cart synced and cleared');
+            } catch (error) {
+                console.error('Error syncing guest cart:', error);
+                // Don't block login if sync fails
+            }
+        }
+
+        document.getElementById('loginForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+            const errorMsg = document.getElementById('errorMsg');
+            
+            console.log('Login attempt:', username);
+            
+            try {
+                const response = await fetch(`${API_BASE}/web/users/login/`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ username, password })
+                });
+                
+                const data = await response.json();
+                console.log('Login response:', data);
+                
+                if (data.success && data.token) {
+                    // Save auth data
+                    localStorage.setItem('token', data.token);
+                    localStorage.setItem('accessToken', data.access || data.token);
+                    localStorage.setItem('refreshToken', data.refresh || '');
+                    localStorage.setItem('username', data.user?.username || username);
+                    localStorage.setItem('user', JSON.stringify(data.user || {}));
+                    
+                    console.log('Token saved:', localStorage.getItem('token'));
+                    console.log('Username saved:', localStorage.getItem('username'));
+                    
+                    // Sync guest cart to database after login
+                    await syncGuestCartToDatabase(data.user?.id, data.token);
+                    
+                    // Check for redirect parameter
+                    const urlParams = new URLSearchParams(window.location.search);
+                    const redirect = urlParams.get('redirect');
+                    
+                    // Redirect to specified page or home
+                    const targetPage = redirect || 'index.html';
+                    console.log('Redirecting to:', targetPage);
+                    window.location.href = targetPage;
+                } else {
+                    console.error('Login failed:', data);
+                    errorMsg.textContent = data.message || 'Đăng nhập thất bại';
+                    errorMsg.style.display = 'block';
+                }
+            } catch (error) {
+                console.error('Login error:', error);
+                errorMsg.textContent = 'Lỗi kết nối. Vui lòng kiểm tra Docker.';
+                errorMsg.style.display = 'block';
+            }
+        });
+    </script>
+</body>
+</html>

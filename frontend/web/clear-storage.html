@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Clear Storage & Re-login</title>
+</head>
+<body>
+    <h2>🔄 Clear Storage và Đăng nhập lại</h2>
+    <button onclick="clearAndRedirect()">Clear và đăng nhập lại</button>
+    
+    <script>
+        function clearAndRedirect() {
+            localStorage.clear();
+            sessionStorage.clear();
+            console.log('✅ Đã clear storage');
+            window.location.href = 'login.html';
+        }
+        
+        // Auto clear sau 2 giây
+        setTimeout(clearAndRedirect, 2000);
+    </script>
+</body>
+</html>

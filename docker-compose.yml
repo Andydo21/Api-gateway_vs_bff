@@ -1,0 +1,171 @@
+version: '3.8'
+
+services:
+  # PostgreSQL Database
+  postgres:
+    image: postgres:15-alpine
+    environment:
+      POSTGRES_DB: ecommerce
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Redis Cache
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+    command: redis-server --appendonly yes
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # API Gateway
+  api-gateway:
+    build: ./api-gateway
+    ports:
+      - "8000:8000"
+    environment:
+      - DEBUG=True
+      - DB_HOST=postgres
+      - REDIS_HOST=redis
+      - WEB_BFF_URL=http://web-bff:3001
+      - ADMIN_BFF_URL=http://admin-bff:3002
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    volumes:
+      - ./api-gateway:/app
+      - ./frontend:/app/frontend
+
+  # Web BFF
+  web-bff:
+    build: ./bff/web-bff
+    ports:
+      - "3001:3001"
+    environment:
+      - DEBUG=True
+      - DB_HOST=postgres
+      - REDIS_HOST=redis
+      - USER_SERVICE_URL=http://user-service:4001
+      - PRODUCT_SERVICE_URL=http://product-service:4002
+      - ORDER_SERVICE_URL=http://order-service:4003
+      - PAYMENT_SERVICE_URL=http://payment-service:4004
+      - INVENTORY_SERVICE_URL=http://inventory-service:4005
+      - RECOMMENDATION_SERVICE_URL=http://recommendation-service:4006
+    depends_on:
+      - postgres
+    volumes:
+      - ./bff/web-bff:/app
+
+  # Admin BFF
+  admin-bff:
+    build: ./bff/admin-bff
+    ports:
+      - "3002:3002"
+    environment:
+      - DEBUG=True
+      - DB_HOST=postgres
+      - USER_SERVICE_URL=http://user-service:4001
+      - PRODUCT_SERVICE_URL=http://product-service:4002
+      - ORDER_SERVICE_URL=http://order-service:4003
+    depends_on:
+      - postgres
+    volumes:
+      - ./bff/admin-bff:/app
+
+  # User Service
+  user-service:
+    build: ./microservices/user-service
+    ports:
+      - "4001:4001"
+    environment:
+      - DEBUG=True
+      - DB_HOST=postgres
+    depends_on:
+      - postgres
+    volumes:
+      - ./microservices/user-service:/app
+
+  # Product Service
+  product-service:
+    build: ./microservices/product-service
+    ports:
+      - "4002:4002"
+    environment:
+      - DEBUG=True
+      - DB_HOST=postgres
+    depends_on:
+      - postgres
+    volumes:
+      - ./microservices/product-service:/app
+
+  # Order Service
+  order-service:
+    build: ./microservices/order-service
+    ports:
+      - "4003:4003"
+    environment:
+      - DEBUG=True
+      - DB_HOST=postgres
+    depends_on:
+      - postgres
+    volumes:
+      - ./microservices/order-service:/app
+
+  # Payment Service
+  payment-service:
+    build: ./microservices/payment-service
+    ports:
+      - "4004:4004"
+    environment:
+      - DEBUG=True
+      - DB_HOST=postgres
+    depends_on:
+      - postgres
+    volumes:
+      - ./microservices/payment-service:/app
+
+  # Inventory Service
+  inventory-service:
+    build: ./microservices/inventory-service
+    ports:
+      - "4005:4005"
+    environment:
+      - DEBUG=True
+      - DB_HOST=postgres
+    depends_on:
+      - postgres
+    volumes:
+      - ./microservices/inventory-service:/app
+
+  # Recommendation Service
+  recommendation-service:
+    build: ./microservices/recommendation-service
+    ports:
+      - "4006:4006"
+    environment:
+      - DEBUG=True
+      - DB_HOST=postgres
+    depends_on:
+      - postgres
+    volumes:
+      - ./microservices/recommendation-service:/app
+
+volumes:
+  postgres_data:
+  redis_data:
