@@ -19,7 +19,8 @@ def create_route(route_id, uri, upstream_nodes, name):
             "nodes": upstream_nodes
         },
         "plugins": {
-            "prometheus": {}
+            "prometheus": {},
+            "cors": {}
         }
     }
     response = requests.put(url, headers=headers, data=json.dumps(data))

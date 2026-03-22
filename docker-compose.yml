@@ -336,6 +336,17 @@ services:
       frontend-service:
         condition: service_started
 
+  # APISIX Dashboard
+  apisix-dashboard:
+    image: apache/apisix-dashboard:3.0.1-alpine
+    ports:
+      - "9000:9000"
+    volumes:
+      - ./apisix_conf/dashboard_conf.yaml:/usr/local/apisix-dashboard/conf/conf.yaml:ro
+    depends_on:
+      etcd:
+        condition: service_healthy
+
 volumes:
   postgres_data:
   redis_data:
