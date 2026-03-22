@@ -1,5 +1,6 @@
 {
   "artifactType": "ARTIFACT_TYPE_OTHER",
-  "summary": "This document explains all the technical and business flows of the microservices project, including synchronous API calls, asynchronous events via Kafka, and the Transactional Outbox pattern.",
-  "updatedAt": "2026-03-22T12:52:09.506150800Z"
+  "summary": "Updated the flows explanation to include a dedicated section on the role of the API Gateway (Proxy) vs. the BFF. Used a \"Building Receptionist\" analogy to make the concepts of routing, security, and data aggregation easier to understand.",
+  "updatedAt": "2026-03-22T16:15:31.163904400Z",
+  "version": "1"
 }

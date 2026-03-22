@@ -4,11 +4,38 @@ Hệ thống của bạn được xây dựng trên kiến trúc **Microservices
 
 ---
 
-## 1. Luồng Truy Vấn Dữ Liệu (Synchronous Request Flow)
+## Luồng Xử lý & Kiến trúc Proxy/BFF
+
+Dưới đây là giải giải thích về cách dữ liệu di chuyển trong hệ thống và tại sao chúng ta cần các thành phần như API Gateway (Proxy) và BFF.
+
+### 1. Proxy (API Gateway) là gì? Tại sao phải thêm vào?
+
+Hãy tưởng tượng hệ thống Microservices của bạn giống như một tòa nhà văn phòng lớn với nhiều phòng ban (User Service, Startup Service, v.v.).
+
+**Nếu không có Proxy:**
+Khách hàng (Frontend) muốn giao dịch với 10 phòng ban thì phải tự đi tìm đúng cửa của 10 phòng đó. Nếu phòng ban chuyển chỗ, khách hàng sẽ bị lạc.
+
+**Khi có Proxy (Apache APISIX):**
+Proxy đóng vai trò như **Quầy lễ tân** duy nhất ở cổng chính.
+- **Một địa chỉ duy nhất:** Frontend chỉ cần gửi yêu cầu đến `http://localhost/`. Lễ tân sẽ biết phải dẫn khách đến đúng phòng nào.
+- **Bảo vệ (Security):** Lễ tân kiểm tra thẻ căn cước (JWT Token) của khách ngay tại cửa. Nếu không có thẻ, khách bị đuổi về luôn, không được vào quấy rầy các phòng ban bên trong.
+- **Kiểm soát (Rate Limit):** Ngăn chặn một người chạy ra chạy vào quá nhiều lần làm tắc nghẽn cổng.
+- **Theo dõi (Logging):** Ghi lại nhật ký ai đã vào tòa nhà vào lúc nào.
+
+### 2. BFF (Backend-for-Frontend) khác gì Proxy?
+
+Nếu Proxy là **Lễ tân**, thì BFF giống như một **Trợ lý riêng** của từng nhóm khách.
+
+- **Proxy (APISIX):** Chỉ dẫn đường và kiểm tra an ninh (Cấp độ hạ tầng).
+- **BFF (Admin BFF / Web BFF):** Hiểu rõ khách cần gì. Nếu khách muốn một bản "Báo cáo tổng hợp", trợ lý (BFF) sẽ đi gom dữ liệu từ 3-4 phòng ban khác nhau, đóng gói thành một tệp duy nhất và đưa cho khách. Khách không phải tự đi gom (Aggregation).
+
+---
+
+## 3. Luồng Truy Vấn Dữ Liệu (Synchronous Request Flow)
 **Mục đích:** Khi người dùng muốn xem thông tin (VD: danh sách Startup, xem hồ sơ cá nhân).
 
 *   **Bước 1 (Frontend):** Trình duyệt gửi request (VD: `GET /web/startups/`) tới **API Gateway** (Port 8000).
-*   **Bước 2 (API Gateway):** 
+*   **Bước 2 (API Gateway):**
     *   Kiểm tra đăng nhập (JWT Token).
     *   Nếu hợp lệ, nó sẽ đính kèm thông tin User ID vào Header (`X-User-ID`) và chuyển tiếp tới **Web-BFF**.
 *   **Bước 3 (Web-BFF):** 
