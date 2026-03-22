@@ -22,6 +22,15 @@ Mục tiêu là mở rộng khả năng quản trị của `admin-bff`, cho phé
     - `/users/<id>/unblock/`
 - Xóa các route liên quan đến `inventory`.
 
+### [Component] Admin Frontend (Frontend Layer)
+
+#### [MODIFY] [admin.html](file:///d:/Django_project/api-gateway_vs_bff/frontend/admin/admin.html)
+- **Sidebar**: Loại bỏ mục "Kho cổ phần", thêm mục "Tổng quan" (Dashboard Stats).
+- **Dashboard Section**: Thêm một section mới hiển thị các chỉ số tổng hợp (Người dùng, Startup, Hệ thống).
+- **Startup Section**: Cập nhật bảng để hiển thị trạng thái (APPROVED/PENDING) và thêm nút "Duyệt"/"Từ chối" cho các startup đang chờ.
+- **User Section**: Cập nhật hàm xử lý khóa người dùng để gọi đúng các endpoint `block`/`unblock` mới.
+- **Cleanup**: Xóa bỏ toàn bộ HTML/JS liên quan đến `inventory`.
+
 ## Verification Plan
 
 ### Automated Tests

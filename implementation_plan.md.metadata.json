@@ -1,6 +1,6 @@
 {
   "artifactType": "ARTIFACT_TYPE_IMPLEMENTATION_PLAN",
-  "summary": "Plan to enhance the Admin BFF with specialized features for startup approval, user management, and system-wide statistics. This includes fixing the existing dashboard stats logic and removing legacy inventory code.",
-  "updatedAt": "2026-03-22T15:55:23.139683Z",
-  "version": "6"
+  "summary": "Updated plan to include Frontend (UI) changes for the Admin Dashboard. This involves adding a statistics overview, implementing approval workflows for startups, and cleaning up legacy components.",
+  "updatedAt": "2026-03-22T15:56:28.070241900Z",
+  "version": "7"
 }

@@ -240,17 +240,38 @@
     <!-- Sidebar -->
     <div class="sidebar">
         <h2>🚀 Startup Hub Admin</h2>
-        <div class="nav-item active" onclick="showSection('startups', event)">🏠 Dự án Startup</div>
+        <div class="nav-item active" onclick="showSection('dashboard', event)">📊 Tổng quan</div>
+        <div class="nav-item" onclick="showSection('startups', event)">🏠 Dự án Startup</div>
         <div class="nav-item" onclick="showSection('pitch-slots', event)">🤝 Duyệt Pitch Slot</div>
-        <div class="nav-item" onclick="showSection('inventory', event)">🧱 Kho cổ phần</div>
         <div class="nav-item" onclick="showSection('users', event)">👥 Người dùng</div>
         <div class="nav-item" onclick="showSection('notifications', event)">🔔 Thông báo</div>
     </div>
 
     <!-- Main Content -->
     <div class="main-content">
+        <!-- Dashboard Section -->
+        <section id="section-dashboard">
+            <div class="header">
+                <h1>Tổng quan hệ thống</h1>
+            </div>
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1.5rem; margin-bottom: 2.5rem;">
+                <div class="card" style="margin-bottom: 0; text-align: center;">
+                    <h3 style="color: #718096; font-size: 0.9rem;">Tổng Người dùng</h3>
+                    <p id="stat-users" style="font-size: 2rem; font-weight: bold; color: #667eea;">--</p>
+                </div>
+                <div class="card" style="margin-bottom: 0; text-align: center;">
+                    <h3 style="color: #718096; font-size: 0.9rem;">Startup Hoạt động</h3>
+                    <p id="stat-startups" style="font-size: 2rem; font-weight: bold; color: #48bb78;">--</p>
+                </div>
+                <div class="card" style="margin-bottom: 0; text-align: center;">
+                    <h3 style="color: #718096; font-size: 0.9rem;">Bị khóa</h3>
+                    <p id="stat-banned" style="font-size: 2rem; font-weight: bold; color: #f56565;">--</p>
+                </div>
+            </div>
+        </section>
+
         <!-- Startups Section -->
-        <section id="section-startups">
+        <section id="section-startups" style="display: none;">
             <div class="header">
                 <h1>Quản lý Startup</h1>
                 <button class="btn-add" onclick="openStartupModal()">+ Thêm Startup</button>
@@ -299,28 +320,6 @@
             </div>
         </section>
 
-        <!-- Inventory Section -->
-        <section id="section-inventory" style="display: none;">
-            <div class="header">
-                <h1>Quản lý Kho cổ phần</h1>
-            </div>
-            <div class="card">
-                <table>
-                    <thead>
-                        <tr>
-                            <th>Startup ID</th>
-                            <th>Tên Startup</th>
-                            <th>Cổ phần có sẵn</th>
-                            <th>Cổ phần giữ chỗ</th>
-                            <th>Thao tác</th>
-                        </tr>
-                    </thead>
-                    <tbody id="inventoryTable">
-                        <!-- Data loaded via JS -->
-                    </tbody>
-                </table>
-            </div>
-        </section>
         
         <!-- Users Section -->
         <section id="section-users" style="display: none;">
@@ -444,11 +443,24 @@
             document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
             if (event) event.target.classList.add('active');
 
+            if (sectionId === 'dashboard') loadDashboardStats();
             if (sectionId === 'startups') loadStartups();
             if (sectionId === 'pitch-slots') loadPitchSlots();
-            if (sectionId === 'inventory') loadInventory();
             if (sectionId === 'users') loadUsers();
             if (sectionId === 'notifications') loadNotifications();
+        }
+
+        async function loadDashboardStats() {
+            try {
+                const res = await fetch(`${API_BASE}/admin/dashboard/`, { headers: authHeaders() });
+                const json = await res.json();
+                if (json.success) {
+                    const d = json.data;
+                    document.getElementById('stat-users').innerText = d.users.total_users || 0;
+                    document.getElementById('stat-startups').innerText = d.startups.total_startups || 0;
+                    document.getElementById('stat-banned').innerText = d.users.banned_users || 0;
+                }
+            } catch (err) {}
         }
 
         // --- Startups ---
@@ -475,17 +487,34 @@
             table.innerHTML = list.map(s => `
                 <tr>
                     <td>${s.id}</td>
-                    <td><strong>${s.name}</strong></td>
-                    <td>${s.category_name || s.category || 'Khởi nghiệp'}</td>
-                    <td>${formatPrice(s.price)}</td>
-                    <td>${s.stock}</td>
+                    <td><strong>${s.company_name || s.name}</strong></td>
+                    <td>${s.industry || s.category_name || 'Khởi nghiệp'}</td>
+                    <td>${formatPrice(s.valuation || s.price)}</td>
+                    <td><span class="badge ${s.status === 'APPROVED' ? 'badge-completed' : 'badge-pending'}">${s.status || 'PENDING'}</span></td>
                     <td>${s.rating || 0} ★</td>
                     <td>
+                        ${s.status !== 'APPROVED' ? `<button class="btn-edit" onclick="approveStartup(${s.id})" style="color: #48bb78;">Duyệt</button>` : ''}
+                        ${s.status !== 'REJECTED' ? `<button class="btn-delete" onclick="rejectStartup(${s.id})" style="color: #f56565;">Từ chối</button>` : ''}
                         <button class="btn-edit" onclick="editStartup(${s.id})">Sửa</button>
-                        <button class="btn-delete" onclick="deleteStartup(${s.id})">Xóa</button>
                     </td>
                 </tr>
             `).join('');
+        }
+
+        async function approveStartup(id) {
+            if(!confirm('Duyệt dự án này?')) return;
+            try {
+                const res = await fetch(`${API_BASE}/admin/startups/${id}/approve/`, { method: 'POST', headers: authHeaders() });
+                if ((await res.json()).success) { showToast('Đã duyệt dự án!'); loadStartups(); }
+            } catch (err) {}
+        }
+
+        async function rejectStartup(id) {
+            if(!confirm('Từ chối dự án này?')) return;
+            try {
+                const res = await fetch(`${API_BASE}/admin/startups/${id}/reject/`, { method: 'POST', headers: authHeaders() });
+                if ((await res.json()).success) { showToast('Đã từ chối dự án!'); loadStartups(); }
+            } catch (err) {}
         }
 
         function openStartupModal() {
@@ -631,60 +660,6 @@
             return map[status] || status;
         }
 
-        // --- Inventory ---
-        async function loadInventory() {
-            try {
-                const response = await fetch(`${API_BASE}/admin/inventory/`, { headers: authHeaders() });
-                const data = await response.json();
-                if (data.success) {
-                    const inv = data.inventory || data.data || [];
-                    renderInventory(inv);
-                }
-            } catch (err) {}
-        }
-
-        function renderInventory(inv) {
-            const table = document.getElementById('inventoryTable');
-            table.innerHTML = inv.map(i => `
-                <tr>
-                    <td>${i.startup_id || i.product_id}</td>
-                    <td><strong>${i.startup_name || i.product_name || 'N/A'}</strong></td>
-                    <td>${i.available_quantity || i.stock_quantity || 0}</td>
-                    <td>${i.reserved_quantity || 0}</td>
-                    <td><button class="btn-edit" onclick="openInventoryModal(${i.startup_id || i.product_id})">Cập nhật</button></td>
-                </tr>
-            `).join('');
-        }
-
-        function openInventoryModal(id) {
-            document.getElementById('invStartupId').value = id;
-            document.getElementById('stockDelta').value = '';
-            document.getElementById('inventoryModal').classList.add('active');
-        }
-
-        document.getElementById('inventoryForm').onsubmit = async (e) => {
-            e.preventDefault();
-            const id = document.getElementById('invStartupId').value;
-            const delta = document.getElementById('stockDelta').value;
-
-            try {
-                const response = await fetch(`${API_BASE}/admin/inventory/update/`, {
-                    method: 'POST',
-                    headers: authHeaders(),
-                    body: JSON.stringify({ startup_id: parseInt(id), quantity: parseInt(delta) })
-                });
-                const data = await response.json();
-                if (data.success) {
-                    showToast('Đã cập nhật kho!');
-                    document.getElementById('inventoryModal').classList.remove('active');
-                    loadInventory();
-                } else {
-                    showToast('Lỗi: ' + data.error);
-                }
-            } catch (err) {
-                showToast('Lỗi cập nhật');
-            }
-        };
 
         // --- Notifications ---
         async function loadNotifications() {
@@ -771,11 +746,12 @@
         };
 
         async function toggleBan(id, isBanned) {
+            const action = isBanned ? 'unblock' : 'block';
+            if(!confirm(`${isBanned ? 'Mở khóa' : 'Khóa'} người dùng này?`)) return;
             try {
-                const response = await fetch(`${API_BASE}/admin/users/${id}/ban/`, {
-                    method: 'PUT',
-                    headers: authHeaders(),
-                    body: JSON.stringify({ banned: !isBanned })
+                const response = await fetch(`${API_BASE}/admin/users/${id}/${action}/`, {
+                    method: 'POST',
+                    headers: authHeaders()
                 });
                 const data = await response.json();
                 if (data.success) {
