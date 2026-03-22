@@ -21,3 +21,7 @@
     - [x] Create APISIX configuration files (`config.yaml`)
     - [x] Configure routes for all services in APISIX
     - [x] Enable security and monitoring plugins
+    - [x] Restore Redis service in `docker-compose.yml`
+    - [x] **Refactor old Gateway to Frontend Service**
+    - [x] Clean up redundant `ProxyView` logic and URL patterns
+    - [x] Clean up `task.md.resolved.*` and temporary files

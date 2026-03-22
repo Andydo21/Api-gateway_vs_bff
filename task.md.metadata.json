@@ -1,6 +1,6 @@
 {
   "artifactType": "ARTIFACT_TYPE_TASK",
-  "summary": "Task list updated to reflect completion of APISIX Gateway integration. All distributed flows and modern gateway infrastructure are now implemented.",
-  "updatedAt": "2026-03-22T15:10:31.673443300Z",
-  "version": "15"
+  "summary": "Task list updated to reflect the successful integration of APISIX and the refactoring of the old API Gateway into a dedicated Frontend Service. Garbage files have been cleaned up and Redis restored.",
+  "updatedAt": "2026-03-22T15:15:42.788227500Z",
+  "version": "16"
 }
