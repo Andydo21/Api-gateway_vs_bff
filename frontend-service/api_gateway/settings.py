@@ -14,14 +14,12 @@ ALLOWED_HOSTS = [host.strip() for host in config('ALLOWED_HOSTS', default='local
 
 # Application definition
 INSTALLED_APPS = [
-    'daphne',
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.staticfiles',
     'rest_framework',
     'corsheaders',
     'gateway',
-    'channels',
 ]
 
 MIDDLEWARE = [
@@ -31,9 +29,6 @@ MIDDLEWARE = [
     # 'django.middleware.csrf.CsrfViewMiddleware',  # Disabled for REST API
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
-    'gateway.auth_middleware.JWTAuthenticationMiddleware',  # JWT auth at Gateway level
-    'gateway.middleware.RateLimitMiddleware',
-    'gateway.middleware.LoggingMiddleware',
 ]
 
 ROOT_URLCONF = 'api_gateway.urls'

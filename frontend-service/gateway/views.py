@@ -1,7 +1,6 @@
 import os
 import mimetypes
 import logging
-import requests
 from django.http import JsonResponse, HttpResponse, FileResponse, Http404
 from django.conf import settings
 from django.views import View
