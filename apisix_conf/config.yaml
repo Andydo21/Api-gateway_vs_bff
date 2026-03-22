@@ -1,0 +1,22 @@
+apisix:
+  node_listen: 80              # APISIX listening port
+  admin_key:
+    - name: "admin"
+      key: edd1c9f0-3353-3901-906d-73d197c72d2f
+      role: admin
+
+deployment:
+  role: traditional
+  role_traditional:
+    config_provider: etcd
+  etcd:
+    host:
+      - "http://etcd:2379"
+    prefix: "/apisix"
+    timeout: 30
+
+plugin_attr:
+  prometheus:
+    export_addr:
+      ip: "0.0.0.0"
+      port: 9091

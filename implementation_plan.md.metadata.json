@@ -1,6 +1,6 @@
 {
   "artifactType": "ARTIFACT_TYPE_IMPLEMENTATION_PLAN",
-  "summary": "Comprehensive plan to apply Saga pattern (Choreography) to Startup Registration and Investment flows. Complements the existing Pitch Booking Saga.",
-  "updatedAt": "2026-03-22T14:55:08.978874300Z",
-  "version": "4"
+  "summary": "Plan to integrate Apache APISIX as a cloud-native API Gateway. Includes adding APISIX and Etcd to Docker Compose, configuring dynamic routing for BFFs and microservices, and implementing key plugins for security and observability.",
+  "updatedAt": "2026-03-22T15:10:04.765415900Z",
+  "version": "5"
 }

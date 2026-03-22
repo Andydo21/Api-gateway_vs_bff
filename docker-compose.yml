@@ -50,12 +50,17 @@ services:
       timeout: 5s
       retries: 5
 
-  redis:
-    image: redis:7-alpine
+      retries: 5
+
+  etcd:
+    image: bitnami/etcd:3.5.0
+    environment:
+      - ALLOW_NONE_AUTHENTICATION=yes
+      - ETCD_ADVERTISED_LISTEN_ADDRESS=http://etcd:2379
     ports:
-      - "6379:6379"
+      - "2379:2379"
     healthcheck:
-      test: ["CMD", "redis-cli", "ping"]
+      test: ["CMD", "etcdctl", "endpoint", "health"]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -308,15 +313,21 @@ services:
     volumes:
       - ./microservices/notification-service:/app
 
-  # Load Balancer (Nginx)
-  nginx:
-    image: nginx:stable-alpine
+  # Apache APISIX Gateway
+  apisix:
+    image: apache/apisix:3.9.0-debian
     ports:
       - "80:80"
+      - "9091:9091"
+      - "9180:9180"
     volumes:
-      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./apisix_conf/config.yaml:/usr/local/apisix/conf/config.yaml:ro
     depends_on:
-      api-gateway:
+      etcd:
+        condition: service_healthy
+      web-bff:
+        condition: service_started
+      admin-bff:
         condition: service_started
 
 volumes:

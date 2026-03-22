@@ -15,8 +15,9 @@
 - [x] Audit code for consistency and fix data mismatch in Meeting service
 - [x] Unify ID Data Types to BIGINT
 - [x] Implement Saga Pattern (Pitch Booking Choreography)
-- [x] **Implement Comprehensive Saga Patterns**
-    - [x] Update `User` role choices in User Service
-    - [x] Implement Startup Registration Saga (Startup -> User -> Notification)
-    - [x] Implement Investment Saga (Funding -> Feedback -> Notification)
-    - [x] Update Kafka consumers across all involved services
+- [x] Implement Comprehensive Saga Patterns
+- [x] **Integrate Apache APISIX Gateway**
+    - [x] Add APISIX and Etcd to `docker-compose.yml`
+    - [x] Create APISIX configuration files (`config.yaml`)
+    - [x] Configure routes for all services in APISIX
+    - [x] Enable security and monitoring plugins

@@ -100,10 +100,14 @@ Tôi đã bổ sung thêm các luồng nghiệp vụ quan trọng vào code đ�
 
 ---
 
-- **Comprehensive Saga Patterns (Choreography)**:
-    - **Pitch Booking Saga**: Booking -> Scheduling (Slot) -> Meeting. (Automated compensation supported).
-    - **Startup Registration Saga**: Startup (`PENDING`) -> User (Role `founder`) -> Notification (Welcome Email).
-    - **Investment Saga**: Funding (`PENDING`) -> Feedback (Linked Interest) -> Notification (Startup Update).
+- **Apache APISIX Gateway Integration**:
+    - **Infrastructure**: Added `apisix` and `etcd` services.
+    - **Dynamic Routing**: Replaced static Nginx with APISIX for flexible traffic management.
+    - **Observability**: Built-in `prometheus` and `prometheus` metrics support.
+    - **Entry Points**: 
+        - Port 80: Client Gateway.
+        - Port 9180: Admin API.
+        - Port 9091: Metrics.
 
 ---
 
