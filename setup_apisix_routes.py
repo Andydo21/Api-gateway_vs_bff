@@ -33,8 +33,8 @@ if __name__ == "__main__":
     create_route("1", "/web/*", {"web-bff:3001": 1}, "Web-BFF")
     create_route("2", "/admin/*", {"admin-bff:3002": 1}, "Admin-BFF")
     
-    # Route for UI / Auth (Custom Gateway)
-    create_route("3", "/ui/*", {"api-gateway:8000": 1}, "UI-Auth-Gateway")
+    # Route for UI / Auth (Frontend Service)
+    create_route("3", "/ui/*", {"frontend-service:8000": 1}, "Frontend-UI-Service")
     
     # Route for Notifications (Direct)
     create_route("4", "/api/notifications/*", {"notification-service:4007": 1}, "Notification-Service")

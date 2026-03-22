@@ -75,28 +75,22 @@ services:
       timeout: 5s
       retries: 5
 
-  # API Gateway
-  api-gateway:
-    build: ./api-gateway
+  # Frontend Service (UI Server)
+  frontend-service:
+    build: ./frontend-service
     environment:
       - DEBUG=True
       - DB_HOST=postgres
       - REDIS_HOST=redis
-      - WEB_BFF_URL=http://web-bff:3001
-      - ADMIN_BFF_URL=http://admin-bff:3002
-      - NOTIFICATION_SERVICE_URL=http://notification-service:4007/api
-      - KAFKA_BOOTSTRAP_SERVERS=kafka:9092
     deploy:
-      replicas: 2
+      replicas: 1
     depends_on:
       postgres:
         condition: service_healthy
       redis:
         condition: service_healthy
-      kafka:
-        condition: service_healthy
     volumes:
-      - ./api-gateway:/app
+      - ./frontend-service:/app
       - ./frontend:/app/frontend
 
   # Web BFF
@@ -338,6 +332,8 @@ services:
       web-bff:
         condition: service_started
       admin-bff:
+        condition: service_started
+      frontend-service:
         condition: service_started
 
 volumes:
