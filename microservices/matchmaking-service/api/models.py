@@ -9,8 +9,8 @@ class UserInteraction(models.Model):
         ('review', 'Review'),
     ]
     
-    user_id = models.IntegerField()
-    startup_id = models.IntegerField()
+    user_id = models.BigIntegerField()
+    startup_id = models.BigIntegerField()
     interaction_type = models.CharField(max_length=20, choices=INTERACTION_TYPES)
     weight = models.FloatField(default=1.0)  # Weight for recommendation algorithm
     metadata = models.JSONField(default=dict, blank=True)
@@ -30,8 +30,8 @@ class UserInteraction(models.Model):
 
 class StartupSimilarity(models.Model):
     """Pre-computed startup similarities for faster recommendations"""
-    startup_id = models.IntegerField()
-    similar_startup_id = models.IntegerField()
+    startup_id = models.BigIntegerField()
+    similar_startup_id = models.BigIntegerField()
     similarity_score = models.FloatField()  # 0-1
     created_at = models.DateTimeField(auto_now_add=True)
     

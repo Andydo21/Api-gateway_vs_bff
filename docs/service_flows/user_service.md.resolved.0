@@ -1,0 +1,20 @@
+# 👤 User Service - Documentation
+
+## 1. Vai trò (Purpose)
+Quản lý danh tính người dùng, hồ sơ cá nhân và phân quyền (Admin, Investor, User). Đây là dịch vụ nền tảng cho việc xác thực.
+
+## 2. Các luồng dữ liệu (Data Flows)
+
+### A. Luồng Đăng ký/Cập nhật (Auth Flow)
+- **Input:** Request từ API Gateway sau khi check JWT.
+- **Logic:** Lưu thông tin [User](file:///d:/Django_project/api-gateway_vs_bff/microservices/user-service/api/models.py#6-25) vào Database.
+- **Output:** Bắn sự kiện `identity_created` hoặc `identity_updated` vào Kafka qua Outbox.
+
+### B. Luồng Xác thực (Identity Flow)
+- Cung cấp dữ liệu để **API Gateway** kiểm tra quyền truy cập.
+- Các dịch vụ khác (BFF) gọi để lấy thông tin chi tiết người dùng qua User ID.
+
+## 3. Sự kiện Kafka (Kafka Events)
+- **Producer:** `identity_events` (topic)
+    - `identity_created`: Khi có user mới.
+    - `identity_updated`: Khi user đổi profile.

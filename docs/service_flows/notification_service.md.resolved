@@ -1,0 +1,27 @@
+# 🔔 Notification Service - Documentation
+
+## 1. Vai trò (Purpose)
+Trung tâm thông báo thời gian thực. Đảm bảo mọi thay đổi quan trọng đều được báo cho người dùng ngay lập tức qua WebSockets.
+
+## 2. Các luồng dữ liệu (Data Flows)
+
+### A. Luồng Thông báo thời gian thực (Real-time Alert)
+- **Input:** Mọi sự kiện từ Kafka ([payment_completed](file:///d:/Django_project/api-gateway_vs_bff/microservices/notification-service/api/management/commands/run_kafka_consumer.py#80-87), `booking_confirmed`, v.v.).
+- **Logic:** Xác định User ID nhận tin -> Đẩy qua Django Channels (WebSockets).
+- **Browser:** User nhận thông báo nổi trên trình duyệt.
+
+## 3. Sự kiện Kafka (Kafka Events)
+- **Consumer:** "Hâm mộ" (Listen) hầu hết các topics trong hệ thống:
+    - `pitching_events`
+    - `finance_events`
+    - `identity_events`
+    - `startup_events`
+
+## 4. Cấu trúc Database (Models)
+
+### Bảng `notifications`
+Lưu trữ lịch sử thông báo.
+- `user_id`: Người nhận.
+- `message`: Nội dung thông báo.
+- `is_read`: Đã xem chưa.
+- `notification_type`: Phân loại (`success`, `info`, `error`).

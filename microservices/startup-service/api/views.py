@@ -138,6 +138,32 @@ class StartupViewSet(viewsets.ModelViewSet):
             'total_startups': total_startups,
             'featured_startups': featured_startups,
         })
+    
+    @action(detail=True, methods=['post'])
+    def approve(self, request, pk=None):
+        """Approve a startup registration"""
+        startup = self.get_object()
+        with transaction.atomic():
+            startup.status = 'APPROVED'
+            startup.save()
+            StartupOutboxEvent.objects.create(
+                event_type='startup_approved',
+                payload=StartupSerializer(startup).data
+            )
+        return Response({'success': True, 'status': 'APPROVED'})
+
+    @action(detail=True, methods=['post'])
+    def reject(self, request, pk=None):
+        """Reject a startup registration"""
+        startup = self.get_object()
+        with transaction.atomic():
+            startup.status = 'REJECTED'
+            startup.save()
+            StartupOutboxEvent.objects.create(
+                event_type='startup_rejected',
+                payload={'id': startup.id, 'status': 'REJECTED'}
+            )
+        return Response({'success': True, 'status': 'REJECTED'})
 
 
 class InvestorViewSet(viewsets.ModelViewSet):

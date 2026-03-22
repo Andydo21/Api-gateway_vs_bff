@@ -10,7 +10,7 @@ class PitchRequest(models.Model):
         ('COMPLETED', 'Completed'),
     ]
     
-    startup_id = models.IntegerField()
+    startup_id = models.BigIntegerField()
     title = models.CharField(max_length=255)
     pitch_deck_url = models.URLField(max_length=500, blank=True)
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='REGISTERED')

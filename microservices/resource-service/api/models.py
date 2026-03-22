@@ -2,7 +2,7 @@ from django.db import models
 
 class EventResource(models.Model):
     """Event resources (Demo booths, equipment)"""
-    startup_id = models.IntegerField(unique=True)
+    startup_id = models.BigIntegerField(unique=True)
     startup_name = models.CharField(max_length=255)
     available_quantity = models.IntegerField(default=0)
     reserved_quantity = models.IntegerField(default=0)
@@ -36,7 +36,7 @@ class ResourceReservation(models.Model):
     ]
     
     resource = models.ForeignKey(EventResource, related_name='reservations', on_delete=models.CASCADE)
-    booking_id = models.IntegerField()
+    booking_id = models.BigIntegerField()
     quantity = models.IntegerField()
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='active')
     expires_at = models.DateTimeField()

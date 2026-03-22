@@ -78,3 +78,6 @@ CORS_ALLOW_ALL_ORIGINS = True
 
 # Kafka configuration
 KAFKA_BOOTSTRAP_SERVERS = config('KAFKA_BOOTSTRAP_SERVERS', default='localhost:9092')
+
+# Internal Service URLs
+SCHEDULING_SERVICE_URL = config('SCHEDULING_SERVICE_URL', default='http://localhost:4008')

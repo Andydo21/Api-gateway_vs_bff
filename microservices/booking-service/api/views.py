@@ -31,6 +31,32 @@ class PitchRequestViewSet(viewsets.ModelViewSet):
                 payload=PitchRequestSerializer(pitch_request).data
             )
 
+    @action(detail=True, methods=['post'])
+    def approve(self, request, pk=None):
+        """Approve a pitch request"""
+        pitch_request = self.get_object()
+        with transaction.atomic():
+            pitch_request.status = 'APPROVED'
+            pitch_request.save()
+            BookingOutboxEvent.objects.create(
+                event_type='pitch_request_approved',
+                payload=PitchRequestSerializer(pitch_request).data
+            )
+        return Response({'success': True, 'status': 'APPROVED'})
+
+    @action(detail=True, methods=['post'])
+    def reject(self, request, pk=None):
+        """Reject a pitch request"""
+        pitch_request = self.get_object()
+        with transaction.atomic():
+            pitch_request.status = 'REJECTED'
+            pitch_request.save()
+            BookingOutboxEvent.objects.create(
+                event_type='pitch_request_rejected',
+                payload=PitchRequestSerializer(pitch_request).data
+            )
+        return Response({'success': True, 'status': 'REJECTED'})
+
 class PitchBookingViewSet(viewsets.ModelViewSet):
     """Orchestration for pitch bookings"""
     queryset = PitchBooking.objects.all()

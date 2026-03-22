@@ -1,0 +1,16 @@
+# 🤝 Meeting Service - Documentation
+
+## 1. Vai trò (Purpose)
+Quản lý các phiên họp trực tuyến. Tự động hóa việc tạo link Zoom/Meet để người dùng không phải tạo thủ công.
+
+## 2. Các luồng dữ liệu (Data Flows)
+
+### A. Luồng Tự động tạo Meeting (Auto-Create)
+- **Trigger:** Nhận sự kiện [pitch_booking_created](file:///d:/Django_project/api-gateway_vs_bff/microservices/notification-service/api/management/commands/run_kafka_consumer.py#97-123) từ Kafka.
+- **Logic:** Gọi API Zoom (giả lập) -> Tạo bản ghi [Meeting](file:///d:/Django_project/api-gateway_vs_bff/microservices/meeting-service/api/models.py#3-19) -> Lưu `meeting_url`.
+- **Output:** Bắn sự kiện `meeting_auto_created` để báo cho User.
+
+## 3. Sự kiện Kafka (Kafka Events)
+- **Consumer:** Nghe `pitching_events` (topic).
+- **Producer:** `meeting_events`
+    - `meeting_auto_created`: Gửi link phòng họp tới Notification Service để báo cho Startup và Investor.

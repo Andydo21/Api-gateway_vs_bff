@@ -150,3 +150,39 @@ def submit_feedback(request):
         res = requests.post(f'{FEEDBACK_SERVICE}/feedbacks/', json=request.data, timeout=5)
         return Response(res.json(), status=res.status_code)
     except Exception as e: return Response({'error': str(e)}, status=500)
+
+@api_view(['POST'])
+@permission_classes([AllowAny])
+def approve_pitch_request(request, request_id):
+    """Proxy for approving a pitch request"""
+    try:
+        res = requests.post(f'{BOOKING_SERVICE}/pitch-requests/{request_id}/approve/', timeout=5)
+        return Response(res.json(), status=res.status_code)
+    except Exception as e: return Response({'error': str(e)}, status=500)
+
+@api_view(['POST'])
+@permission_classes([AllowAny])
+def reject_pitch_request(request, request_id):
+    """Proxy for rejecting a pitch request"""
+    try:
+        res = requests.post(f'{BOOKING_SERVICE}/pitch-requests/{request_id}/reject/', timeout=5)
+        return Response(res.json(), status=res.status_code)
+    except Exception as e: return Response({'error': str(e)}, status=500)
+
+@api_view(['POST'])
+@permission_classes([AllowAny])
+def approve_startup(request, startup_id):
+    """Proxy for approving a startup registration"""
+    try:
+        res = requests.post(f'{STARTUP_SERVICE}/startups/{startup_id}/approve/', timeout=5)
+        return Response(res.json(), status=res.status_code)
+    except Exception as e: return Response({'error': str(e)}, status=500)
+
+@api_view(['POST'])
+@permission_classes([AllowAny])
+def reject_startup(request, startup_id):
+    """Proxy for rejecting a startup registration"""
+    try:
+        res = requests.post(f'{STARTUP_SERVICE}/startups/{startup_id}/reject/', timeout=5)
+        return Response(res.json(), status=res.status_code)
+    except Exception as e: return Response({'error': str(e)}, status=500)

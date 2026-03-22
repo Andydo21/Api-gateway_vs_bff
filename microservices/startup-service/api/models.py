@@ -18,7 +18,7 @@ class Category(models.Model):
 
 class Startup(models.Model):
     """Startups"""
-    user_id = models.IntegerField(null=True, blank=True) # Startup Owner
+    user_id = models.BigIntegerField(null=True, blank=True) # Startup Owner
     company_name = models.CharField(max_length=255, null=True, blank=True)
     description = models.TextField(null=True, blank=True)
     industry = models.CharField(max_length=100, blank=True, null=True) # AI, Fintech...
@@ -27,6 +27,13 @@ class Startup(models.Model):
     category = models.ForeignKey(Category, on_delete=models.SET_NULL, null=True, related_name='startups')
     image_url = models.URLField(blank=True)
     featured = models.BooleanField(default=False)
+    STATUS_CHOICES = [
+        ('PENDING', 'Pending'),
+        ('APPROVED', 'Approved'),
+        ('REJECTED', 'Rejected'),
+    ]
+    
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='PENDING')
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     
@@ -40,7 +47,7 @@ class Startup(models.Model):
 
 class Investor(models.Model):
     """Investor profiles"""
-    user_id = models.IntegerField(unique=True)
+    user_id = models.BigIntegerField(unique=True)
     company_name = models.CharField(max_length=255)
     bio = models.TextField()
     interests = models.CharField(max_length=255, blank=True, null=True) # comma separated
@@ -56,7 +63,7 @@ class Investor(models.Model):
 class Review(models.Model):
     """Startup reviews"""
     startup = models.ForeignKey(Startup, on_delete=models.CASCADE, related_name='reviews')
-    user_id = models.IntegerField()
+    user_id = models.BigIntegerField()
     username = models.CharField(max_length=255, default='Khách hàng')  # Store username for display
     rating = models.IntegerField(choices=[(i, i) for i in range(1, 6)])
     comment = models.TextField(blank=True)

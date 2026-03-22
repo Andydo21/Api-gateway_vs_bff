@@ -65,8 +65,17 @@ class Command(BaseCommand):
             consumer.close()
 
     def process_startup_created(self, startup_data):
-        # Implementation for startup_created notification
-        pass
+        """Notify admin or featured group when a new startup is registered"""
+        startup_name = startup_data.get('company_name', 'Một Startup mới')
+        
+        # Notify all users (demo purposes) or specific admins
+        # For simplicity, we send to a broadcast group 'notifications'
+        self._send_socket_notification('all', {
+            'type': 'notification_message',
+            'message': f'Hệ thống: {startup_name} vừa mới đăng ký tham gia sàn Pitching!',
+            'notification_type': 'info'
+        })
+        self.stdout.write(self.style.NOTICE(f" [KAFKA] Startup '{startup_name}' created ➔ Broadcasted to all users."))
 
     def process_payment_completed(self, payment_data):
         user_id = payment_data.get('user_id')

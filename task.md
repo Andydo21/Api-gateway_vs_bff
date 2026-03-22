@@ -1,0 +1,16 @@
+# Task List - Database Table Audit & Flow Implementation
+
+- [x] Identify database engine used in the project
+- [x] Locate all `models.py` files across microservices
+- [x] Extract custom `db_table` names for each service
+- [x] Research MySQL and PostgreSQL commands for listing tables
+- [x] Provide a comprehensive list of tables and the requested commands
+- [x] Provide MySQL import commands and migration instructions
+- [x] Generate full MySQL DDL script (`setup_mysql.sql`)
+- [x] Split MySQL schema into separate files for each microservice
+- [x] Analyze project flows and explain them (`flows_explanation.md`)
+- [x] Split project flow and model documentation by microservice
+- [x] Implement Missing Flows (Pitch Approval & Auto-Meeting)
+- [x] **Implement Startup Registration Approval Flow**
+- [x] Audit code for consistency and fix data mismatch in Meeting service
+- [x] Unify ID Data Types to BIGINT

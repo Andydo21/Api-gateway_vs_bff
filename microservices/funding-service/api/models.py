@@ -17,8 +17,8 @@ class Payment(models.Model):
         ('refunded', 'Refunded'),
     ]
     
-    reference_id = models.IntegerField(unique=True) # Linked to Booking, Sponsorship, etc.
-    user_id = models.IntegerField()
+    reference_id = models.BigIntegerField(unique=True) # Linked to Booking, Sponsorship, etc.
+    user_id = models.BigIntegerField()
     amount = models.DecimalField(max_digits=10, decimal_places=2)
     payment_method = models.CharField(max_length=50, choices=PAYMENT_METHOD_CHOICES)
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='pending')
