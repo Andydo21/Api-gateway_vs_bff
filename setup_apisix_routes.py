@@ -9,7 +9,7 @@ headers = {
     "Content-Type": "application/json"
 }
 
-def create_route(route_id, uri, upstream_nodes, name):
+def create_route(route_id, uri, upstream_nodes, name, enable_websocket=False):
     url = f"{APISIX_ADMIN_URL}/routes/{route_id}"
     data = {
         "name": name,
@@ -21,7 +21,8 @@ def create_route(route_id, uri, upstream_nodes, name):
         "plugins": {
             "prometheus": {},
             "cors": {}
-        }
+        },
+        "enable_websocket": enable_websocket
     }
     response = requests.put(url, headers=headers, data=json.dumps(data))
     if response.status_code in [200, 201]:
@@ -37,5 +38,24 @@ if __name__ == "__main__":
     # Route for UI / Auth (Frontend Service)
     create_route("3", "/ui/*", {"frontend-service:8000": 1}, "Frontend-UI-Service")
     
-    # Route for Notifications (Direct)
-    create_route("4", "/api/notifications/*", {"notification-service:4007": 1}, "Notification-Service")
+    # Route for Notifications (REST API)
+    create_route("4", "/api/notifications/*", {"notification-service:4007": 1}, "Notification-Service-API")
+    
+    # Route for Notifications (WebSockets)
+    create_route("5", "/ws/notifications/*", {"notification-service:4007": 1}, "Notification-Service-WS", enable_websocket=True)
+    
+    # Route for Health Check (replacing Nginx healthy endpoint)
+    url = f"{APISIX_ADMIN_URL}/routes/6"
+    data = {
+        "name": "Health-Check",
+        "uri": "/health",
+        "plugins": {
+            "fault-injection": {
+                "abort": {
+                    "http_status": 200,
+                    "body": "APISIX Gateway is healthy"
+                }
+            }
+        }
+    }
+    requests.put(url, headers=headers, data=json.dumps(data))
