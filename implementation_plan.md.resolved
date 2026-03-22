@@ -1,38 +1,40 @@
-# Implementation Plan - Saga Pattern (Pitch Booking)
+# Implementation Plan - Comprehensive Saga Patterns
 
-Mục tiêu là triển khai Saga Pattern (Choreography) để đảm bảo tính nhất quán dữ liệu khi thực hiện quy trình Đặt lịch Pitch (Booking -> Scheduling -> Meeting).
+Mục tiêu là mở rộng Saga Pattern (Choreography) cho toàn bộ các quy trình nghiệp vụ quan trọng trong hệ thống microservices.
+
+## Added Sagas
+
+### 1. Startup Registration Saga
+**Luồng:** Startup Service -> User Service -> Notification Service.
+- **Startup Service**: Tạo startup (`PENDING`) -> Bắn `startup_registration_initiated`.
+- **User Service**: Lắng nghe `startup_registration_initiated` -> Cập nhật `role = 'founder'` cho người dùng -> Bắn `user_role_updated`.
+- **Notification Service**: Lắng nghe `user_role_updated` -> Gửi mail chào mừng -> Bắn `welcome_email_sent`.
+- **Startup Service**: Lắng nghe `welcome_email_sent` để hoàn thành quy trình đăng ký Saga.
+
+### 2. Investment & Payment Saga
+**Luồng:** Funding Service -> Feedback Service -> Notification Service.
+- **Funding Service**: Tạo Payment (`PENDING`) -> Bắn `payment_initiated`.
+- **Feedback Service**: Lắng nghe `payment_initiated` -> Liên kết khoản đầu tư dự kiến -> Bắn `investment_linked`.
+- **Notification Service**: Lắng nghe `investment_linked` -> Thông báo cho Startup về sự quan tâm -> Bắn `startup_notified`.
+- **Funding Service**: Khi thanh toán thành công (Simulated) -> Bắn `payment_success`.
+- **Notification Service**: Gửi thông báo thanh toán thành công.
 
 ## Proposed Changes
 
-### 1. [booking-service](file:///d:/Django_project/api-gateway_vs_bff/microservices/booking-service/api/models.py)
-- Cập nhật trạng thái [PitchBooking](file:///d:/Django_project/api-gateway_vs_bff/microservices/booking-service/api/models.py#24-37): `INITIALIZED`, `CONFIRMED`, `FAILED`.
+### 1. User Service
+- Cập nhật `ROLE_CHOICES` để bao gồm `founder`.
+- Thêm Kafka Consumer để xử lý `startup_registration_initiated`.
 
-### 2. [booking-service Views](file:///d:/Django_project/api-gateway_vs_bff/microservices/booking-service/api/views.py)
-- API [create](file:///d:/Django_project/api-gateway_vs_bff/microservices/booking-service/api/views.py#66-77) sẽ tạo booking với trạng thái `INITIALIZED` và bắn sự kiện `booking_initiated`.
+### 2. Funding Service
+- Thêm Kafka Consumer để lắng nghe các phản hồi từ Feedback Service.
 
-### 3. [scheduling-service](file:///d:/Django_project/api-gateway_vs_bff/microservices/scheduling-service/api/management/commands/run_kafka_consumer.py) [NEW]
-- Lắng nghe `booking_initiated`.
-- Thực hiện giữ chỗ (Slot -> `BOOKED`).
-- Thành công: Bắn `slot_confirmed`.
-- Thất bại: Bắn `slot_failed`.
+### 3. Feedback Service
+- Thêm Kafka Consumer để xử lý `payment_initiated`.
 
-### 4. [meeting-service](file:///d:/Django_project/api-gateway_vs_bff/microservices/meeting-service/api/management/commands/run_kafka_consumer.py)
-- Đổi từ lắng nghe [pitch_booking_created](file:///d:/Django_project/api-gateway_vs_bff/microservices/notification-service/api/management/commands/run_kafka_consumer.py#106-132) sang `slot_confirmed`.
-- Thành công: Bắn `meeting_created`.
-- Thất bại: Bắn `meeting_failed`.
-
-### 5. [booking-service Consumer](file:///d:/Django_project/api-gateway_vs_bff/microservices/booking-service/api/management/commands/run_kafka_consumer.py) [NEW]
-- Lắng nghe `meeting_created` -> Chuyển status `CONFIRMED`.
-- Lắng nghe `slot_failed` hoặc `meeting_failed` -> Chuyển status `FAILED` (Bù trừ).
-
-### 6. Logic Bù trừ (Compensation)
-- Nếu `Meeting Service` thất bại, `Scheduling Service` sẽ nghe `meeting_failed` để giải phóng Slot (Slot -> `AVAILABLE`).
+### 4. Notification Service
+- Cập nhật Consumer để hỗ trợ các sự kiện Saga mới.
 
 ## Verification Plan
-
-### Automated Tests
-- Gửi yêu cầu đặt lịch và kiểm tra chuỗi sự kiện trong Kafka.
-- Giả lập lỗi ở Meeting Service để kiểm tra Slot có được giải phóng không.
-
-### Manual Verification
-- Kiểm tra trạng thái Booking trong Database của Booking Service sau khi toàn bộ quy trình hoàn tất.
+- Chạy toàn bộ chuỗi Microservices.
+- Thực hiện Đăng ký Startup mới và kiểm tra Role của User có tự động đổi sang `founder` không.
+- Thực hiện thanh toán đầu tư và kiểm tra thông báo có được gửi đến Startup không.

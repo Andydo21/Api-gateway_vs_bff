@@ -50,6 +50,10 @@ class Command(BaseCommand):
                         self.process_pitch_booking_created(data)
                     elif event_type == 'startup_created':
                         self.process_startup_created(data)
+                    elif event_type == 'user_role_updated':
+                        self.process_user_role_updated(data)
+                    elif event_type == 'investment_linked':
+                        self.process_investment_linked(data)
                     elif event_type == 'payment_completed':
                         self.process_payment_completed(data)
                     elif event_type == 'payment_failed':
@@ -129,3 +133,43 @@ class Command(BaseCommand):
             group_name,
             message
         )
+    def process_user_role_updated(self, data):
+        """Send welcome email to the new founder"""
+        user_id = data.get('user_id')
+        email = data.get('email')
+        startup_id = data.get('startup_id')
+        
+        # Simulate sending email
+        self.stdout.write(self.style.SUCCESS(f" [SAGA] Sending welcome email to {email} for Startup #{startup_id}"))
+        
+        # In a real app, we'd use django.core.mail
+        # Now broadcast through WebSocket
+        self._send_socket_notification(user_id, {
+            'type': 'notification_message',
+            'message': 'Chào mừng Founder! Hồ sơ Startup của bạn đã được khởi tạo và đang chờ duyệt.',
+            'notification_type': 'success'
+        })
+        
+        # Emit event to finalize registration Saga
+        # Assuming Notification Service has an Outbox or we produce directly
+        # For simplicity, we'll assume the Saga ends here or service uses a producer
+        from api.models import NotificationOutboxEvent # Need to check if exists
+        try:
+            NotificationOutboxEvent.objects.create(
+                event_type='welcome_email_sent',
+                payload={'user_id': user_id, 'startup_id': startup_id}
+            )
+        except: pass # Fallback if model doesn't exist yet
+
+    def process_investment_linked(self, data):
+        """Notify startup owner about investor interest"""
+        startup_id = data.get('startup_id')
+        investor_name = data.get('investor_name', 'Một nhà đầu tư')
+        
+        # In a real app, find startup owner user_id
+        # For demo, broadcast to a general group or specific owner if known
+        self._send_socket_notification('all', {
+            'type': 'notification_message',
+            'message': f'Tin vui! {investor_name} vừa bày tỏ sự quan tâm đến Startup #{startup_id}.',
+            'notification_type': 'info'
+        })

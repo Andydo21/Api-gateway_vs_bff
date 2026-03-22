@@ -51,7 +51,12 @@ class PaymentViewSet(viewsets.ModelViewSet):
     def create(self, request):
         serializer = self.get_serializer(data=request.data)
         if serializer.is_valid():
-            payment = serializer.save()
+            with transaction.atomic():
+                payment = serializer.save()
+                FundingOutboxEvent.objects.create(
+                    event_type='payment_initiated',
+                    payload=PaymentSerializer(payment).data
+                )
             return Response({
                 'success': True,
                 'message': 'Payment created successfully',

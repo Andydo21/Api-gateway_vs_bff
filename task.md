@@ -14,9 +14,9 @@
 - [x] Implement Startup Registration Approval Flow
 - [x] Audit code for consistency and fix data mismatch in Meeting service
 - [x] Unify ID Data Types to BIGINT
-- [x] **Implement Saga Pattern (Pitch Booking Choreography)**
-    - [x] Update `PitchBooking` models and status states
-    - [x] Implement Kafka consumer in `scheduling-service` for `booking_initiated`
-    - [x] Update `meeting-service` consumer to listen for `slot_confirmed`
-    - [x] Implement Kafka consumer in `booking-service` for Saga confirmation/failure
-    - [x] Implement compensation logic in `scheduling-service` for `meeting_failed`
+- [x] Implement Saga Pattern (Pitch Booking Choreography)
+- [x] **Implement Comprehensive Saga Patterns**
+    - [x] Update `User` role choices in User Service
+    - [x] Implement Startup Registration Saga (Startup -> User -> Notification)
+    - [x] Implement Investment Saga (Funding -> Feedback -> Notification)
+    - [x] Update Kafka consumers across all involved services

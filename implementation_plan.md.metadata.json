@@ -1,6 +1,6 @@
 {
   "artifactType": "ARTIFACT_TYPE_IMPLEMENTATION_PLAN",
-  "summary": "Plan to implement Choreography-based Saga for Pitch Booking. Includes updates to Booking, Scheduling, and Meeting services to ensure data consistency and automated compensation.",
-  "updatedAt": "2026-03-22T14:49:08.410743600Z",
-  "version": "3"
+  "summary": "Comprehensive plan to apply Saga pattern (Choreography) to Startup Registration and Investment flows. Complements the existing Pitch Booking Saga.",
+  "updatedAt": "2026-03-22T14:55:08.978874300Z",
+  "version": "4"
 }

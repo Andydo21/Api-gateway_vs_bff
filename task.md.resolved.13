@@ -15,8 +15,8 @@
 - [x] Audit code for consistency and fix data mismatch in Meeting service
 - [x] Unify ID Data Types to BIGINT
 - [x] Implement Saga Pattern (Pitch Booking Choreography)
-- [x] **Implement Comprehensive Saga Patterns**
-    - [x] Update [User](file:///d:/Django_project/api-gateway_vs_bff/microservices/user-service/api/models.py#6-26) role choices in User Service
-    - [x] Implement Startup Registration Saga (Startup -> User -> Notification)
-    - [x] Implement Investment Saga (Funding -> Feedback -> Notification)
-    - [x] Update Kafka consumers across all involved services
+- [/] **Implement Comprehensive Saga Patterns**
+    - [ ] Update [User](file:///d:/Django_project/api-gateway_vs_bff/microservices/user-service/api/models.py#6-25) role choices in User Service
+    - [ ] Implement Startup Registration Saga (Startup -> User -> Notification)
+    - [ ] Implement Investment Saga (Funding -> Feedback -> Notification)
+    - [ ] Update Kafka consumers across all involved services
