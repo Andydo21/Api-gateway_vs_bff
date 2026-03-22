@@ -1,6 +1,6 @@
 {
   "artifactType": "ARTIFACT_TYPE_IMPLEMENTATION_PLAN",
-  "summary": "Plan to integrate Apache APISIX as a cloud-native API Gateway. Includes adding APISIX and Etcd to Docker Compose, configuring dynamic routing for BFFs and microservices, and implementing key plugins for security and observability.",
-  "updatedAt": "2026-03-22T15:10:04.765415900Z",
-  "version": "5"
+  "summary": "Plan to enhance the Admin BFF with specialized features for startup approval, user management, and system-wide statistics. This includes fixing the existing dashboard stats logic and removing legacy inventory code.",
+  "updatedAt": "2026-03-22T15:55:23.139683Z",
+  "version": "6"
 }

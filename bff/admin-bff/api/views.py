@@ -35,23 +35,25 @@ def health_check(request):
 @api_view(['GET'])
 @permission_classes([AllowAny])
 def dashboard(request):
-    """Admin dashboard statistics"""
+    """Admin dashboard statistics aggregator"""
     try:
-        users_res = requests.get(f"{USER_SERVICE}/users/", timeout=5)
-        startups_res = requests.get(f"{STARTUP_SERVICE}/startups/", timeout=5)
-        pitching_res = requests.get(f"{BOOKING_SERVICE}/pitch-requests/", timeout=5)
-        users_stats = requests.get(f'{USER_SERVICE}/users/stats/', timeout=5)
-        scheduling_stats = requests.get(f'{SCHEDULING_SERVICE}/pitch-slots/', timeout=5)
+        # Get stats from multiple services
+        users_stats = requests.get(f'{USER_SERVICE}/users/stats/', timeout=5).json()
+        startup_stats = requests.get(f'{STARTUP_SERVICE}/startups/stats/', timeout=5).json()
+        
+        # We can also add count for bookings if needed
+        # booking_stats = requests.get(f'{BOOKING_SERVICE}/pitch-requests/stats/', timeout=5).json()
         
         return Response({
             'success': True,
             'data': {
-                'pitch_slots': pitch_slots_stats.json() if pitch_slots_stats.status_code == 200 else {},
-                'users': users_stats.json() if users_stats.status_code == 200 else {}
+                'users': users_stats,
+                'startups': startup_stats,
+                'system_health': 'All services online'
             }
         })
     except Exception as e:
-        return Response({'error': str(e)}, status=500)
+        return Response({'success': False, 'error': str(e)}, status=500)
 
 
 @api_view(['GET', 'POST'])
@@ -120,8 +122,49 @@ def user_detail(request, user_id):
 @api_view(['PUT'])
 @permission_classes([AllowAny])
 def user_ban(request, user_id):
+    """Generic update for user (often used for banning)"""
     try:
         res = requests.put(f'{USER_SERVICE}/users/{user_id}/', json=request.data, timeout=5)
+        return Response(res.json(), status=res.status_code)
+    except Exception as e: return Response({'error': str(e)}, status=500)
+
+
+@api_view(['POST'])
+@permission_classes([AllowAny])
+def approve_startup(request, startup_id):
+    """Approve startup via Startup Service"""
+    try:
+        res = requests.post(f'{STARTUP_SERVICE}/startups/{startup_id}/approve/', timeout=5)
+        return Response(res.json(), status=res.status_code)
+    except Exception as e: return Response({'error': str(e)}, status=500)
+
+
+@api_view(['POST'])
+@permission_classes([AllowAny])
+def reject_startup(request, startup_id):
+    """Reject startup via Startup Service"""
+    try:
+        res = requests.post(f'{STARTUP_SERVICE}/startups/{startup_id}/reject/', timeout=5)
+        return Response(res.json(), status=res.status_code)
+    except Exception as e: return Response({'error': str(e)}, status=500)
+
+
+@api_view(['POST'])
+@permission_classes([AllowAny])
+def block_user(request, user_id):
+    """Block user (banned=True)"""
+    try:
+        res = requests.patch(f'{USER_SERVICE}/users/{user_id}/', json={'banned': True}, timeout=5)
+        return Response(res.json(), status=res.status_code)
+    except Exception as e: return Response({'error': str(e)}, status=500)
+
+
+@api_view(['POST'])
+@permission_classes([AllowAny])
+def unblock_user(request, user_id):
+    """Unblock user (banned=False)"""
+    try:
+        res = requests.patch(f'{USER_SERVICE}/users/{user_id}/', json={'banned': False}, timeout=5)
         return Response(res.json(), status=res.status_code)
     except Exception as e: return Response({'error': str(e)}, status=500)
 

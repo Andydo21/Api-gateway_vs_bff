@@ -12,6 +12,10 @@ urlpatterns = [
     path('users/', views.users, name='users'),
     path('users/<int:user_id>/', views.user_detail, name='user-detail'),
     path('users/<int:user_id>/ban/', views.user_ban, name='user-ban'),
-    path('inventory/', views.inventory, name='inventory'),
-    path('inventory/update/', views.inventory_update, name='inventory-update'),
+    
+    # New Specific Admin Actions
+    path('startups/<int:startup_id>/approve/', views.approve_startup, name='approve-startup'),
+    path('startups/<int:startup_id>/reject/', views.reject_startup, name='reject-startup'),
+    path('users/<int:user_id>/block/', views.block_user, name='block-user'),
+    path('users/<int:user_id>/unblock/', views.unblock_user, name='unblock-user'),
 ]

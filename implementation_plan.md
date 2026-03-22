@@ -1,32 +1,33 @@
-# Implementation Plan - Apache APISIX Integration
+# Implementation Plan - Enhanced Admin BFF Features
 
-Mục tiêu là tích hợp Apache APISIX làm API Gateway chính thức, thay thế hoặc bổ trợ cho Nginx/custom gateway hiện tại để tăng cường khả năng quản lý traffic, bảo mật và khả năng mở rộng.
+Mục tiêu là mở rộng khả năng quản trị của `admin-bff`, cho phép Admin thực hiện các tác vụ quan trọng như duyệt Startup, quản lý người dùng và theo dõi chỉ số toàn hệ thống một cách tập trung.
 
 ## Proposed Changes
 
-### 1. [docker-compose.yml](file:///d:/Django_project/api-gateway_vs_bff/docker-compose.yml)
-- Bổ sung service `apisix` và `etcd`.
-- Cấu hình APISIX thay thế Nginx lắng nghe cổng 80.
+### [Component] Admin BFF (BFF Layer)
 
-### 2. APISIX Configuration [NEW]
-- Tạo file `apisix_conf/config.yaml` để cấu hình cơ bản.
-- Tạo file `apisix_conf/routes.json` (hoặc cấu hình qua Dashboard/Admin API) để định nghĩa các route:
-    - `/web/*` -> `web-bff`
-    - `/admin/*` -> `admin-bff`
-    - `/api/notifications/*` -> `notification-service`
-    - `/ui/*` -> `api-gateway`
+#### [MODIFY] [views.py](file:///d:/Django_project/api-gateway_vs_bff/bff/admin-bff/api/views.py)
+- Sửa lỗi trong hàm `dashboard`: Định nghĩa chính xác các biến stats và tổng hợp dữ liệu từ User, Startup, và Booking services.
+- Thêm hàm `approve_startup(request, startup_id)`: Gọi endpoint `approve` của Startup Service.
+- Thêm hàm `reject_startup(request, startup_id)`: Gọi endpoint `reject` của Startup Service.
+- Thêm hàm `block_user(request, user_id)`: Cập nhật trạng thái `banned=True` qua User Service.
+- Thêm hàm `unblock_user(request, user_id)`: Cập nhật trạng thái `banned=False` qua User Service.
+- Xóa các hàm liên quan đến `inventory` (đã cũ).
 
-### 3. Plugins & Security
-- Kích hoạt `key-auth` để bảo vệ các API nhạy cảm.
-- Kích hoạt `prometheus` để thu thập số liệu giám sát.
-- Cấu hình `cors` plugin cho Frontend.
-
-## Architecture Impact
-- **Entry Point**: Mọi request từ Client sẽ đi qua APISIX đầu tiên.
-- **Dynamic Routing**: Có thể thay đổi cấu hình route mà không cần restart service.
-- **Offloading**: Các tính năng như giới hạn tốc độ (Rate Limiting), xác thực (Auth), và nén dữ liệu (Gzip) sẽ được đẩy cho APISIX xử lý thay vì code ở BFF.
+#### [MODIFY] [urls.py](file:///d:/Django_project/api-gateway_vs_bff/bff/admin-bff/api/urls.py)
+- Cập nhật các route mới:
+    - `/startups/<id>/approve/`
+    - `/startups/<id>/reject/`
+    - `/users/<id>/block/`
+    - `/users/<id>/unblock/`
+- Xóa các route liên quan đến `inventory`.
 
 ## Verification Plan
-1. Chạy `docker-compose up` với APISIX.
-2. Truy cập `/web/home/` thông qua cổng của APISIX.
-3. Kiểm tra Dashboard của APISIX để quản lý các route.
+
+### Automated Tests
+- Sử dụng `curl` hoặc Postman để kiểm tra các hành động Admin mới qua API Gateway (cổng 80 - route `/admin/*`).
+- Kiểm tra dashboard stats qua `http://localhost/admin/dashboard/`.
+
+### Manual Verification
+- Truy cập Admin Dashboard thông qua APISIX và xác nhận các chỉ số hiển thị chính xác.
+- Thử approve/reject một startup mẫu và kiểm tra trạng thái trong database.

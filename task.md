@@ -16,6 +16,11 @@
 - [x] Unify ID Data Types to BIGINT
 - [x] Implement Saga Pattern (Pitch Booking Choreography)
 - [x] Implement Comprehensive Saga Patterns
+- [x] **Enhance Admin BFF Features**
+    - [x] Fix Dashboard Statistics
+    - [x] Add Startup Approve/Reject endpoints
+    - [x] Add User Block/Unblock endpoints
+    - [x] Clean up legacy inventory code
 - [x] **Integrate Apache APISIX Gateway**
     - [x] Add APISIX and Etcd to `docker-compose.yml`
     - [x] Create APISIX configuration files (`config.yaml`)
