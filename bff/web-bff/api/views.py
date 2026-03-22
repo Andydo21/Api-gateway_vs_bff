@@ -7,6 +7,9 @@ import requests
 from decouple import config
 
 # Microservice URLs
+from functools import wraps
+
+# Microservice URLs
 USER_SERVICE = config('USER_SERVICE_URL', default='http://localhost:4001')
 STARTUP_SERVICE = config('STARTUP_SERVICE_URL', default='http://localhost:4002')
 SCHEDULING_SERVICE = config('SCHEDULING_SERVICE_URL', default='http://localhost:4008')
@@ -16,6 +19,20 @@ FEEDBACK_SERVICE = config('FEEDBACK_SERVICE_URL', default='http://localhost:4011
 FUNDING_SERVICE = config('FUNDING_SERVICE_URL', default='http://localhost:4004')
 RESOURCE_SERVICE = config('RESOURCE_SERVICE_URL', default='http://localhost:4005')
 NOTIFICATION_SERVICE = config('NOTIFICATION_SERVICE_URL', default='http://localhost:4006')
+
+def role_required(allowed_roles):
+    def decorator(f):
+        @wraps(f)
+        def decorated_function(request, *args, **kwargs):
+            role = request.META.get('HTTP_X_ROLE', 'user')
+            if role not in allowed_roles:
+                return Response(
+                    {'success': False, 'error': f'Unauthorized. {allowed_roles} role required.'}, 
+                    status=status.HTTP_403_FORBIDDEN
+                )
+            return f(request, *args, **kwargs)
+        return decorated_function
+    return decorator
 
 def get_user_from_gateway(request):
     """Get user info from API Gateway headers."""
@@ -153,8 +170,9 @@ def submit_feedback(request):
 
 @api_view(['POST'])
 @permission_classes([AllowAny])
+@role_required(['admin'])
 def approve_pitch_request(request, request_id):
-    """Proxy for approving a pitch request"""
+    """Handle approval of a pitch request (Admin only)"""
     try:
         res = requests.post(f'{BOOKING_SERVICE}/pitch-requests/{request_id}/approve/', timeout=5)
         return Response(res.json(), status=res.status_code)
@@ -162,8 +180,9 @@ def approve_pitch_request(request, request_id):
 
 @api_view(['POST'])
 @permission_classes([AllowAny])
+@role_required(['admin'])
 def reject_pitch_request(request, request_id):
-    """Proxy for rejecting a pitch request"""
+    """Handle rejection of a pitch request (Admin only)"""
     try:
         res = requests.post(f'{BOOKING_SERVICE}/pitch-requests/{request_id}/reject/', timeout=5)
         return Response(res.json(), status=res.status_code)
@@ -171,8 +190,9 @@ def reject_pitch_request(request, request_id):
 
 @api_view(['POST'])
 @permission_classes([AllowAny])
+@role_required(['admin'])
 def approve_startup(request, startup_id):
-    """Proxy for approving a startup registration"""
+    """Handle startup registration approval (Admin only)"""
     try:
         res = requests.post(f'{STARTUP_SERVICE}/startups/{startup_id}/approve/', timeout=5)
         return Response(res.json(), status=res.status_code)
@@ -180,8 +200,9 @@ def approve_startup(request, startup_id):
 
 @api_view(['POST'])
 @permission_classes([AllowAny])
+@role_required(['admin'])
 def reject_startup(request, startup_id):
-    """Proxy for rejecting a startup registration"""
+    """Handle startup registration rejection (Admin only)"""
     try:
         res = requests.post(f'{STARTUP_SERVICE}/startups/{startup_id}/reject/', timeout=5)
         return Response(res.json(), status=res.status_code)
