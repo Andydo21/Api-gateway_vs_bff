@@ -1,0 +1,98 @@
+# docker-compose.aws.yml - Production Configuration for AWS
+version: '3.8'
+
+services:
+  # API Gateway
+  api-gateway:
+    image: your-registry/api-gateway:latest # Use pre-built images for AWS
+    environment:
+      - DEBUG=False
+      - DB_HOST=${DB_HOST} # Points to Amazon RDS
+      - REDIS_HOST=${REDIS_HOST} # Points to Amazon ElastiCache
+      - WEB_BFF_URL=http://web-bff:3001
+      - ADMIN_BFF_URL=http://admin-bff:3002
+      - NOTIFICATION_SERVICE_URL=http://notification-service:4007/api
+    ports:
+      - "8000:8000" # Map to port 8000 for AWS ALB Target Group
+    restart: always
+
+  # Web BFF
+  web-bff:
+    image: your-registry/web-bff:latest
+    environment:
+      - DEBUG=False
+      - DB_HOST=${DB_HOST}
+      - REDIS_HOST=${REDIS_HOST}
+      - USER_SERVICE_URL=http://user-service:4001
+      - PRODUCT_SERVICE_URL=http://product-service:4002
+      - ORDER_SERVICE_URL=http://order-service:4003
+      - PAYMENT_SERVICE_URL=http://payment-service:4004
+      - INVENTORY_SERVICE_URL=http://inventory-service:4005
+      - RECOMMENDATION_SERVICE_URL=http://recommendation-service:4006
+    restart: always
+
+  # Admin BFF
+  admin-bff:
+    image: your-registry/admin-bff:latest
+    environment:
+      - DEBUG=False
+      - DB_HOST=${DB_HOST}
+      - USER_SERVICE_URL=http://user-service:4001
+      - PRODUCT_SERVICE_URL=http://product-service:4002
+      - ORDER_SERVICE_URL=http://order-service:4003
+    restart: always
+
+  # Microservices
+  user-service:
+    image: your-registry/user-service:latest
+    environment:
+      - DEBUG=False
+      - DB_HOST=${DB_HOST}
+    restart: always
+
+  product-service:
+    image: your-registry/product-service:latest
+    environment:
+      - DEBUG=False
+      - DB_HOST=${DB_HOST}
+    restart: always
+
+  order-service:
+    image: your-registry/order-service:latest
+    environment:
+      - DEBUG=False
+      - DB_HOST=${DB_HOST}
+    restart: always
+
+  payment-service:
+    image: your-registry/payment-service:latest
+    environment:
+      - DEBUG=False
+      - DB_HOST=${DB_HOST}
+    restart: always
+
+  inventory-service:
+    image: your-registry/inventory-service:latest
+    environment:
+      - DEBUG=False
+      - DB_HOST=${DB_HOST}
+    restart: always
+
+  recommendation-service:
+    image: your-registry/recommendation-service:latest
+    environment:
+      - DEBUG=False
+      - DB_HOST=${DB_HOST}
+    restart: always
+
+  notification-service:
+    image: your-registry/notification-service:latest
+    environment:
+      - DEBUG=False
+      - DB_HOST=${DB_HOST}
+      - REDIS_HOST=${REDIS_HOST}
+    restart: always
+
+# Note: Postgres and Redis containers are REMOVED here.
+# It is strongly recommended to use Amazon RDS and Amazon ElastiCache
+# for production stability and easy maintenance.

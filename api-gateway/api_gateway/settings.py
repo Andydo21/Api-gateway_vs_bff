@@ -8,31 +8,28 @@ import os
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-SECRET_KEY = config('SECRET_KEY', default='django-insecure-shared-key-for-jwt-validation-12345')
 DEBUG = config('DEBUG', default=True, cast=bool)
-ALLOWED_HOSTS = config('ALLOWED_HOSTS', default='*').split(',')
+SECRET_KEY = config('SECRET_KEY', default='django-insecure-dev-only-key-change-in-production')
+ALLOWED_HOSTS = [host.strip() for host in config('ALLOWED_HOSTS', default='localhost,127.0.0.1').split(',') if host.strip()]
 
 # Application definition
 INSTALLED_APPS = [
-    'django.contrib.admin',
+    'daphne',
     'django.contrib.auth',
     'django.contrib.contenttypes',
-    'django.contrib.sessions',
-    'django.contrib.messages',
     'django.contrib.staticfiles',
     'rest_framework',
     'corsheaders',
     'gateway',
+    'channels',
 ]
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'corsheaders.middleware.CorsMiddleware',
-    'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     # 'django.middleware.csrf.CsrfViewMiddleware',  # Disabled for REST API
     'django.contrib.auth.middleware.AuthenticationMiddleware',
-    'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'gateway.auth_middleware.JWTAuthenticationMiddleware',  # JWT auth at Gateway level
     'gateway.middleware.RateLimitMiddleware',
@@ -50,14 +47,22 @@ TEMPLATES = [
             'context_processors': [
                 'django.template.context_processors.debug',
                 'django.template.context_processors.request',
-                'django.contrib.auth.context_processors.auth',
-                'django.contrib.messages.context_processors.messages',
             ],
         },
     },
 ]
 
 WSGI_APPLICATION = 'api_gateway.wsgi.application'
+ASGI_APPLICATION = 'api_gateway.asgi.application'
+
+CHANNEL_LAYERS = {
+    'default': {
+        'BACKEND': 'channels_redis.core.RedisChannelLayer',
+        'CONFIG': {
+            "hosts": [(config('REDIS_HOST', default='localhost'), 6379)],
+        },
+    },
+}
 
 # Database
 DATABASES = {
@@ -120,18 +125,24 @@ REST_FRAMEWORK = {
 }
 
 # CORS
-CORS_ALLOW_ALL_ORIGINS = True
+# Allow all origins only in development to avoid overly permissive production defaults.
+CORS_ALLOW_ALL_ORIGINS = DEBUG
 CORS_ALLOW_CREDENTIALS = True
-
-# Session settings
-SESSION_COOKIE_SAMESITE = None
-SESSION_COOKIE_SECURE = False
-SESSION_COOKIE_HTTPONLY = True
-SESSION_COOKIE_AGE = 86400
+if not DEBUG:
+    CORS_ALLOWED_ORIGINS = [
+        origin.strip()
+        for origin in config('CORS_ALLOWED_ORIGINS', default='').split(',')
+        if origin.strip()
+    ]
 
 # Service URLs
 WEB_BFF_URL = config('WEB_BFF_URL', default='http://localhost:3001')
 ADMIN_BFF_URL = config('ADMIN_BFF_URL', default='http://localhost:3002')
+NOTIFICATION_SERVICE_URL = config('NOTIFICATION_SERVICE_URL', default='http://localhost:4007/api')
+SCHEDULING_SERVICE_URL = config('SCHEDULING_SERVICE_URL', default='http://scheduling-service:4008')
+BOOKING_SERVICE_URL = config('BOOKING_SERVICE_URL', default='http://booking-service:4009')
+MEETING_SERVICE_URL = config('MEETING_SERVICE_URL', default='http://meeting-service:4010')
+FEEDBACK_SERVICE_URL = config('FEEDBACK_SERVICE_URL', default='http://feedback-service:4011')
 
 # Rate Limiting
 RATE_LIMIT = config('RATE_LIMIT', default='100/h')

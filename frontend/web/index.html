@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>E-Shop - Mua sắm trực tuyến</title>
+    <title>Startup Hub - Invest in the Future</title>
     <style>
         * {
             margin: 0;
@@ -89,7 +89,7 @@
         }
 
         .badge {
-            background: #667eea;
+            background: #e74c3c;
             color: white;
             padding: 2px 8px;
             border-radius: 12px;
@@ -97,201 +97,111 @@
             font-weight: 600;
         }
 
-        /* Container */
-        .container {
-            max-width: 1200px;
-            margin: 2rem auto;
-            padding: 0 2rem;
-        }
-
-        /* Categories */
-        .categories {
-            background: white;
-            padding: 1.5rem;
-            border-radius: 12px;
-            margin-bottom: 2rem;
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
-        }
-
-        .categories h2 {
-            font-size: 1.2rem;
-            margin-bottom: 1rem;
-            color: #333;
-        }
-
-        .category-list {
-            display: flex;
-            gap: 0.75rem;
-            flex-wrap: wrap;
-        }
-
-        .category-btn {
-            padding: 0.5rem 1.25rem;
+        /* Notification Icon & Panel */
+        .notif-btn {
+            position: relative;
             background: #f8f9fa;
-            border: 2px solid #e0e0e0;
-            border-radius: 20px;
-            cursor: pointer;
-            font-size: 0.9rem;
-            transition: all 0.3s;
-        }
-
-        .category-btn:hover {
-            background: #e9ecef;
-        }
-
-        .category-btn.active {
-            background: #667eea;
-            color: white;
-            border-color: #667eea;
-        }
-
-        /* Products */
-        .products-section {
-            background: white;
-            padding: 2rem;
-            border-radius: 12px;
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
-        }
-
-        .products-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 1.5rem;
-        }
-
-        .products-header h2 {
-            font-size: 1.3rem;
-            color: #333;
-        }
-
-        .product-count {
-            color: #6c757d;
-            font-size: 0.9rem;
-        }
-
-        .product-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
-            gap: 1.5rem;
-        }
-
-        .product-card {
-            background: white;
-            border: 1px solid #e0e0e0;
-            border-radius: 12px;
-            overflow: hidden;
-            cursor: pointer;
-            transition: all 0.3s;
-        }
-
-        .product-card:hover {
-            transform: translateY(-4px);
-            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
-        }
-
-        .product-image {
-            width: 100%;
-            height: 200px;
-            object-fit: cover;
-            background: #f8f9fa;
-        }
-
-        .product-info {
-            padding: 1rem;
-        }
-
-        .product-category {
-            color: #667eea;
-            font-size: 0.8rem;
-            font-weight: 600;
-            text-transform: uppercase;
-            margin-bottom: 0.5rem;
-        }
-
-        .product-name {
-            font-size: 1rem;
-            font-weight: 600;
-            margin-bottom: 0.5rem;
-            color: #333;
-            display: -webkit-box;
-            -webkit-line-clamp: 2;
-            -webkit-box-orient: vertical;
-            overflow: hidden;
-        }
-
-        .product-rating {
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-            margin-bottom: 0.75rem;
-        }
-
-        .stars {
-            color: #ffc107;
-            font-size: 0.9rem;
-        }
-
-        .review-count {
-            color: #6c757d;
-            font-size: 0.85rem;
-        }
-
-        .product-price {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-top: 1rem;
-        }
-
-        .price {
-            font-size: 1.2rem;
-            font-weight: 700;
-            color: #e74c3c;
-        }
-
-        .add-cart-btn {
-            padding: 0.5rem 1rem;
-            background: #667eea;
-            color: white;
             border: none;
-            border-radius: 8px;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
             cursor: pointer;
-            font-weight: 600;
             transition: background 0.3s;
         }
 
-        .add-cart-btn:hover {
-            background: #5568d3;
+        .notif-btn:hover {
+            background: #e9ecef;
         }
 
-        .add-cart-btn:disabled {
-            background: #ccc;
-            cursor: not-allowed;
+        .notif-badge {
+            position: absolute;
+            top: -5px;
+            right: -5px;
+            background: #e74c3c;
+            color: white;
+            font-size: 0.7rem;
+            padding: 2px 6px;
+            border-radius: 10px;
+            display: none;
         }
 
-        .stock {
-            font-size: 0.85rem;
-            margin-top: 0.5rem;
+        .notif-panel {
+            position: absolute;
+            top: 60px;
+            right: 0;
+            width: 320px;
+            max-height: 400px;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.15);
+            display: none;
+            flex-direction: column;
+            z-index: 1000;
+            overflow: hidden;
+            border: 1px solid #e0e0e0;
         }
 
-        .out-of-stock {
-            color: #e74c3c;
+        .notif-panel.active {
+            display: flex;
         }
 
-        /* Loading */
-        .loading {
-            text-align: center;
-            padding: 3rem;
-            color: #6c757d;
-        }
-
-        .error {
-            background: #fee;
-            color: #c33;
+        .notif-header {
             padding: 1rem;
-            border-radius: 8px;
+            border-bottom: 1px solid #f0f0f0;
+            font-weight: 700;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .notif-list {
+            overflow-y: auto;
+            flex: 1;
+        }
+
+        .notif-item {
+            padding: 1rem;
+            border-bottom: 1px solid #f8f9fa;
+            cursor: pointer;
+            transition: background 0.2s;
+            display: flex;
+            gap: 10px;
+        }
+
+        .notif-item:hover {
+            background: #f8f9fa;
+        }
+
+        .notif-item.unread {
+            background: #f0f5ff;
+        }
+
+        .notif-icon {
+            font-size: 1.2rem;
+        }
+
+        .notif-content {
+            flex: 1;
+        }
+
+        .notif-message {
+            font-size: 0.9rem;
+            margin-bottom: 4px;
+        }
+
+        .notif-time {
+            font-size: 0.75rem;
+            color: #888;
+        }
+
+        .notif-empty {
+            padding: 2rem;
             text-align: center;
+            color: #888;
+            font-style: italic;
         }
 
         /* Toast */
@@ -299,13 +209,17 @@
             position: fixed;
             bottom: 2rem;
             right: 2rem;
-            background: #28a745;
+            background: #333;
             color: white;
-            padding: 1rem 1.5rem;
-            border-radius: 8px;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
-            animation: slideIn 0.3s;
-            z-index: 1000;
+            padding: 1rem;
+            border-radius: 12px;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.2);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            z-index: 2000;
+            animation: slideIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            max-width: 350px;
         }
 
         @keyframes slideIn {
@@ -320,8 +234,143 @@
             }
         }
 
+        /* Container & Grid */
+        .container {
+            max-width: 1200px;
+            margin: 2rem auto;
+            padding: 0 2rem;
+            display: grid;
+            grid-template-columns: 250px 1fr;
+            gap: 2rem;
+        }
+
+        .category-list {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+            margin-top: 1rem;
+        }
+
+        .category-btn {
+            text-align: left;
+            padding: 0.75rem 1rem;
+            background: white;
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .category-btn.active,
+        .category-btn:hover {
+            background: #667eea;
+            color: white;
+            border-color: #667eea;
+        }
+
+        .product-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 2rem;
+        }
+
+        .product-card {
+            background: white;
+            border-radius: 16px;
+            overflow: hidden;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+            transition: transform 0.3s;
+            cursor: pointer;
+        }
+
+        .product-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .product-image {
+            width: 100%;
+            height: 200px;
+            object-fit: cover;
+        }
+
+        .product-info {
+            padding: 1.5rem;
+        }
+
+        .product-category {
+            font-size: 0.8rem;
+            color: #667eea;
+            text-transform: uppercase;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+        }
+
+        .product-name {
+            font-size: 1.1rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+            color: #333;
+        }
+
+        .product-rating {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            margin-bottom: 1rem;
+        }
+
+        .stars {
+            color: #f1c40f;
+        }
+
+        .review-count {
+            color: #888;
+            font-size: 0.9rem;
+        }
+
+        .product-price {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .price {
+            font-size: 1.25rem;
+            font-weight: 800;
+            color: #e74c3c;
+        }
+
+        .add-cart-btn {
+            background: #667eea;
+            color: white;
+            border: none;
+            padding: 0.6rem 1.2rem;
+            border-radius: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+
+        .add-cart-btn:hover {
+            background: #5a6fd6;
+        }
+
+        .stock {
+            font-size: 0.85rem;
+            margin-bottom: 1rem;
+            color: #27ae60;
+        }
+
+        .stock.out-of-stock {
+            color: #e74c3c;
+        }
+
         /* Responsive */
         @media (max-width: 768px) {
+            .container {
+                grid-template-columns: 1fr;
+            }
+
             .header-content {
                 flex-wrap: wrap;
                 padding: 1rem;
@@ -337,10 +386,6 @@
                 grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
                 gap: 1rem;
             }
-
-            .container {
-                padding: 0 1rem;
-            }
         }
     </style>
 </head>
@@ -349,20 +394,39 @@
     <!-- Header -->
     <header>
         <div class="header-content">
-            <a href="index.html" class="logo">🛒 E-Shop</a>
+            <a href="index.html" class="logo">🚀 Startup Hub</a>
 
             <div class="search-bar">
-                <input type="text" id="searchInput" placeholder="Tìm kiếm sản phẩm..." onkeyup="handleSearch()">
+                <input type="text" id="searchInput" placeholder="Tìm kiếm Startup..." onkeyup="handleSearch()">
             </div>
 
             <div class="header-actions">
-                <button class="cart-btn" onclick="window.location.href='orders.html'">
-                    📦 Đơn hàng
+                <button class="cart-btn" onclick="window.location.href='pitch-slots.html'">
+                    📋 Lịch sử Slot
                 </button>
-                <button class="cart-btn" onclick="window.location.href='cart.html'">
-                    🛒 Giỏ hàng
-                    <span class="badge" id="cartCount">0</span>
+                <button class="cart-btn" onclick="window.location.href='pitch-requests.html'">
+                    💼 Đơn xin Pitch
+                    <span class="badge" id="pitchCount">0</span>
                 </button>
+                
+                <!-- Notification Bell -->
+                <div style="position: relative;">
+                    <button class="notif-btn" onclick="toggleNotifPanel()">
+                        🔔
+                        <span class="notif-badge" id="notifBadge">0</span>
+                    </button>
+                    <!-- Notification Panel -->
+                    <div class="notif-panel" id="notifPanel">
+                        <div class="notif-header">
+                            Thông báo
+                            <button onclick="clearNotifications()" style="font-size: 0.75rem; background: none; border: none; color: #667eea; cursor: pointer;">Xóa hết</button>
+                        </div>
+                        <div class="notif-list" id="notifList">
+                            <div class="notif-empty">Không có thông báo mới</div>
+                        </div>
+                    </div>
+                </div>
+
                 <button class="user-btn" onclick="handleUserClick()">
                     <span id="userName">Đăng nhập</span>
                 </button>
@@ -374,27 +438,27 @@
     <div class="container">
         <!-- Categories -->
         <div class="categories">
-            <h2>📂 Danh mục</h2>
+            <h2>📂 Lĩnh vực</h2>
             <div class="category-list" id="categoryList">
                 <button class="category-btn active" onclick="filterCategory(null)">Tất cả</button>
             </div>
         </div>
 
-        <!-- Products -->
+        <!-- Startups -->
         <div class="products-section">
             <div class="products-header">
-                <h2>Sản phẩm</h2>
-                <span class="product-count" id="productCount">0 sản phẩm</span>
+                <h2>Cơ hội Đầu tư Startup</h2>
+                <span class="product-count" id="startupCount">0 Startup</span>
             </div>
-            <div class="product-grid" id="productGrid">
-                <div class="loading">Đang tải sản phẩm...</div>
+            <div class="product-grid" id="startupGrid">
+                <div class="loading">Đang tải danh sách Startup...</div>
             </div>
         </div>
     </div>
 
     <script>
         const API_BASE = 'http://localhost:8000';
-        let allProducts = [];
+        let allStartups = [];
         let allCategories = [];
         let currentCategory = null;
 
@@ -408,25 +472,135 @@
             };
             const token = getToken();
             if (token) {
-                console.log('🔑 [AUTH] Sending token:', token.substring(0, 30) + '...');
                 headers['Authorization'] = `Bearer ${token}`;
-            } else {
-                console.warn('⚠️ [AUTH] No token found in localStorage!');
             }
             return headers;
         }
 
         // Init
         window.onload = () => {
-            // Kiểm tra authentication trước - nếu chưa login thì chuyển sang trang đăng nhập
             if (!checkAuth()) {
-                return; // Dừng load nếu chưa authen
+                return;
             }
-            loadProducts();
-            updateCartCount();
+            loadStartups();
+            updatePitchCount();
+            setupNotifications();
         };
 
-        // Check auth - trả về true nếu đã login, false nếu chưa
+        function setupNotifications() {
+            const userId = JSON.parse(localStorage.getItem('user') || '{}').id;
+            if (!userId) return;
+
+            const wsScheme = window.location.protocol === 'https:' ? 'wss' : 'ws';
+            const wsUrl = `${wsScheme}://${window.location.hostname}:8000/ws/notifications/${userId}/`;
+            
+            const socket = new WebSocket(wsUrl);
+
+            socket.onmessage = function(e) {
+                const data = JSON.parse(e.data);
+                addNotifToPanel(data);
+                showNotificationToast(data.message, data.notification_type);
+            };
+
+            socket.onopen = function(e) {
+                fetchNotifications();
+            };
+
+            socket.onclose = function(e) {
+                setTimeout(setupNotifications, 5000);
+            };
+        }
+
+        function toggleNotifPanel() {
+            const panel = document.getElementById('notifPanel');
+            panel.classList.toggle('active');
+            
+            if (panel.classList.contains('active')) {
+                const badge = document.getElementById('notifBadge');
+                badge.style.display = 'none';
+                badge.textContent = '0';
+            }
+        }
+
+        async function fetchNotifications() {
+            const userId = JSON.parse(localStorage.getItem('user') || '{}').id;
+            if (!userId) return;
+
+            try {
+                const response = await fetch(`http://${window.location.hostname}:8000/notifications/list/?user_id=${userId}`);
+                const data = await response.json();
+                if (data.success && data.data) {
+                    const list = document.getElementById('notifList');
+                    list.innerHTML = '';
+                    if (data.data.length === 0) {
+                        list.innerHTML = '<div class="notif-empty">Không có thông báo mới</div>';
+                    } else {
+                        data.data.forEach(notif => addNotifToPanel(notif, false));
+                    }
+                }
+            } catch (error) {}
+        }
+
+        function addNotifToPanel(notif, isNew = true) {
+            const list = document.getElementById('notifList');
+            const empty = list.querySelector('.notif-empty');
+            if (empty) empty.remove();
+
+            const item = document.createElement('div');
+            item.className = `notif-item ${notif.is_read ? '' : 'unread'}`;
+            
+            const icon = getNotifIcon(notif.notification_type);
+            const time = new Date(notif.created_at || new Date()).toLocaleTimeString();
+
+            item.innerHTML = `
+                <div class="notif-icon">${icon}</div>
+                <div class="notif-content">
+                    <div class="notif-message">${notif.message}</div>
+                    <div class="notif-time">${time}</div>
+                </div>
+            `;
+            
+            if (isNew) {
+                list.prepend(item);
+                const panel = document.getElementById('notifPanel');
+                if (!panel.classList.contains('active')) {
+                    const badge = document.getElementById('notifBadge');
+                    const currentCount = parseInt(badge.textContent) || 0;
+                    badge.textContent = currentCount + 1;
+                    badge.style.display = 'block';
+                }
+            } else {
+                list.appendChild(item);
+            }
+        }
+
+        function getNotifIcon(type) {
+            switch(type) {
+                case 'success': return '✅';
+                case 'warning': return '⚠️';
+                case 'error': return '❌';
+                default: return 'ℹ️';
+            }
+        }
+
+        function clearNotifications() {
+            document.getElementById('notifList').innerHTML = '<div class="notif-empty">Không có thông báo mới</div>';
+            document.getElementById('notifBadge').style.display = 'none';
+            document.getElementById('notifBadge').textContent = '0';
+        }
+
+        function showNotificationToast(message, type = 'info') {
+            const toast = document.createElement('div');
+            toast.className = `toast toast-${type}`;
+            const icon = getNotifIcon(type);
+            toast.innerHTML = `
+                <div style="font-size: 1.5rem">${icon}</div>
+                <div style="flex: 1">${message}</div>
+            `;
+            document.body.appendChild(toast);
+            setTimeout(() => toast.remove(), 5000);
+        }
+
         function checkAuth() {
             const token = localStorage.getItem('token');
             const username = localStorage.getItem('username');
@@ -436,84 +610,44 @@
                 userNameSpan.textContent = username;
                 return true;
             } else {
-                // Chưa login → redirect đến trang đăng nhập
-                console.log('⚠️ Chưa đăng nhập, chuyển sang trang login...');
                 window.location.href = 'login.html';
                 return false;
             }
         }
 
         function handleUserClick() {
-            const token = localStorage.getItem('token');
-            if (token) {
-                logout();
+            if (localStorage.getItem('token')) {
+                if (confirm('Bạn muốn đăng xuất?')) {
+                    localStorage.clear();
+                    window.location.reload();
+                }
             } else {
                 window.location.href = 'login.html';
             }
         }
 
-        function logout() {
-            if (confirm('Bạn muốn đăng xuất?')) {
-                localStorage.clear();
-                window.location.reload();
-            }
-        }
-
-        // Load products - BFF PATTERN: 1 API call, BFF aggregate phía sau
-        async function loadProducts() {
+        async function loadStartups() {
             try {
-                console.log('🚀 [FRONTEND] Gọi API Gateway...');
-                console.log('📡 [FRONTEND → GATEWAY] GET /web/home/');
-                console.log('   ↓ Gateway validates JWT & forwards to BFF');
-                console.log('   ↓ BFF aggregate data từ NHIỀU microservices:');
-                console.log('      • Product Service: GET /products/?featured=true');
-                console.log('      • Product Service: GET /categories/');
-                console.log('      • Product Service: GET /products/{id}/reviews/summary/ (x3)');
-                console.log('      • Recommendation Service: GET /recommendations/ (nếu có user)');
-                console.log('   ↓ BFF trả về 1 RESPONSE duy nhất với TẤT CẢ data');
-                
                 const response = await fetch(`${API_BASE}/web/home/`, {
                     headers: authHeaders()
                 });
                 const data = await response.json();
 
-                console.log('✅ [FRONTEND] Nhận AGGREGATED response từ BFF:');
-                console.log(`   📦 Products: ${data.data?.featuredProducts?.length || 0} items`);
-                console.log(`   📂 Categories: ${data.data?.categories?.length || 0} items`);
-                console.log(`   ⭐ Recommendations: ${data.data?.recommendations?.length || 0} items`);
-                
-                // Hiển thị bff_info nếu có
-                if (data.bff_info) {
-                    console.log('📊 [BFF INFO]:');
-                    console.log(`   Pattern: ${data.bff_info.pattern}`);
-                    console.log(`   Total API calls: ${data.bff_info.total_api_calls}`);
-                    console.log(`   APIs called: ${data.bff_info.api_endpoints_called?.join(', ')}`);
-                    console.log(`   💡 ${data.bff_info.message}`);
-                }
-                
-                console.log('🎯 [BFF PATTERN] 1 API call → Nhận tất cả data (products + categories + reviews + recommendations)!');
-
                 if (data.success) {
-                    allProducts = data.data?.featuredProducts || [];
+                    allStartups = data.data?.featuredStartups || [];
                     allCategories = data.data?.categories || [];
-
                     renderCategories();
-                    displayProducts(allProducts);
-                    
-                    console.log('🎉 [FRONTEND] Load xong! BFF đã aggregate từ nhiều services phía sau.');
+                    displayStartups(allStartups);
                 } else {
-                    showError('Không thể tải sản phẩm');
+                    showError('Không thể tải Startup');
                 }
             } catch (error) {
-                console.error('❌ [FRONTEND] Lỗi:', error);
-                showError('Lỗi kết nối. Vui lòng kiểm tra Docker.');
+                showError('Lỗi kết nối. Vui lòng kiểm tra Server.');
             }
         }
 
-        // Render categories
         function renderCategories() {
             const container = document.getElementById('categoryList');
-
             allCategories.forEach(cat => {
                 const btn = document.createElement('button');
                 btn.className = 'category-btn';
@@ -523,218 +657,103 @@
             });
         }
 
-        // Filter by category
         function filterCategory(categoryId) {
             currentCategory = categoryId;
-
-            document.querySelectorAll('.category-btn').forEach(btn => {
-                btn.classList.remove('active');
-            });
+            document.querySelectorAll('.category-btn').forEach(btn => btn.classList.remove('active'));
             event.target.classList.add('active');
-
             const filtered = categoryId
-                ? allProducts.filter(p => p.category == categoryId || p.category_name == categoryId)
-                : allProducts;
-
-            displayProducts(filtered);
+                ? allStartups.filter(p => p.category == categoryId || p.category_name == categoryId)
+                : allStartups;
+            displayStartups(filtered);
         }
 
-        // Search
         function handleSearch() {
             const query = document.getElementById('searchInput').value.toLowerCase();
-
-            const filtered = allProducts.filter(p =>
-                p.name.toLowerCase().includes(query) ||
-                (p.description && p.description.toLowerCase().includes(query))
+            const filtered = allStartups.filter(p =>
+                p.company_name.toLowerCase().includes(query) ||
+                (p.description && p.description.toLowerCase().includes(query)) ||
+                (p.industry && p.industry.toLowerCase().includes(query))
             );
-
-            displayProducts(filtered);
+            displayStartups(filtered);
         }
 
-        // Display products
-        function displayProducts(products) {
-            const grid = document.getElementById('productGrid');
-            document.getElementById('productCount').textContent = `${products.length} sản phẩm`;
+        function displayStartups(startups) {
+            const grid = document.getElementById('startupGrid');
+            document.getElementById('startupCount').textContent = `${startups.length} Startup`;
 
-            if (products.length === 0) {
-                grid.innerHTML = '<div class="error">Không tìm thấy sản phẩm</div>';
+            if (startups.length === 0) {
+                grid.innerHTML = '<div class="error">Không tìm thấy Startup</div>';
                 return;
             }
 
-            grid.innerHTML = products.map(product => `
-                <div class="product-card" onclick="viewProduct(${product.id})">
-                    <img src="${product.image || 'https://via.placeholder.com/250'}" 
-                         alt="${product.name}" 
-                         class="product-image">
+            grid.innerHTML = startups.map(startup => `
+                <div class="product-card" onclick="viewStartup(${startup.id})">
+                    <img src="${startup.image_url || 'https://via.placeholder.com/250'}" alt="${startup.company_name}" class="product-image">
                     <div class="product-info">
-                        <div class="product-category">${product.category_name || 'Khác'}</div>
-                        <div class="product-name">${product.name}</div>
+                        <div class="product-category">${startup.industry || 'Startup'}</div>
+                        <div class="product-name">${startup.company_name}</div>
                         <div class="product-rating">
-                            <span class="stars">${renderStars(product.rating || product.average_rating || 0)}</span>
-                            <span class="review-count">(${product.review_count || 0})</span>
+                            <span class="stars">${renderStars(startup.rating || 0)}</span>
+                            <span class="review-count">(Web: ${startup.website || 'N/A'})</span>
                         </div>
-                        ${product.stock <= 0 ? '<div class="stock out-of-stock">Hết hàng</div>' :
-                    `<div class="stock">Còn ${product.stock} sản phẩm</div>`}
                         <div class="product-price">
-                            <span class="price">${formatPrice(product.price)}₫</span>
-                            <button class="add-cart-btn" 
-                                    onclick="addToCart(event, ${product.id}, '${escapeHtml(product.name)}', ${product.price})" 
-                                    ${product.stock <= 0 ? 'disabled' : ''}>
-                                Thêm
-                            </button>
+                            <span class="price">${startup.industry || 'Innovative'}</span>
+                            <button class="add-cart-btn" onclick="openPitchModal(event, ${startup.id}, '${startup.company_name.replace(/'/g, "\\'")}')">Gửi hồ sơ Pitch</button>
                         </div>
                     </div>
                 </div>
             `).join('');
         }
 
-        // Render stars
         function renderStars(rating) {
             const fullStars = Math.floor(rating);
-            const hasHalfStar = rating % 1 >= 0.5;
-            let stars = '★'.repeat(fullStars);
-            if (hasHalfStar) stars += '☆';
-            stars += '☆'.repeat(5 - Math.ceil(rating));
-            return stars.substring(0, 5);
+            return '★'.repeat(fullStars) + '☆'.repeat(5 - fullStars);
         }
 
-        // Format price
-        function formatPrice(price) {
-            return new Intl.NumberFormat('vi-VN').format(price);
-        }
+        function formatPrice(price) { return new Intl.NumberFormat('vi-VN').format(price); }
 
-        // Escape HTML
-        function escapeHtml(text) {
-            return text.replace(/'/g, "\\'");
-        }
-
-        // Add to cart
-        async function addToCart(event, id, name, price) {
+        async function openPitchModal(event, id, name) {
             event.stopPropagation();
+            const title = prompt("Nhập tiêu đề hồ sơ Pitch:", `Pitch for ${name}`);
+            if (!title) return;
+            const pdfUrl = prompt("Nhập link Pitch Deck (PDF/Drive):", "https://");
+            if (!pdfUrl) return;
 
-            const token = getToken();
-            const userId = JSON.parse(localStorage.getItem('user') || '{}').id;
-
-            // Must login to add to cart
-            if (!token || !userId) {
-                alert('⚠️ Bạn cần đăng nhập để thêm vào giỏ hàng!');
-                window.location.href = 'login.html';
-                return;
-            }
-
-            // Logged in - save to database
             try {
-                const headers = authHeaders();
-                console.log('🔐 Adding to cart with headers:', headers);
-                console.log('📦 Cart data:', { user_id: userId, product_id: id, product_name: name, price: price });
-                
-                const response = await fetch(`${API_BASE}/web/cart/add/`, {
+                const response = await fetch(`${API_BASE}/web/pitch/submit/`, {
                     method: 'POST',
-                    headers: headers,
-                    body: JSON.stringify({
-                        user_id: userId,
-                        product_id: id,
-                        product_name: name,
-                        price: price,
-                        quantity: 1
-                    })
+                    headers: authHeaders(),
+                    body: JSON.stringify({ startup_id: id, title: title, pitch_deck_url: pdfUrl })
                 });
-                
-                console.log('📡 Response status:', response.status);
-
                 const data = await response.json();
-                console.log('📥 Response data:', data);
-                
-                if (response.status === 401) {
-                    alert('⚠️ Token hết hạn hoặc không hợp lệ. Vui lòng đăng nhập lại!');
-                    localStorage.clear();
-                    window.location.href = 'login.html';
-                    return;
-                }
-                
-                if (data.success) {
-                    updateCartCount();
-                    showToast(`Đã thêm "${name}" vào giỏ hàng`);
-                } else {
-                    showToast(data.error || 'Lỗi thêm vào giỏ hàng');
+                if (data.id) {
+                    showToast(`Đã gửi hồ sơ Pitch cho "${name}" thành công!`);
+                    updatePitchCount();
                 }
             } catch (error) {
-                console.error('Lỗi thêm vào giỏ:', error);
-                showToast('Lỗi kết nối');
+                showToast("Lỗi khi gửi hồ sơ.");
             }
         }
 
-        // Add to guest cart (localStorage)
-        function addToGuestCart(productId, productName, price) {
-            let guestCart = JSON.parse(localStorage.getItem('guestCart') || '[]');
-            
-            const existingItem = guestCart.find(item => item.product_id === productId);
-            
-            if (existingItem) {
-                existingItem.quantity += 1;
-            } else {
-                guestCart.push({
-                    product_id: productId,
-                    product_name: productName,
-                    price: price,
-                    quantity: 1
-                });
-            }
-            
-            localStorage.setItem('guestCart', JSON.stringify(guestCart));
-        }
-
-        // Update cart count
-        async function updateCartCount() {
-            const token = getToken();
-            const userId = JSON.parse(localStorage.getItem('user') || '{}').id;
-
-            // Nếu chưa đăng nhập, đếm guest cart từ localStorage
-            if (!token || !userId) {
-                const guestCart = JSON.parse(localStorage.getItem('guestCart') || '[]');
-                const totalItems = guestCart.reduce((sum, item) => sum + item.quantity, 0);
-                document.getElementById('cartCount').textContent = totalItems;
-                return;
-            }
-
-            // Nếu đã đăng nhập, lấy từ database
+        async function updatePitchCount() {
+            // Updated to list pitch requests for the user
             try {
-                const response = await fetch(`${API_BASE}/web/cart/?user_id=${userId}`, {
-                    headers: authHeaders()
-                });
-                const data = await response.json();
-
-                if (data.success && data.data) {
-                    document.getElementById('cartCount').textContent = data.data.total_items || 0;
-                } else {
-                    document.getElementById('cartCount').textContent = 0;
-                }
-            } catch (error) {
-                document.getElementById('cartCount').textContent = 0;
-            }
+                const response = await fetch(`${API_BASE}/web/pitch/list/`, { headers: authHeaders() });
+                // We'll add this endpoint to BFF if missing, but for now just placeholder
+                // document.getElementById('pitchCount').textContent = ...;
+            } catch (error) {}
         }
 
-        // View product
-        function viewProduct(id) {
-            window.location.href = `product.html?id=${id}`;
-        }
-
-        // Show error
-        function showError(message) {
-            document.getElementById('productGrid').innerHTML =
-                `<div class="error">${message}</div>`;
-        }
-
-        // Show toast
+        function viewStartup(id) { window.location.href = `startup.html?id=${id}`; }
+        function showError(message) { document.getElementById('startupGrid').innerHTML = `<div class="error">${message}</div>`; }
         function showToast(message) {
             const toast = document.createElement('div');
             toast.className = 'toast';
             toast.textContent = message;
             document.body.appendChild(toast);
-
             setTimeout(() => toast.remove(), 3000);
         }
     </script>
 </body>
-
 </html>
+ Riverside

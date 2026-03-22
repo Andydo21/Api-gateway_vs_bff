@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Đơn hàng của tôi - E-Shop</title>
+    <title>Lịch sử Đầu tư - Startup Hub</title>
     <style>
         * {
             margin: 0;
@@ -243,18 +243,18 @@
 <body>
     <header>
         <div class="header-content">
-            <a href="index.html" class="logo">🛒 E-Shop</a>
+            <a href="index.html" class="logo">🚀 Startup Hub</a>
             <div class="nav-buttons">
-                <button class="back-btn" onclick="window.location.href='index.html'">← Tiếp tục mua sắm</button>
-                <a href="cart.html" class="nav-btn">🛒 Giỏ hàng</a>
+                <button class="back-btn" onclick="window.location.href='index.html'">← Tiếp tục tìm kiếm Startup</button>
+                <a href="cart.html" class="nav-btn">💼 Danh mục</a>
             </div>
         </div>
     </header>
 
     <div class="container">
-        <h1>📦 Đơn hàng của tôi</h1>
+        <h1>📈 Lịch sử Đầu tư</h1>
         <div id="ordersContainer" class="orders-container">
-            <div class="loading">⏳ Đang tải đơn hàng...</div>
+            <div class="loading">⏳ Đang tải lịch sử đầu tư...</div>
         </div>
     </div>
 
@@ -306,9 +306,9 @@
 
         function getStatusText(status) {
             const statusMap = {
-                'pending': '⏳ Chờ xử lý',
-                'processing': '🔄 Đang xử lý',
-                'completed': '✅ Hoàn thành',
+                'pending': '⏳ Chờ xác nhận',
+                'processing': '🔄 Đang thực hiện',
+                'completed': '✅ Thành công',
                 'cancelled': '❌ Đã hủy'
             };
             return statusMap[status] || status;
@@ -321,7 +321,7 @@
                 document.getElementById('ordersContainer').innerHTML = `
                     <div class="empty-orders">
                         <h3>🔒 Vui lòng đăng nhập</h3>
-                        <p>Bạn cần đăng nhập để xem đơn hàng của mình</p>
+                        <p>Bạn cần đăng nhập để xem lịch sử đầu tư của mình</p>
                         <a href="login.html" class="shop-btn">Đăng nhập ngay</a>
                     </div>
                 `;
@@ -346,9 +346,9 @@
                 if (!data.success || !data.orders || data.orders.length === 0) {
                     document.getElementById('ordersContainer').innerHTML = `
                         <div class="empty-orders">
-                            <h3>📦 Chưa có đơn hàng nào</h3>
-                            <p>Hãy đặt hàng ngay để trải nghiệm dịch vụ của chúng tôi!</p>
-                            <a href="index.html" class="shop-btn">Mua sắm ngay</a>
+                            <h3>📦 Chưa có lịch sử đầu tư</h3>
+                            <p>Hãy bắt đầu xây dựng danh mục đầu tư của bạn ngay hôm nay!</p>
+                            <a href="index.html" class="shop-btn">Khám phá Startup</a>
                         </div>
                     `;
                     return;
@@ -356,10 +356,10 @@
 
                 renderOrders(data.orders);
             } catch (error) {
-                console.error('Lỗi tải đơn hàng:', error);
+                console.error('Lỗi tải lịch sử:', error);
                 document.getElementById('ordersContainer').innerHTML = `
                     <div class="empty-orders">
-                        <h3>❌ Lỗi tải đơn hàng</h3>
+                        <h3>❌ Lỗi tải dữ liệu</h3>
                         <p>${error.message}</p>
                         <button class="shop-btn" onclick="loadOrders()">Thử lại</button>
                     </div>
@@ -373,7 +373,7 @@
                     <div class="order-item">
                         <div class="item-info">
                             <div>
-                                <div class="item-name">${item.product_name}</div>
+                                <div class="item-name">${item.startup_name}</div>
                                 <div class="item-quantity">Số lượng: ${item.quantity}</div>
                             </div>
                         </div>
@@ -385,7 +385,7 @@
                     <div class="order-card">
                         <div class="order-header">
                             <div>
-                                <div class="order-id">Đơn hàng #${order.id}</div>
+                                <div class="order-id">Mã đầu tư #${order.id}</div>
                                 <div class="order-date">${formatDate(order.created_at)}</div>
                             </div>
                             <span class="order-status ${getStatusClass(order.status)}">
@@ -397,8 +397,8 @@
                         </div>
                         <div class="order-footer">
                             <div>
-                                <div class="order-total">Tổng cộng: ${formatPrice(order.total_amount)}</div>
-                                ${order.shipping_address ? `<div class="order-address">📍 ${order.shipping_address}</div>` : ''}
+                                <div class="order-total">Tổng đầu tư: ${formatPrice(order.total_amount)}</div>
+                                ${order.shipping_address ? `<div class="order-address">📍 Ghi chú: ${order.shipping_address}</div>` : ''}
                             </div>
                         </div>
                     </div>
@@ -416,3 +416,4 @@
 </body>
 
 </html>
+ Riverside

@@ -5,10 +5,13 @@ from . import views
 urlpatterns = [
     path('health/', views.health_check, name='health'),
     path('dashboard/', views.dashboard, name='dashboard'),
-    path('products/', views.products, name='products'),
-    path('products/<int:product_id>/', views.product_detail, name='product-detail'),
-    path('orders/', views.orders, name='orders'),
-    path('orders/<int:order_id>/status/', views.order_status, name='order-status'),
+    path('startups/', views.startups, name='startups'),
+    path('startups/<int:startup_id>/', views.startup_detail, name='startup-detail'),
+    path('pitch-slots/', views.pitch_slots, name='pitch-slots'),
+    path('pitch-slots/<int:slot_id>/status/', views.pitch_slot_status, name='pitch-slot-status'),
     path('users/', views.users, name='users'),
+    path('users/<int:user_id>/', views.user_detail, name='user-detail'),
     path('users/<int:user_id>/ban/', views.user_ban, name='user-ban'),
+    path('inventory/', views.inventory, name='inventory'),
+    path('inventory/update/', views.inventory_update, name='inventory-update'),
 ]

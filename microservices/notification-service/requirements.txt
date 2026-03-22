@@ -1,0 +1,14 @@
+django>=4.2
+djangorestframework>=3.14
+django-cors-headers>=4.0
+django-filter>=23.2
+drf-yasg>=1.21
+psycopg2-binary>=2.9
+django-environ>=0.10
+channels>=4.0
+daphne>=4.0
+channels-redis>=4.1
+requests>=2.31
+python-decouple>=3.8
+asgiref>=3.7
+confluent-kafka==2.3.0

@@ -1,0 +1,398 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lịch sử Đặt lịch (Pitch Slots) - Startup Hub</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #f5f7fa;
+            color: #333;
+        }
+
+        header {
+            background: white;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            padding: 1rem 2rem;
+            margin-bottom: 2rem;
+        }
+
+        .header-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .logo {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #667eea;
+            text-decoration: none;
+        }
+
+        .nav-buttons {
+            display: flex;
+            gap: 1rem;
+        }
+
+        .nav-btn {
+            padding: 0.6rem 1.2rem;
+            background: #667eea;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 0.95rem;
+            text-decoration: none;
+            display: inline-block;
+        }
+
+        .nav-btn:hover {
+            background: #5568d3;
+        }
+
+        .back-btn {
+            padding: 0.6rem 1.2rem;
+            background: #f8f9fa;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 0.95rem;
+        }
+
+        .back-btn:hover {
+            background: #e9ecef;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        h1 {
+            font-size: 2rem;
+            margin-bottom: 2rem;
+            color: #2d3748;
+        }
+
+        .orders-container {
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+
+        .order-card {
+            background: white;
+            border-radius: 12px;
+            padding: 1.5rem;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+        }
+
+        .order-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid #e2e8f0;
+        }
+
+        .order-id {
+            font-weight: 600;
+            color: #2d3748;
+        }
+
+        .order-date {
+            color: #718096;
+            font-size: 0.9rem;
+        }
+
+        .order-status {
+            padding: 0.4rem 0.8rem;
+            border-radius: 6px;
+            font-size: 0.85rem;
+            font-weight: 600;
+        }
+
+        .status-available { background: #dcfce7; color: #15803d; }
+        .status-booked { background: #fee2e2; color: #b91c1c; }
+        .status-blocked { background: #f3f4f6; color: #4b5563; }
+        .meeting-tag { 
+            display: inline-block;
+            margin-top: 5px;
+            padding: 2px 8px;
+            background: #e0e7ff;
+            color: #4338ca;
+            border-radius: 4px;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+        .feedback-btn {
+            background: #10b981;
+            margin-top: 10px;
+        }
+
+        .order-items {
+            margin: 1rem 0;
+        }
+
+        .order-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 0.75rem 0;
+            border-bottom: 1px solid #f7fafc;
+        }
+
+        .item-info {
+            display: flex;
+            gap: 1rem;
+            flex: 1;
+        }
+
+        .item-name {
+            font-weight: 500;
+            color: #2d3748;
+        }
+
+        .item-quantity {
+            color: #718096;
+            font-size: 0.9rem;
+        }
+
+        .item-price {
+            font-weight: 600;
+            color: #667eea;
+        }
+
+        .order-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 1rem;
+            padding-top: 1rem;
+            border-top: 2px solid #e2e8f0;
+        }
+
+        .order-total {
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: #2d3748;
+        }
+
+        .order-address {
+            color: #718096;
+            font-size: 0.9rem;
+            margin-top: 0.5rem;
+        }
+
+        .empty-orders {
+            text-align: center;
+            padding: 4rem 2rem;
+            background: white;
+            border-radius: 12px;
+        }
+
+        .empty-orders h3 {
+            font-size: 1.5rem;
+            color: #718096;
+            margin-bottom: 1rem;
+        }
+
+        .empty-orders p {
+            color: #a0aec0;
+            margin-bottom: 1.5rem;
+        }
+
+        .shop-btn {
+            padding: 0.8rem 2rem;
+            background: #667eea;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1rem;
+            text-decoration: none;
+            display: inline-block;
+        }
+
+        .shop-btn:hover {
+            background: #5568d3;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 3rem;
+            color: #718096;
+        }
+    </style>
+</head>
+
+<body>
+    <header>
+        <div class="header-content">
+            <a href="index.html" class="logo">🚀 Startup Hub</a>
+            <div class="nav-buttons">
+                <button class="back-btn" onclick="window.location.href='index.html'">← Tiếp tục tìm kiếm Startup</button>
+                <a href="pitch-requests.html" class="nav-btn">💼 Giỏ hàng Pitch</a>
+            </div>
+        </div>
+    </header>
+
+    <div class="container">
+        <h1>📅 Lịch hẹn Pitching (Investor Slots)</h1>
+        <div id="slotsContainer" class="orders-container">
+            <div class="loading">⏳ Đang tải lịch sử...</div>
+        </div>
+    </div>
+
+    <script>
+        const API_BASE = 'http://localhost:8000';
+
+        function getToken() {
+            return localStorage.getItem('token');
+        }
+
+        function authHeaders() {
+            const headers = { 'Content-Type': 'application/json' };
+            const token = getToken();
+            if (token) headers['Authorization'] = `Bearer ${token}`;
+            return headers;
+        }
+
+        function formatPrice(price) {
+            return new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(price);
+        }
+
+        function formatDate(dateString) {
+            const date = new Date(dateString);
+            return date.toLocaleDateString('vi-VN', {
+                year: 'numeric', month: 'long', day: 'numeric',
+                hour: '2-digit', minute: '2-digit'
+            });
+        }
+
+        function getStatusClass(status) {
+            const statusMap = {
+                'AVAILABLE': 'status-available',
+                'BOOKED': 'status-booked',
+                'BLOCKED': 'status-blocked'
+            };
+            return statusMap[status] || 'status-available';
+        }
+
+        function getStatusText(status) {
+            const statusMap = {
+                'AVAILABLE': '🟢 Còn trống',
+                'BOOKED': '🔴 Đã đặt',
+                'BLOCKED': '🔒 Đã chặn'
+            };
+            return statusMap[status] || status;
+        }
+
+        async function loadSlots() {
+            try {
+                const response = await fetch(`${API_BASE}/web/slots/`, { headers: authHeaders() });
+                const slots = await response.json();
+                
+                // Also fetch meetings to show links
+                const mRes = await fetch(`${API_BASE}/web/meetings/`, { headers: authHeaders() });
+                const meetings = await mRes.json();
+
+                if (!slots || slots.length === 0) {
+                    document.getElementById('slotsContainer').innerHTML = `
+                        <div class="empty-orders">
+                            <h3>📅 Chưa có lịch hẹn nào</h3>
+                            <p>Các Investor sẽ sớm mở các Slot Pitching tại đây!</p>
+                            <a href="index.html" class="shop-btn">Khám phá Startup</a>
+                        </div>
+                    `;
+                    return;
+                }
+
+                renderSlots(slots, meetings);
+            } catch (error) {
+                document.getElementById('slotsContainer').innerHTML = `<div class="empty-orders"><h3>❌ Lỗi tải dữ liệu</h3></div>`;
+            }
+        }
+
+        async function submitFeedback(bookingId) {
+            const rating = prompt("Đánh giá Startup (1-5 sao):", "5");
+            if (!rating) return;
+            const comment = prompt("Nhận xét chi tiết:");
+            if (!comment) return;
+
+            try {
+                const res = await fetch(`${API_BASE}/web/feedback/submit/`, {
+                    method: 'POST',
+                    headers: authHeaders(),
+                    body: JSON.stringify({ booking: bookingId, rating: parseInt(rating), comment: comment, investor_id: 1 }) // investor_id logic simplified
+                });
+                if ((await res.json()).id) alert("✅ Đã gửi đánh giá thành công!");
+            } catch (e) { alert("Lỗi gửi đánh giá"); }
+        }
+
+        async function bookSlot(id) {
+            if (!confirm("Bạn muốn đặt lịch Pitching tại Slot này?")) return;
+            try {
+                const res = await fetch(`${API_BASE}/web/slots/${id}/book/`, {
+                    method: 'PATCH', headers: authHeaders()
+                });
+                const data = await res.json();
+                if (data.success) {
+                    alert("✅ Đã đặt lịch thành công!");
+                    loadSlots();
+                } else {
+                    alert("Lỗi: " + (data.error || "Không thể đặt lịch."));
+                }
+            } catch (e) { alert("Lỗi kết nối"); }
+        }
+
+        function renderSlots(slots, meetings) {
+            const slotsHTML = slots.map(slot => {
+                const meeting = (meetings || []).find(m => m.booking === slot.id);
+                return `
+                <div class="order-card">
+                    <div class="order-header">
+                        <div>
+                            <div class="order-id">Lịch Investor #${slot.investor_id}</div>
+                            <div class="order-date">Bắt đầu: ${formatDate(slot.start_time)}</div>
+                            <div class="order-date">Kết thúc: ${formatDate(slot.end_time)}</div>
+                            ${meeting ? `
+                                <div class="meeting-tag">📍 ${meeting.meeting_type}: <a href="${meeting.meeting_url}" target="_blank" style="color: inherit;">Join Meeting</a></div>
+                            ` : ''}
+                        </div>
+                        <span class="order-status ${getStatusClass(slot.status)}">
+                            ${getStatusText(slot.status)}
+                        </span>
+                    </div>
+                    <div class="order-footer">
+                        <button class="shop-btn" 
+                                onclick="bookSlot(${slot.id})" 
+                                ${slot.status !== 'AVAILABLE' ? 'disabled style="background:#ccc; cursor:not-allowed;"' : ''}>
+                            ĐẶT LỊCH PITCH
+                        </button>
+                        ${slot.status === 'BOOKED' ? `
+                            <button class="shop-btn feedback-btn" onclick="submitFeedback(${slot.id})">GỬI FEEDBACK</button>
+                        ` : ''}
+                    </div>
+                </div>
+            `}).join('');
+
+            document.getElementById('slotsContainer').innerHTML = slotsHTML;
+        }
+
+        window.onload = loadSlots;
+    </script>
+</body>
+</html>

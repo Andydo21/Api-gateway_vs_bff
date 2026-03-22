@@ -5,7 +5,14 @@ from django.contrib.auth.models import AbstractUser
 
 class User(AbstractUser):
     """Extended User model"""
+    ROLE_CHOICES = [
+        ('admin', 'Admin'),
+        ('investor', 'Investor'),
+        ('user', 'User'),
+    ]
+    
     phone = models.CharField(max_length=20, blank=True)
+    role = models.CharField(max_length=20, choices=ROLE_CHOICES, default='user')
     banned = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
@@ -17,20 +24,18 @@ class User(AbstractUser):
         return self.email
 
 
-class Address(models.Model):
-    """User shipping addresses"""
-    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='addresses')
-    street = models.CharField(max_length=255)
-    city = models.CharField(max_length=100)
-    state = models.CharField(max_length=100)
-    postal_code = models.CharField(max_length=20)
-    country = models.CharField(max_length=100)
-    is_default = models.BooleanField(default=False)
+
+
+class UserOutboxEvent(models.Model):
+    event_type = models.CharField(max_length=100)
+    payload = models.JSONField()
     created_at = models.DateTimeField(auto_now_add=True)
-    
+    processed = models.BooleanField(default=False)
+    processed_at = models.DateTimeField(null=True, blank=True)
+
     class Meta:
-        db_table = 'addresses'
-        verbose_name_plural = 'Addresses'
-    
+        db_table = 'user_outbox_events'
+        ordering = ['created_at']
+
     def __str__(self):
-        return f"{self.street}, {self.city}"
+        return f"{self.event_type} - {self.id} (Processed: {self.processed})"

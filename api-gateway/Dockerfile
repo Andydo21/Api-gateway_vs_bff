@@ -12,5 +12,5 @@ COPY . .
 # Expose port
 EXPOSE 8000
 
-# Run migrations and start server
-CMD ["sh", "-c", "python manage.py migrate && gunicorn api_gateway.wsgi:application --bind 0.0.0.0:8000"]
+# Run migrations and start server with SSL
+CMD ["sh", "-c", "python manage.py migrate && daphne -e ssl:8000:interface=0.0.0.0:cert=localhost.crt:key=localhost.key api_gateway.asgi:application"]

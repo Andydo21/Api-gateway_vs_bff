@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Đăng nhập - E-Shop</title>
+    <title>Đăng nhập - Startup Hub</title>
     <style>
         * {
             margin: 0;
@@ -130,8 +130,8 @@
 <body>
     <div class="login-container">
         <div class="logo">
-            <h1>🛒 E-Shop</h1>
-            <p>Đăng nhập để tiếp tục</p>
+            <h1>🚀 Startup Hub</h1>
+            <p>Đăng nhập để khai phá cơ hội</p>
         </div>
 
         <div id="errorMsg" class="error"></div>
@@ -139,12 +139,12 @@
         <form id="loginForm">
             <div class="form-group">
                 <label>Tên đăng nhập</label>
-                <input type="text" id="username" required autocomplete="username">
+                <input type="text" id="username" required autocomplete="username" placeholder="Nhập tên đăng nhập...">
             </div>
 
             <div class="form-group">
                 <label>Mật khẩu</label>
-                <input type="password" id="password" required autocomplete="current-password">
+                <input type="password" id="password" required autocomplete="current-password" placeholder="Nhập mật khẩu...">
             </div>
 
             <button type="submit" class="btn-login">Đăng nhập</button>
@@ -164,40 +164,33 @@
     <script>
         const API_BASE = 'http://localhost:8000';
 
-        // Sync guest cart to database after login
-        async function syncGuestCartToDatabase(userId, token) {
+        // Sync guest pitch requests to database after login
+        async function syncGuestPitchToDatabase(userId, token) {
             if (!userId || !token) return;
 
-            const guestCart = JSON.parse(localStorage.getItem('guestCart') || '[]');
+            const guestPitch = JSON.parse(localStorage.getItem('guestPitch') || '[]');
             
-            if (guestCart.length === 0) return; // No guest cart to sync
-
-            console.log('Syncing guest cart to database:', guestCart);
+            if (guestPitch.length === 0) return;
 
             try {
-                // Add each item from guest cart to database
-                for (const item of guestCart) {
-                    await fetch(`${API_BASE}/web/cart/add/`, {
+                for (const item of guestPitch) {
+                    await fetch(`${API_BASE}/web/pitch-requests/add/`, {
                         method: 'POST',
                         headers: {
-                            'Content-Type': 'application/json'
+                            'Content-Type': 'application/json',
+                            'Authorization': `Bearer ${token}`
                         },
                         body: JSON.stringify({
-                            user_id: userId,
-                            product_id: item.product_id,
-                            product_name: item.product_name,
+                            startup_id: item.startup_id || item.product_id,
+                            startup_name: item.startup_name || item.product_name,
                             price: item.price,
                             quantity: item.quantity
                         })
                     });
                 }
-
-                // Clear guest cart after successful sync
-                localStorage.removeItem('guestCart');
-                console.log('Guest cart synced and cleared');
+                localStorage.removeItem('guestPitch');
             } catch (error) {
-                console.error('Error syncing guest cart:', error);
-                // Don't block login if sync fails
+                console.error('Error syncing guest pitch requests:', error);
             }
         }
 
@@ -208,53 +201,40 @@
             const password = document.getElementById('password').value;
             const errorMsg = document.getElementById('errorMsg');
             
-            console.log('Login attempt:', username);
-            
             try {
                 const response = await fetch(`${API_BASE}/web/users/login/`, {
                     method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
+                    headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ username, password })
                 });
                 
                 const data = await response.json();
-                console.log('Login response:', data);
                 
                 if (data.success && data.token) {
-                    // Save auth data
                     localStorage.setItem('token', data.token);
-                    localStorage.setItem('accessToken', data.access || data.token);
-                    localStorage.setItem('refreshToken', data.refresh || '');
                     localStorage.setItem('username', data.user?.username || username);
                     localStorage.setItem('user', JSON.stringify(data.user || {}));
                     
-                    console.log('Token saved:', localStorage.getItem('token'));
-                    console.log('Username saved:', localStorage.getItem('username'));
+                    await syncGuestPitchToDatabase(data.user?.id, data.token);
                     
-                    // Sync guest cart to database after login
-                    await syncGuestCartToDatabase(data.user?.id, data.token);
-                    
-                    // Check for redirect parameter
                     const urlParams = new URLSearchParams(window.location.search);
                     const redirect = urlParams.get('redirect');
                     
-                    // Redirect to specified page or home
-                    const targetPage = redirect || 'index.html';
-                    console.log('Redirecting to:', targetPage);
+                    // Update legacy redirect
+                    let targetPage = redirect || 'index.html';
+                    if (targetPage === 'product.html') targetPage = 'startup.html';
+                    
                     window.location.href = targetPage;
                 } else {
-                    console.error('Login failed:', data);
                     errorMsg.textContent = data.message || 'Đăng nhập thất bại';
                     errorMsg.style.display = 'block';
                 }
             } catch (error) {
-                console.error('Login error:', error);
-                errorMsg.textContent = 'Lỗi kết nối. Vui lòng kiểm tra Docker.';
+                errorMsg.textContent = 'Lỗi kết nối Server.';
                 errorMsg.style.display = 'block';
             }
         });
     </script>
 </body>
 </html>
+ Riverside

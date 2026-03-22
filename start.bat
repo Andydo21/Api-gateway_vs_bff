@@ -42,6 +42,10 @@ echo - Recommendation Service...
 docker-compose exec -T recommendation-service python manage.py makemigrations
 docker-compose exec -T recommendation-service python manage.py migrate
 
+echo - Notification Service...
+docker-compose exec -T notification-service python manage.py makemigrations
+docker-compose exec -T notification-service python manage.py migrate
+
 echo.
 echo [3/5] Creating sample data...
 python create_sample_data.py
@@ -76,6 +80,7 @@ echo   - Order Service:   http://localhost:4003/api/
 echo   - Payment Service: http://localhost:4004/api/
 echo   - Inventory Svc:   http://localhost:4005/api/
 echo   - Recommend Svc:   http://localhost:4006/api/
+echo   - Notification Svc:http://localhost:4007/api/
 echo.
 echo Test credentials:
 echo   Username: john_doe

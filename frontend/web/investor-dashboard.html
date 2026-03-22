@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <title>Investor Dashboard - Startup Hub</title>
+    <style>
+        body { font-family: 'Segoe UI', sans-serif; background: #f5f7fa; padding: 2rem; }
+        .dashboard-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; max-width: 1200px; margin: 0 auto; }
+        .card { background: white; padding: 2rem; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
+        .template-item { display: flex; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid #eee; }
+        .form-group { margin-bottom: 1rem; }
+        input, select { width: 100%; padding: 8px; border-radius: 4px; border: 1px solid #ddd; }
+        .submit-btn { background: #667eea; color: white; border: none; padding: 10px 20px; border-radius: 6px; cursor: pointer; }
+    </style>
+</head>
+<body>
+    <div class="dashboard-grid">
+        <div class="card">
+            <h2>⚙️ Cấu hình lịch (Templates)</h2>
+            <div id="templateList"></div>
+            <hr>
+            <h3>Thêm lịch mới</h3>
+            <form onsubmit="addTemplate(event)">
+                <div class="form-group">
+                    <label>Ngày trong tuần (1-7):</label>
+                    <input type="number" id="dayOfWeek" min="1" max="7" value="1" required>
+                </div>
+                <div class="form-group">
+                    <label>Bắt đầu:</label>
+                    <input type="time" id="startTime" value="09:00" required>
+                </div>
+                <div class="form-group">
+                    <label>Kết thúc:</label>
+                    <input type="time" id="endTime" value="10:00" required>
+                </div>
+                <button class="submit-btn" type="submit">Thêm Template</button>
+            </form>
+        </div>
+        <div class="card">
+            <h2>📅 Lịch Pitch sắp tới</h2>
+            <div id="upcomingSlots">Đang tải...</div>
+        </div>
+    </div>
+
+    <script>
+        const API_BASE = 'http://localhost:8000';
+        const investorId = 1; // Logic fixed to current investor
+
+        function authHeaders() {
+            return {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${localStorage.getItem('token')}`
+            };
+        }
+
+        async function loadDashboard() {
+            loadTemplates();
+            loadSlots();
+        }
+
+        async function loadTemplates() {
+            const res = await fetch(`${API_BASE}/web/availability-templates/?investor_id=${investorId}`, { headers: authHeaders() });
+            const data = await res.json();
+            const list = document.getElementById('templateList');
+            if (data.length) {
+                list.innerHTML = data.map(t => `<div class="template-item"><span>Thứ ${t.day_of_week}: ${t.start_time} - ${t.end_time}</span></div>`).join('');
+            } else {
+                list.innerHTML = "<p>Chưa có template nào.</p>";
+            }
+        }
+
+        async function addTemplate(e) {
+            e.preventDefault();
+            const payload = {
+                investor: investorId,
+                day_of_week: parseInt(document.getElementById('dayOfWeek').value),
+                start_time: document.getElementById('startTime').value,
+                end_time: document.getElementById('endTime').value
+            };
+            const res = await fetch(`${API_BASE}/web/availability-templates/`, {
+                method: 'POST', headers: authHeaders(), body: JSON.stringify(payload)
+            });
+            if (res.ok) { alert("✅ Đã thêm template!"); loadTemplates(); }
+        }
+
+        async function loadSlots() {
+            const res = await fetch(`${API_BASE}/web/slots/?investor_id=${investorId}`, { headers: authHeaders() });
+            const slots = await res.json();
+            const list = document.getElementById('upcomingSlots');
+            if (slots.length) {
+                list.innerHTML = slots.map(s => `<div class="template-item"><span>${s.start_time} - ${s.status}</span></div>`).join('');
+            } else {
+                list.innerHTML = "<p>Chưa có slot nào.</p>";
+            }
+        }
+
+        window.onload = loadDashboard;
+    </script>
+</body>
+</html>

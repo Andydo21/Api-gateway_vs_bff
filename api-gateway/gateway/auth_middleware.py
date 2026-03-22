@@ -1,9 +1,12 @@
 """JWT Authentication Middleware for API Gateway"""
-import jwt
+import logging
+import re
 from django.http import JsonResponse
-from django.conf import settings
 from rest_framework_simplejwt.tokens import UntypedToken
 from rest_framework_simplejwt.exceptions import InvalidToken, TokenError
+
+
+logger = logging.getLogger(__name__)
 
 
 class JWTAuthenticationMiddleware:
@@ -12,14 +15,20 @@ class JWTAuthenticationMiddleware:
     Extracts user info from token and injects into headers for downstream services (BFF).
     """
     
-    # Public endpoints that don't require authentication
-    PUBLIC_PATHS = [
-        '/health',
-        '/web/users/login/',
-        '/web/users/register/',
-        '/admin/users/login/',
-        '/admin/users/register/',
-        '/web/products/',  # Browse products without login
+    # Public routes that don't require authentication.
+    # Each rule supports optional method restrictions to avoid broad path bypasses.
+    PUBLIC_ROUTE_RULES = [
+        (None, re.compile(r'^/health/?$')),
+        ('POST', re.compile(r'^/web/users/login/?$')),
+        ('POST', re.compile(r'^/web/users/register/?$')),
+        ('POST', re.compile(r'^/admin-panel/users/login/?$')),
+        ('POST', re.compile(r'^/admin-panel/users/register/?$')),
+        ('GET', re.compile(r'^/web/home/?$')),
+        ('GET', re.compile(r'^/web/categories/?$')),
+        ('GET', re.compile(r'^/web/products/?$')),
+        ('GET', re.compile(r'^/web/products/\d+/?$')),
+        ('GET', re.compile(r'^/web/products/\d+/reviews/?$')),
+        (None, re.compile(r'^/notifications/.*$')),
     ]
     
     def __init__(self, get_response):
@@ -27,13 +36,14 @@ class JWTAuthenticationMiddleware:
         
     def __call__(self, request):
         # Skip authentication for public paths
-        if self.is_public_path(request.path):
+        if self.is_public_path(request.path, request.method):
             return self.get_response(request)
         
         # Skip for static files, frontend HTML, and browser requests
         if (request.path.startswith('/static/') or 
             request.path.startswith('/media/') or 
             request.path.startswith('/ui/') or
+            request.path.startswith('/admin/') or
             request.path == '/favicon.ico' or
             request.path.startswith('/.well-known/')):
             return self.get_response(request)
@@ -41,15 +51,10 @@ class JWTAuthenticationMiddleware:
         # Get Authorization header
         auth_header = request.META.get('HTTP_AUTHORIZATION', '')
         
-        print(f"🔍 [AUTH] Path: {request.path}")
-        print(f"🔍 [AUTH] Authorization header: {auth_header[:50] if auth_header else 'NONE'}...")
+        logger.debug("[AUTH] Path=%s, has_auth_header=%s", request.path, bool(auth_header))
         
         if not auth_header.startswith('Bearer '):
-            # No token - allow through for endpoints that support guest access
-            if self.supports_guest_access(request.path):
-                return self.get_response(request)
-            
-            print(f"❌ [AUTH] No Bearer token found")
+            logger.info("[AUTH] Missing Bearer token for path=%s", request.path)
             return JsonResponse({
                 'error': 'Authentication required',
                 'detail': 'No authentication token provided'
@@ -57,56 +62,49 @@ class JWTAuthenticationMiddleware:
         
         # Extract token
         token = auth_header.split(' ')[1]
-        print(f"🔑 [AUTH] Token extracted: {token[:20]}...{token[-20:]}")
-        
         try:
             # Verify token using simplejwt
-            print(f"⏳ [AUTH] Validating token...")
             validated_token = UntypedToken(token)
             
             # Extract user info from token
             user_id = validated_token.get('user_id')
             username = validated_token.get('username', '')
             email = validated_token.get('email', '')
+            role = validated_token.get('role', 'user')
             
-            print(f"✅ [AUTH] Token valid! user_id={user_id}, username={username}")
+            logger.debug("[AUTH] Token validated for user_id=%s, role=%s", user_id, role)
             
             # Inject user info into request headers for downstream services
             # BFF services will read these headers instead of verifying token again
             request.META['HTTP_X_USER_ID'] = str(user_id)
             request.META['HTTP_X_USERNAME'] = username
             request.META['HTTP_X_EMAIL'] = email
+            request.META['HTTP_X_ROLE'] = role
             
             # Token is valid, proceed with request
             response = self.get_response(request)
             return response
             
         except (InvalidToken, TokenError) as e:
-            print(f"❌ [AUTH] JWT validation failed: {type(e).__name__} - {str(e)}")
+            logger.warning("[AUTH] JWT validation failed: %s - %s", type(e).__name__, str(e))
             return JsonResponse({
                 'error': 'Invalid token',
                 'detail': str(e)
             }, status=401)
         except Exception as e:
-            print(f"❌ [AUTH] Unexpected error: {type(e).__name__} - {str(e)}")
+            logger.exception("[AUTH] Unexpected authentication error")
             return JsonResponse({
                 'error': 'Authentication failed',
                 'detail': str(e)
             }, status=401)
     
-    def is_public_path(self, path):
-        """Check if path is public (no auth required)"""
-        for public_path in self.PUBLIC_PATHS:
-            if path.startswith(public_path):
-                return True
-        return False
-    
-    def supports_guest_access(self, path):
-        """Endpoints that work without authentication (very limited)"""
-        guest_paths = [
-            '/web/products/',  # Browse products only
-        ]
-        for guest_path in guest_paths:
-            if path.startswith(guest_path):
+    def is_public_path(self, path, method):
+        """Check if path is public (no auth required)."""
+        return self.matches_public_route(path, method)
+
+    def matches_public_route(self, path, method):
+        for allowed_method, pattern in self.PUBLIC_ROUTE_RULES:
+            method_matches = allowed_method is None or method == allowed_method
+            if method_matches and pattern.match(path):
                 return True
         return False

@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Thông báo - E-Commerce</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Inter', sans-serif; background: #f8f9fa; color: #333; }
+        .container { max-width: 800px; margin: 3rem auto; padding: 2rem; background: white; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.05); }
+        .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem; padding-bottom: 1rem; border-bottom: 2px solid #f0f0f0; }
+        .notif-list { display: flex; flex-direction: column; gap: 1rem; }
+        .notif-item { padding: 1.5rem; background: #fff; border: 1px solid #eee; border-radius: 10px; display: flex; gap: 1rem; align-items: flex-start; transition: scale 0.2s; cursor: pointer; }
+        .notif-item:hover { transform: scale(1.01); background: #fafafa; }
+        .notif-item.unread { border-left: 4px solid #667eea; background: #f0f5ff; }
+        .notif-icon { font-size: 1.5rem; }
+        .notif-content { flex: 1; }
+        .notif-message { font-size: 1rem; font-weight: 500; margin-bottom: 0.5rem; }
+        .notif-time { font-size: 0.85rem; color: #888; }
+        .empty-state { text-align: center; padding: 4rem; color: #888; font-style: italic; }
+        .back-link { color: #667eea; text-decoration: none; font-weight: 600; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>📥 Thông báo của bạn</h1>
+            <a href="index.html" class="back-link">← Quay lại cửa hàng</a>
+        </div>
+        <div id="loading" style="text-align: center; padding: 2rem;">Đang tải...</div>
+        <div class="notif-list" id="notifList"></div>
+    </div>
+
+    <script>
+        async function loadNotifications() {
+            const user = JSON.parse(localStorage.getItem('user') || '{}');
+            if (!user.id) {
+                window.location.href = 'index.html';
+                return;
+            }
+
+            try {
+                const response = await fetch(`http://${window.location.hostname}:8000/notifications/list/?user_id=${user.id}`);
+                const data = await response.json();
+                
+                document.getElementById('loading').style.display = 'none';
+                const list = document.getElementById('notifList');
+                
+                if (data.success && data.data) {
+                    if (data.data.length === 0) {
+                        list.innerHTML = '<div class="empty-state">Bạn chưa có thông báo nào.</div>';
+                    } else {
+                        data.data.forEach(notif => {
+                            const item = document.createElement('div');
+                            item.className = `notif-item ${notif.is_read ? '' : 'unread'}`;
+                            
+                            const icon = getNotifIcon(notif.notification_type);
+                            const time = new Date(notif.created_at).toLocaleString('vi-VN');
+
+                            item.innerHTML = `
+                                <div class="notif-icon">${icon}</div>
+                                <div class="notif-content">
+                                    <div class="notif-message">${notif.message}</div>
+                                    <div class="notif-time">${time}</div>
+                                </div>
+                            `;
+                            
+                            item.onclick = () => markAsRead(notif.id, item);
+                            list.appendChild(item);
+                        });
+                    }
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                document.getElementById('loading').textContent = 'Lỗi khi tải thông báo.';
+            }
+        }
+
+        async function markAsRead(id, element) {
+            if (!element.classList.contains('unread')) return;
+            try {
+                await fetch(`http://${window.location.hostname}:8000/notifications/${id}/read/`, { method: 'PUT' });
+                element.classList.remove('unread');
+            } catch (e) {}
+        }
+
+        function getNotifIcon(type) {
+            switch(type) {
+                case 'success': return '✅';
+                case 'warning': return '⚠️';
+                case 'error': return '❌';
+                default: return 'ℹ️';
+            }
+        }
+
+        window.onload = loadNotifications;
+    </script>
+</body>
+</html>

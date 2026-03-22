@@ -5,7 +5,8 @@ from rest_framework.response import Response
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework_simplejwt.tokens import RefreshToken
 from django.contrib.auth import authenticate, get_user_model
-from .models import Address
+from django.db import transaction
+from .models import Address, UserOutboxEvent
 from .serializers import UserSerializer, UserRegistrationSerializer, AddressSerializer
 
 User = get_user_model()
@@ -21,8 +22,20 @@ def register(request):
     """User registration"""
     serializer = UserRegistrationSerializer(data=request.data)
     if serializer.is_valid():
-        user = serializer.save()
+        with transaction.atomic():
+            user = serializer.save()
+            
+            # Emit event via Outbox
+            UserOutboxEvent.objects.create(
+                event_type='user_created',
+                payload=UserSerializer(user).data
+            )
+            
         refresh = RefreshToken.for_user(user)
+        # Add custom claims
+        refresh.access_token['role'] = user.role
+        refresh.access_token['username'] = user.username
+        refresh.access_token['email'] = user.email
         
         return Response({
             'success': True,
@@ -51,6 +64,10 @@ def login(request):
         return Response({'error': 'Account is banned'}, status=status.HTTP_403_FORBIDDEN)
     
     refresh = RefreshToken.for_user(user)
+    # Add custom claims
+    refresh.access_token['role'] = user.role
+    refresh.access_token['username'] = user.username
+    refresh.access_token['email'] = user.email
     
     return Response({
         'success': True,
@@ -68,6 +85,23 @@ class UserViewSet(viewsets.ModelViewSet):
     serializer_class = UserSerializer
     permission_classes = [AllowAny]  # Trust BFF - Gateway already validated
     
+    def perform_update(self, serializer):
+        with transaction.atomic():
+            user = serializer.save()
+            UserOutboxEvent.objects.create(
+                event_type='user_updated',
+                payload=UserSerializer(user).data
+            )
+
+    def perform_destroy(self, instance):
+        with transaction.atomic():
+            user_id = instance.id
+            UserOutboxEvent.objects.create(
+                event_type='user_deleted',
+                payload={'id': user_id}
+            )
+            instance.delete()
+
     def get_queryset(self):
         queryset = User.objects.all()
         search = self.request.query_params.get('search', None)
@@ -92,15 +126,3 @@ class UserViewSet(viewsets.ModelViewSet):
             'banned_users': banned_users,
             'active_users': total_users - banned_users
         })
-
-
-class AddressViewSet(viewsets.ModelViewSet):
-    """Address management - Trust BFF (no auth needed)"""
-    serializer_class = AddressSerializer
-    permission_classes = [AllowAny]  # Trust BFF - Gateway already validated
-    
-    def get_queryset(self):
-        return Address.objects.filter(user=self.request.user)
-    
-    def perform_create(self, serializer):
-        serializer.save(user=self.request.user)

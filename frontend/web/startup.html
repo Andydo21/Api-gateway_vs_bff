@@ -1,0 +1,592 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chi tiết Startup - Startup Hub</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #f5f7fa;
+            color: #333;
+        }
+
+        header {
+            background: white;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            padding: 1rem 2rem;
+        }
+
+        .header-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .logo {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #667eea;
+            text-decoration: none;
+        }
+
+        .back-btn {
+            padding: 0.5rem 1rem;
+            background: #f8f9fa;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 0.95rem;
+        }
+
+        .back-btn:hover {
+            background: #e9ecef;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 2rem auto;
+            padding: 0 2rem;
+        }
+
+        .product-detail {
+            background: white;
+            border-radius: 12px;
+            padding: 2rem;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+        }
+
+        .product-layout {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 3rem;
+        }
+
+        .product-image-section {
+            position: sticky;
+            top: 2rem;
+            height: fit-content;
+        }
+
+        .product-main-image {
+            width: 100%;
+            height: 400px;
+            object-fit: cover;
+            border-radius: 12px;
+            background: #f8f9fa;
+        }
+
+        .product-info-section h1 {
+            font-size: 1.8rem;
+            margin-bottom: 1rem;
+            color: #333;
+        }
+
+        .product-category {
+            display: inline-block;
+            padding: 0.25rem 0.75rem;
+            background: #667eea;
+            color: white;
+            border-radius: 12px;
+            font-size: 0.85rem;
+            margin-bottom: 1rem;
+        }
+
+        .product-rating {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .stars {
+            color: #ffc107;
+            font-size: 1.2rem;
+        }
+
+        .rating-text {
+            color: #6c757d;
+        }
+
+        .product-price {
+            font-size: 2rem;
+            font-weight: 700;
+            color: #e74c3c;
+            margin-bottom: 1.5rem;
+        }
+
+        .product-stock {
+            padding: 0.75rem 1rem;
+            background: #e0e7ff;
+            color: #4338ca;
+            border-radius: 8px;
+            margin-bottom: 1.5rem;
+            font-weight: 600;
+        }
+
+        .product-description {
+            margin-bottom: 2rem;
+            line-height: 1.6;
+            color: #4b5563;
+        }
+
+        .product-actions {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        .quantity-selector {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            padding: 0.75rem 1rem;
+            background: #f8f9fa;
+            border-radius: 8px;
+        }
+
+        .quantity-btn {
+            width: 35px;
+            height: 35px;
+            border: none;
+            background: white;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 1.1rem;
+        }
+
+        .quantity-btn:hover {
+            background: #e9ecef;
+        }
+
+        .quantity {
+            min-width: 40px;
+            text-align: center;
+            font-weight: 600;
+            font-size: 1.1rem;
+        }
+
+        .add-to-pitch-btn {
+            flex: 1;
+            padding: 1rem;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+
+        .add-to-pitch-btn:hover {
+            transform: translateY(-2px);
+        }
+
+        .add-to-pitch-btn:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .reviews-section {
+            margin-top: 3rem;
+            padding-top: 2rem;
+            border-top: 2px solid #e0e0e0;
+        }
+
+        .reviews-section h2 {
+            margin-bottom: 1.5rem;
+            color: #333;
+        }
+
+        .review-card {
+            padding: 1rem;
+            background: #f8f9fa;
+            border-radius: 8px;
+            margin-bottom: 1rem;
+        }
+
+        .review-header {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 0.5rem;
+        }
+
+        .review-author {
+            font-weight: 600;
+        }
+
+        .review-rating {
+            color: #ffc107;
+        }
+
+        .review-text {
+            color: #6c757d;
+            line-height: 1.5;
+        }
+
+        .review-form {
+            margin-top: 2rem;
+            padding: 1.5rem;
+            background: #f8f9fa;
+            border-radius: 8px;
+        }
+
+        .review-form h3 {
+            margin-bottom: 1rem;
+            color: #333;
+        }
+
+        .form-group {
+            margin-bottom: 1rem;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+            color: #333;
+        }
+
+        .star-rating {
+            display: flex;
+            gap: 0.5rem;
+            font-size: 2rem;
+        }
+
+        .star {
+            cursor: pointer;
+            color: #ddd;
+            transition: color 0.2s;
+        }
+
+        .star:hover,
+        .star.active {
+            color: #ffc107;
+        }
+
+        .form-group textarea {
+            width: 100%;
+            padding: 0.75rem;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            resize: vertical;
+            min-height: 100px;
+            font-family: inherit;
+        }
+
+        .submit-review-btn {
+            padding: 0.75rem 1.5rem;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+
+        .submit-review-btn:hover {
+            transform: translateY(-2px);
+        }
+
+        .submit-review-btn:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 3rem;
+            color: #6c757d;
+        }
+
+        .toast {
+            position: fixed;
+            bottom: 2rem;
+            right: 2rem;
+            background: #28a745;
+            color: white;
+            padding: 1rem 1.5rem;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+            animation: slideIn 0.3s;
+            z-index: 1000;
+        }
+
+        @keyframes slideIn {
+            from {
+                transform: translateX(400px);
+                opacity: 0;
+            }
+
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .product-layout {
+                grid-template-columns: 1fr;
+                gap: 2rem;
+            }
+
+            .product-actions {
+                flex-direction: column;
+            }
+
+            .container {
+                padding: 0 1rem;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <header>
+        <div class="header-content">
+            <a href="index.html" class="logo">🚀 Startup Hub</a>
+            <button class="back-btn" onclick="window.history.back()">← Quay lại</button>
+        </div>
+    </header>
+
+    <div class="container">
+        <div class="product-detail" id="startupDetail">
+            <div class="loading">Đang tải thông tin Startup...</div>
+        </div>
+    </div>
+
+    <script>
+        const API_BASE = 'http://localhost:8000';
+        let currentQuantity = 1;
+        let currentStartup = null;
+
+        function getToken() {
+            return localStorage.getItem('token');
+        }
+
+        function authHeaders() {
+            return {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${getToken()}`
+            };
+        }
+
+        window.onload = () => {
+            const urlParams = new URLSearchParams(window.location.search);
+            const startupId = urlParams.get('id');
+
+            if (startupId) {
+                loadStartup(startupId);
+            } else {
+                document.getElementById('startupDetail').innerHTML =
+                    '<div class="loading">Không tìm thấy Startup</div>';
+            }
+        };
+
+        async function loadStartup(id) {
+            try {
+                // Endpoint remains /web/products/ for compatibility or update to /web/startups/ if changed in BFF
+                // Based on previous work, I updated BFF to /startups/
+                const response = await fetch(`${API_BASE}/web/startups/${id}/`);
+                const data = await response.json();
+
+                if (data.success && data.startup) {
+                    currentStartup = data.startup;
+                    displayStartup(data.startup, data.reviews || []);
+                } else {
+                    document.getElementById('startupDetail').innerHTML =
+                        '<div class="loading">Không tìm thấy Startup</div>';
+                }
+            } catch (error) {
+                document.getElementById('startupDetail').innerHTML =
+                    '<div class="loading">Lỗi kết nối Server</div>';
+            }
+        }
+
+        function displayStartup(startup, reviews) {
+            const avgRating = startup.average_rating || startup.rating || 0;
+            const reviewCount = startup.review_count || reviews.length || 0;
+
+            document.getElementById('startupDetail').innerHTML = `
+                <div class="product-layout">
+                    <div class="product-image-section">
+                        <img src="${startup.image_url || 'https://via.placeholder.com/400'}" 
+                             alt="${startup.company_name}" 
+                             class="product-main-image">
+                    </div>
+                    
+                    <div class="product-info-section">
+                        <span class="product-category">${startup.industry || 'Startup'}</span>
+                        <h1>${startup.company_name}</h1>
+                        
+                        <div class="product-rating">
+                            <span class="stars">${renderStars(avgRating)}</span>
+                            <span class="rating-text">${avgRating.toFixed(1)} (${reviewCount} đánh giá/phản hồi)</span>
+                        </div>
+                        
+                        <div class="product-price">${startup.industry || 'Innovative Startup'}</div>
+                        
+                        <div class="product-stock">
+                            🌐 Website: <a href="${startup.website}" target="_blank" style="color: inherit;">${startup.website || 'N/A'}</a>
+                        </div>
+                        
+                        <div class="product-description">
+                            ${startup.description || 'Không có mô tả chi tiết'}
+                        </div>
+                        
+                        <div class="product-actions">
+                            <button class="add-to-pitch-btn" onclick="openPitchModal()">
+                                🚀 Gửi hồ sơ Pitch ngay
+                            </button>
+                        </div>
+                        
+                        <div class="reviews-section">
+                            <h2>Phản hồi từ Nhà đầu tư</h2>
+                            
+                            ${reviews.length > 0 ? reviews.map(review => `
+                                <div class="review-card">
+                                    <div class="review-header">
+                                        <span class="review-author">${review.user_name || 'Nhà đầu tư'}</span>
+                                        <span class="review-rating">${renderStars(review.rating)}</span>
+                                    </div>
+                                    <div class="review-text">${review.comment || ''}</div>
+                                </div>
+                            `).join('') : '<p style="color: #6c757d;">Chưa có nhận xét nào. Hãy là nhà đầu tư đầu tiên đánh giá Startup này!</p>'}
+                            
+                            <div class="review-form">
+                                <h3>✍️ Viết đánh giá của bạn</h3>
+                                <form id="reviewForm" onsubmit="submitReview(event)">
+                                    <div class="form-group">
+                                        <label>Đánh giá dự án:</label>
+                                        <div class="star-rating" id="starRating">
+                                            <span class="star" data-rating="1" onclick="setRating(1)">★</span>
+                                            <span class="star" data-rating="2" onclick="setRating(2)">★</span>
+                                            <span class="star" data-rating="3" onclick="setRating(3)">★</span>
+                                            <span class="star" data-rating="4" onclick="setRating(4)">★</span>
+                                            <span class="star" data-rating="5" onclick="setRating(5)">★</span>
+                                        </div>
+                                        <input type="hidden" id="ratingValue" required>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="reviewComment">Cảm nhận:</label>
+                                        <textarea id="reviewComment" placeholder="Chia sẻ cảm nhận của bạn về tiềm năng dự án..." required></textarea>
+                                    </div>
+                                    <button type="submit" class="submit-review-btn">Gửi phản hồi</button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        function updateQuantity(change) {
+            currentQuantity = Math.max(1, Math.min(currentQuantity + change, currentStartup.stock));
+            document.getElementById('quantity').textContent = currentQuantity;
+        }
+
+        async function openPitchModal() {
+            if (!currentStartup) return;
+            const title = prompt("Nhập tiêu đề hồ sơ Pitch:", `Pitch for ${currentStartup.company_name}`);
+            if (!title) return;
+            const pdfUrl = prompt("Nhập link Pitch Deck (PDF/Drive):", "https://");
+            if (!pdfUrl) return;
+
+            try {
+                const response = await fetch(`${API_BASE}/web/pitch/submit/`, {
+                    method: 'POST',
+                    headers: authHeaders(),
+                    body: JSON.stringify({
+                        startup_id: currentStartup.id,
+                        title: title,
+                        pitch_deck_url: pdfUrl
+                    })
+                });
+
+                const data = await response.json();
+                if (data.id) {
+                    showToast(`✅ Đã gửi hồ sơ Pitch cho "${currentStartup.company_name}" thành công!`);
+                } else {
+                    showToast(data.error || 'Lỗi khi gửi hồ sơ');
+                }
+            } catch (error) {
+                showToast('Lỗi kết nối');
+            }
+        }
+
+        function renderStars(rating) {
+            const fullStars = Math.floor(rating);
+            return '★'.repeat(fullStars) + '☆'.repeat(5 - fullStars);
+        }
+
+        function formatPrice(price) {
+            return new Intl.NumberFormat('vi-VN').format(price);
+        }
+
+        function showToast(message) {
+            const toast = document.createElement('div');
+            toast.className = 'toast';
+            toast.textContent = message;
+            document.body.appendChild(toast);
+            setTimeout(() => toast.remove(), 3000);
+        }
+
+        let selectedRating = 0;
+        function setRating(rating) {
+            selectedRating = rating;
+            document.getElementById('ratingValue').value = rating;
+            const stars = document.querySelectorAll('.star');
+            stars.forEach((star, index) => {
+                if (index < rating) star.classList.add('active');
+                else star.classList.remove('active');
+            });
+        }
+
+        async function submitReview(event) {
+            event.preventDefault();
+            const token = getToken();
+            if (!token) { window.location.href = 'login.html'; return; }
+            if (selectedRating === 0) { alert('⚠️ Vui lòng chọn số sao!'); return; }
+
+            const comment = document.getElementById('reviewComment').value.trim();
+            const btn = document.querySelector('.submit-review-btn');
+            btn.disabled = true;
+
+            try {
+                const response = await fetch(`${API_BASE}/web/startups/${currentStartup.id}/reviews/`, {
+                    method: 'POST',
+                    headers: authHeaders(),
+                    body: JSON.stringify({ rating: selectedRating, comment: comment })
+                });
+                const data = await response.json();
+                if (data.success) {
+                    showToast('✅ ' + data.message);
+                    document.getElementById('reviewForm').reset();
+                    selectedRating = 0;
+                    document.querySelectorAll('.star').forEach(s => s.classList.remove('active'));
+                    setTimeout(() => loadStartup(currentStartup.id), 1500);
+                }
+            } catch (error) {
+                showToast('❌ Lỗi gửi đánh giá');
+            } finally {
+                btn.disabled = false;
+            }
+        }
+    </script>
+</body>
+</html>
+ Riverside

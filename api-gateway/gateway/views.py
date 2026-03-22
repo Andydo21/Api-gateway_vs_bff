@@ -1,14 +1,23 @@
-"""Proxy views to forward requests to BFF services"""
+import os
+import mimetypes
+import logging
 import requests
-from django.http import JsonResponse, HttpResponse
+from django.http import JsonResponse, HttpResponse, FileResponse, Http404
 from django.conf import settings
 from django.views import View
+
+
+SCHEDULING_SERVICE_URL = getattr(settings, 'SCHEDULING_SERVICE_URL', 'http://scheduling-service:4008')
+BOOKING_SERVICE_URL = getattr(settings, 'BOOKING_SERVICE_URL', 'http://booking-service:4009')
+MEETING_SERVICE_URL = getattr(settings, 'MEETING_SERVICE_URL', 'http://meeting-service:4010')
+FEEDBACK_SERVICE_URL = getattr(settings, 'FEEDBACK_SERVICE_URL', 'http://feedback-service:4011')
 
 
 class ProxyView(View):
     """Base proxy view to forward requests"""
     
     target_url = None
+    timeout = getattr(settings, 'PROXY_TIMEOUT_SECONDS', 10)
     
     def dispatch(self, request, *args, **kwargs):
         if not self.target_url:
@@ -23,6 +32,7 @@ class ProxyView(View):
             method = request.method.lower()
             headers = self.get_headers(request)
             cookies = request.COOKIES
+            query_params = request.GET
             
             # Prepare request data
             data = None
@@ -40,15 +50,15 @@ class ProxyView(View):
                     data = request.body
             
             if method == 'get':
-                response = requests.get(url, headers=headers, params=request.GET, cookies=cookies)
+                response = requests.get(url, headers=headers, params=query_params, cookies=cookies, timeout=self.timeout)
             elif method == 'post':
-                response = requests.post(url, headers=headers, json=json_data, data=data, params=request.GET, cookies=cookies)
+                response = requests.post(url, headers=headers, json=json_data, data=data, params=query_params, cookies=cookies, timeout=self.timeout)
             elif method == 'put':
-                response = requests.put(url, headers=headers, json=json_data, data=data, cookies=cookies)
+                response = requests.put(url, headers=headers, json=json_data, data=data, params=query_params, cookies=cookies, timeout=self.timeout)
             elif method == 'patch':
-                response = requests.patch(url, headers=headers, json=json_data, data=data, cookies=cookies)
+                response = requests.patch(url, headers=headers, json=json_data, data=data, params=query_params, cookies=cookies, timeout=self.timeout)
             elif method == 'delete':
-                response = requests.delete(url, headers=headers, cookies=cookies)
+                response = requests.delete(url, headers=headers, params=query_params, cookies=cookies, timeout=self.timeout)
             else:
                 return JsonResponse({'error': 'Method not allowed'}, status=405)
             
@@ -117,6 +127,28 @@ class AdminBFFProxy(ProxyView):
     target_url = settings.ADMIN_BFF_URL
 
 
+class NotificationProxy(ProxyView):
+    """Proxy to Notification Service"""
+    target_url = settings.NOTIFICATION_SERVICE_URL
+
+
+class SchedulingProxy(ProxyView):
+    """Proxy for Scheduling Service (Slots, Availability)"""
+    target_url = SCHEDULING_SERVICE_URL
+
+class BookingProxy(ProxyView):
+    """Proxy for Booking Service (PitchRequests, Bookings)"""
+    target_url = BOOKING_SERVICE_URL
+
+class MeetingProxy(ProxyView):
+    """Proxy for Meeting Service (Zoom/Meet)"""
+    target_url = MEETING_SERVICE_URL
+
+class FeedbackProxy(ProxyView):
+    """Proxy for Feedback Service (Evaluations)"""
+    target_url = FEEDBACK_SERVICE_URL
+
+
 def health_check(request):
     """Health check endpoint"""
     return JsonResponse({
@@ -127,9 +159,6 @@ def health_check(request):
 
 def serve_frontend(request, filename='index.html'):
     """Serve frontend HTML/JS/CSS files from frontend/web directory"""
-    import os
-    import mimetypes
-    from django.http import FileResponse, Http404
 
     # Strip leading 'web/' if present (handle /ui/web/login.html)
     if filename.startswith('web/'):
@@ -151,6 +180,31 @@ def serve_frontend(request, filename='index.html'):
 
     if not os.path.exists(filepath):
         raise Http404("Frontend not found")
+
+    content_type, _ = mimetypes.guess_type(filepath)
+    content_type = content_type or 'text/html'
+    return FileResponse(open(filepath, 'rb'), content_type=content_type)
+
+
+def serve_admin_frontend(request, filename='admin.html'):
+    """Serve admin frontend HTML/JS/CSS files from frontend/admin directory"""
+
+    # Path to frontend/admin directory
+    admin_dir = os.path.join(settings.BASE_DIR, 'frontend', 'admin')
+    admin_dir = os.path.abspath(admin_dir)
+
+    filepath = os.path.join(admin_dir, filename)
+
+    # Security: prevent path traversal
+    if not os.path.abspath(filepath).startswith(admin_dir):
+        raise Http404("Not found")
+
+    if not os.path.exists(filepath):
+        # Default to admin.html for SPA-like behavior or if main entry is missing
+        filepath = os.path.join(admin_dir, 'admin.html')
+
+    if not os.path.exists(filepath):
+        raise Http404("Admin Panel not found")
 
     content_type, _ = mimetypes.guess_type(filepath)
     content_type = content_type or 'text/html'

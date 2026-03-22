@@ -4,44 +4,91 @@ import logging
 import json
 from collections import defaultdict
 from django.http import JsonResponse
-from django.conf import settings
-from django.utils.timezone import now
+from django.core.cache import cache
 
 logger = logging.getLogger(__name__)
 
 
 class RateLimitMiddleware:
-    """Simple rate limiting middleware"""
+    """Redis-backed rate limiting middleware"""
     
     def __init__(self, get_response):
         self.get_response = get_response
-        self.requests = defaultdict(list)
+        self.max_requests, self.window = self.parse_rate_limit(
+            getattr(settings, 'RATE_LIMIT', '100/h')
+        )
         
     def __call__(self, request):
+        # Skip health check from rate limiting if needed
+        if request.path == '/health/':
+            return self.get_response(request)
+
         # Get client IP
         ip = self.get_client_ip(request)
         
-        # Check rate limit
-        current_time = time.time()
-        window = 3600  # 1 hour
-        max_requests = 10000  # Increased for development
+        # Check rate limit using Redis (fixed window approach)
+        window = self.window
+        max_requests = self.max_requests
         
-        # Clean old requests
-        self.requests[ip] = [req_time for req_time in self.requests[ip] 
-                             if current_time - req_time < window]
+        # Create a unique key for the current window
+        # Format: ratelimit:<ip>:<window_timestamp_bucket>
+        current_bucket = int(time.time() / window)
+        cache_key = f"rl:{ip}:{current_bucket}"
         
-        # Check limit
-        if len(self.requests[ip]) >= max_requests:
-            return JsonResponse({
-                'error': 'Rate limit exceeded',
-                'retry_after': window
-            }, status=429)
-        
-        # Add current request
-        self.requests[ip].append(current_time)
-        
-        response = self.get_response(request)
-        return response
+        try:
+            # Atomic increment
+            # If key doesn't exist, it starts at 1 and we set expiry
+            count = cache.get(cache_key)
+            
+            if count is None:
+                cache.set(cache_key, 1, timeout=window)
+                count = 1
+            else:
+                if count >= max_requests:
+                    logger.warning(f"[RATELIMIT] Limit exceeded for IP: {ip}")
+                    return JsonResponse({
+                        'error': 'Rate limit exceeded',
+                        'retry_after': window
+                    }, status=429)
+                
+                count = cache.incr(cache_key)
+            
+            # Add headers for transparency
+            response = self.get_response(request)
+            response['X-RateLimit-Limit'] = str(max_requests)
+            response['X-RateLimit-Remaining'] = str(max(0, max_requests - count))
+            return response
+            
+        except Exception as e:
+            # Fallback for cache failure (allow request but log error)
+            logger.error(f"[RATELIMIT] Cache error: {str(e)}")
+            return self.get_response(request)
+
+    def parse_rate_limit(self, rate_limit):
+        """Parse RATE_LIMIT in '<count>/<unit>' format, e.g. '100/h'."""
+        fallback = (100, 3600)
+        try:
+            value = str(rate_limit).strip()
+            if '/' not in value:
+                return fallback
+
+            count_str, unit = value.split('/', 1)
+            count = int(count_str)
+            unit = unit.strip().lower()
+
+            unit_seconds = {
+                's': 1,
+                'm': 60,
+                'h': 3600,
+                'd': 86400,
+            }
+            window_seconds = unit_seconds.get(unit)
+            if not window_seconds or count <= 0:
+                return fallback
+
+            return count, window_seconds
+        except Exception:
+            return fallback
     
     def get_client_ip(self, request):
         x_forwarded_for = request.META.get('HTTP_X_FORWARDED_FOR')
