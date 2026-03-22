@@ -67,9 +67,9 @@ class PitchBookingViewSet(viewsets.ModelViewSet):
         serializer = CreateBookingSerializer(data=request.data)
         if serializer.is_valid():
             with transaction.atomic():
-                booking = serializer.save()
+                booking = serializer.save() # default status is INITIALIZED
                 BookingOutboxEvent.objects.create(
-                    event_type='pitch_booking_created',
+                    event_type='pitch_booking_initiated',
                     payload=PitchBookingSerializer(booking).data
                 )
             return Response(PitchBookingSerializer(booking).data, status=status.HTTP_201_CREATED)

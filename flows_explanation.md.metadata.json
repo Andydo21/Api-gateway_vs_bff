@@ -1,0 +1,5 @@
+{
+  "artifactType": "ARTIFACT_TYPE_OTHER",
+  "summary": "This document explains all the technical and business flows of the microservices project, including synchronous API calls, asynchronous events via Kafka, and the Transactional Outbox pattern.",
+  "updatedAt": "2026-03-22T12:52:09.506150800Z"
+}

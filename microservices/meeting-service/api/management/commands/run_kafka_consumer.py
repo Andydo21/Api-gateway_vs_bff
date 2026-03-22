@@ -43,7 +43,7 @@ class Command(BaseCommand):
                     event_type = payload.get('event_type')
                     data = payload.get('data')
 
-                    if event_type == 'pitch_booking_created':
+                    if event_type == 'slot_confirmed':
                         self.auto_create_meeting(data)
                 except Exception as e:
                     logger.error(f"Error processing message: {e}")
@@ -86,24 +86,36 @@ class Command(BaseCommand):
 
         meeting_url = f"https://zoom.us/j/{booking_id}12345678"
         
-        with transaction.atomic():
-            meeting = Meeting.objects.create(
-                booking_id=booking_id,
-                meeting_url=meeting_url,
-                meeting_type='ZOOM',
-                start_time=start_time,
-                end_time=end_time,
-                status='ONGOING'
-            )
-            
-            # Broadcast meeting creation
-            MeetingOutboxEvent.objects.create(
-                event_type='meeting_auto_created',
-                payload={
-                    'meeting_id': meeting.id,
-                    'booking_id': booking_id,
-                    'meeting_url': meeting_url
-                }
-            )
-            
-        self.stdout.write(self.style.SUCCESS(f" ✅ Meeting cho Booking #{booking_id} đã được tạo tự động: {meeting_url}"))
+        try:
+            with transaction.atomic():
+                meeting = Meeting.objects.create(
+                    booking_id=booking_id,
+                    meeting_url=meeting_url,
+                    meeting_type='ZOOM',
+                    start_time=start_time,
+                    end_time=end_time,
+                    status='ONGOING'
+                )
+                
+                # Broadcast meeting creation
+                MeetingOutboxEvent.objects.create(
+                    event_type='meeting_auto_created',
+                    payload={
+                        'meeting_id': meeting.id,
+                        'booking_id': booking_id,
+                        'meeting_url': meeting_url
+                    }
+                )
+            self.stdout.write(self.style.SUCCESS(f" ✅ Meeting cho Booking #{booking_id} đã được tạo tự động: {meeting_url}"))
+        except Exception as e:
+            logger.error(f"Error creating meeting: {e}")
+            with transaction.atomic():
+                MeetingOutboxEvent.objects.create(
+                    event_type='meeting_failed',
+                    payload={
+                        'booking_id': booking_id,
+                        'pitch_slot_id': pitch_slot_id,
+                        'reason': str(e)
+                    }
+                )
+            self.stdout.write(self.style.ERROR(f" ❌ [SAGA] Tạo Meeting thất bại cho Booking #{booking_id}. Đang báo lỗi..."))

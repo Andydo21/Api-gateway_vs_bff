@@ -23,13 +23,16 @@ class PitchRequest(models.Model):
 
 class PitchBooking(models.Model):
     STATUS_CHOICES = [
+        ('INITIALIZED', 'Initialized'),
         ('SCHEDULED', 'Scheduled'),
-        ('COMPLETED', 'Completed'),
+        ('CONFIRMED', 'Confirmed'),
         ('CANCELLED', 'Cancelled'),
+        ('COMPLETED', 'Completed'),
+        ('FAILED', 'Failed'),
     ]
     pitch_request = models.ForeignKey(PitchRequest, on_delete=models.CASCADE)
     pitch_slot_id = models.BigIntegerField() # Linked to PitchSlot in scheduling-service
-    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='SCHEDULED')
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='INITIALIZED')
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:

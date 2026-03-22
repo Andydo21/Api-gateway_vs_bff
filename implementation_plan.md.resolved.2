@@ -1,0 +1,29 @@
+# Implementation Plan - Startup Registration Approval
+
+Dịch vụ Startup sẽ được cập nhật để cho phép Admin phê duyệt hồ sơ các Startup mới đăng ký.
+
+## Proposed Changes
+
+### 1. [startup-service](file:///d:/Django_project/api-gateway_vs_bff/microservices/startup-service/api/models.py)
+- Thêm trường [status](file:///d:/Django_project/api-gateway_vs_bff/microservices/scheduling-service/api/views.py#50-59) (`PENDING`, `APPROVED`, `REJECTED`) vào model [Startup](file:///d:/Django_project/api-gateway_vs_bff/microservices/startup-service/api/models.py#19-46).
+- Mặc định khi tạo mới sẽ là `PENDING`.
+
+### 2. [startup-service Views](file:///d:/Django_project/api-gateway_vs_bff/microservices/startup-service/api/views.py)
+- Thêm `@action(detail=True, methods=['post'])` mang tên [approve](file:///d:/Django_project/api-gateway_vs_bff/microservices/booking-service/api/views.py#34-46) và [reject](file:///d:/Django_project/api-gateway_vs_bff/microservices/booking-service/api/views.py#47-59).
+- Khi duyệt, tạo [StartupOutboxEvent](file:///d:/Django_project/api-gateway_vs_bff/microservices/startup-service/api/models.py#81-94) với `event_type='startup_approved'`.
+
+### 3. [web-bff](file:///d:/Django_project/api-gateway_vs_bff/bff/web-bff/api/views.py)
+- Thêm hàm `approve_startup` và `reject_startup` để gọi sang Startup Service.
+- Cấu hình URL tương ứng trong [urls.py](file:///d:/Django_project/api-gateway_vs_bff/bff/web-bff/api/urls.py).
+
+### 4. SQL Schemas
+- Cập nhật [schemas/startup_service.sql](file:///C:/Users/Windows%2010/.gemini/antigravity/brain/13100573-443e-434d-8fcb-2a262043bdaa/schemas/startup_service.sql) và [setup_mysql.sql](file:///C:/Users/Windows%2010/.gemini/antigravity/brain/13100573-443e-434d-8fcb-2a262043bdaa/setup_mysql.sql) để thêm cột [status](file:///d:/Django_project/api-gateway_vs_bff/microservices/scheduling-service/api/views.py#50-59).
+
+## Verification Plan
+
+### Automated Tests
+- Kiểm tra tạo Startup mới: [status](file:///d:/Django_project/api-gateway_vs_bff/microservices/scheduling-service/api/views.py#50-59) phải là `PENDING`.
+- Thử gọi API approve: [status](file:///d:/Django_project/api-gateway_vs_bff/microservices/scheduling-service/api/views.py#50-59) phải đổi sang `APPROVED`.
+
+### Manual Verification
+- Kiểm tra thông báo qua WebSocket ở `notification-service` khi Startup được duyệt.

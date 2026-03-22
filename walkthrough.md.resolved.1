@@ -1,0 +1,82 @@
+# Database Tables Overview
+
+Dựa trên cấu trúc dự án microservices của bạn, dưới đây là danh sách toàn bộ các bảng dữ liệu được định nghĩa trong các [models.py](file:///d:/Django_project/api-gateway_vs_bff/bff/web-bff/api/models.py).
+
+> [!NOTE]
+> Dự án của bạn hiện đang cấu hình sử dụng **PostgreSQL** (theo [docker-compose.yml](file:///d:/Django_project/api-gateway_vs_bff/docker-compose.yml) và [settings.py](file:///d:/Django_project/api-gateway_vs_bff/microservices/user-service/user_service/settings.py)). Tuy nhiên, tôi vẫn cung cấp các lệnh MySQL như bạn yêu cầu, cùng với các lệnh PostgreSQL tương ứng để bạn có thể truy vấn chính xác.
+
+## 1. Lệnh xem danh sách Table
+
+| Database | Lệnh xem tất cả các bảng | Lệnh xem cấu trúc 1 bảng |
+| :--- | :--- | :--- |
+| **MySQL** | `SHOW TABLES;` | `DESCRIBE <tên_bảng>;` |
+| **PostgreSQL** | `\dt` hoặc `SELECT table_name FROM information_schema.tables WHERE table_schema = 'public';` | `\d <tên_bảng>` |
+
+---
+
+## 2. Danh sách các bảng theo Microservice
+
+Dưới đây là các bảng (table) chính được tạo từ code Django:
+
+### 👤 User Service
+- `users`: Thông tin người dùng (Admin, Investor, User)
+- `user_outbox_events`: Lưu trữ sự kiện để đồng bộ dữ liệu (Transactional Outbox Pattern)
+
+### 🚀 Startup Service
+- `startups`: Thông tin về các công ty startup
+- `startup_categories`: Danh mục ngành nghề của startup
+- `investors`: Hồ sơ thông tin nhà đầu tư
+- `reviews`: Đánh giá của người dùng về startup
+- `startup_outbox_events`: Sự kiện của startup service
+
+### 📅 Scheduling & Booking Services
+- `pitch_requests`: Yêu cầu pitching của startup
+- `pitch_slots`: Các khung giờ trống của nhà đầu tư
+- `availability_templates`: Mẫu thời gian rảnh định kỳ
+- `pitch_bookings`: Thông tin đặt chỗ pitching thành công
+- `waitlists`: Danh sách chờ khi khung giờ đã đầy
+- `pitch_booking_history`: Lịch sử thay đổi (đổi lịch, hủy lịch)
+- `scheduling_outbox_events` / `booking_outbox_events`: Sự kiện liên quan
+
+### 💰 Funding & Feedback Services
+- `payments`: Thông tin giao dịch thanh toán
+- `feedbacks`: Phản hồi sau buổi pitch
+- `investment_interests`: Mức độ quan tâm đầu tư
+- `funding_outbox_events` / `feedback_outbox_events`: Sự kiện liên quan
+
+### 🛠 Resource & Matchmaking Services
+- `event_resources`: Tài nguyên sự kiện (gian hàng, thiết bị)
+- `resource_reservations`: Thông tin đặt trước tài nguyên
+- `user_interactions`: Lịch sử tương tác của người dùng (view, click, like)
+- `startup_similarities`: Dữ liệu gợi ý startup tương đồng (Recommendation System)
+- `resource_outbox_events` / `matchmaking_outbox_events`: Sự kiện liên quan
+
+### 🔔 Notification & Meeting Services
+- `notifications`: Thông báo cho người dùng
+- `meetings`: Thông tin phòng họp online (Zoom, Google Meet)
+- `meeting_outbox_events`: Sự kiện liên quan
+
+---
+
+## 4. Lệnh Import vào MySQL
+
+Nếu bạn đã có file SQL (ví dụ: `schema.sql`) và muốn import vào MySQL, hãy sử dụng lệnh sau trong Terminal/Command Prompt:
+
+```bash
+# Cú pháp tổng quát
+mysql -u [username] -p [database_name] < [path/to/your_file.sql]
+
+# Ví dụ với người dùng root và database 'microservices'
+mysql -u root -p microservices < schema.sql
+```
+
+### Cách tạo Schema cho MySQL từ Django
+Vì dự án của bạn dùng Django, cách tốt nhất để có lệnh SQL chuẩn MySQL là:
+1. Sửa `ENGINE` trong [settings.py](file:///d:/Django_project/api-gateway_vs_bff/microservices/user-service/user_service/settings.py) thành `'django.db.backends.mysql'`.
+2. Chạy lệnh sau để lấy câu lệnh SQL mà không cần chạy vào DB:
+```bash
+python manage.py sqlmigrate api 0001
+```
+
+> [!TIP]
+> Nếu bạn muốn tôi tạo giúp một file `setup_mysql.sql` chứa toàn bộ cấu trúc các bảng đã liệt kê phía trên để bạn import nhanh, hãy cho tôi biết!

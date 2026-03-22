@@ -1,0 +1,23 @@
+# Task List - Database Table Audit & Flow Implementation
+
+- [x] Identify database engine used in the project
+- [x] Locate all [models.py](file:///d:/Django_project/api-gateway_vs_bff/bff/web-bff/api/models.py) files across microservices
+- [x] Extract custom `db_table` names for each service
+- [x] Research MySQL and PostgreSQL commands for listing tables
+- [x] Provide a comprehensive list of tables and the requested commands
+- [x] Provide MySQL import commands and migration instructions
+- [x] Generate full MySQL DDL script ([setup_mysql.sql](file:///C:/Users/Windows%2010/.gemini/antigravity/brain/13100573-443e-434d-8fcb-2a262043bdaa/setup_mysql.sql))
+- [x] Split MySQL schema into separate files for each microservice
+- [x] Analyze project flows and explain them ([flows_explanation.md](file:///C:/Users/Windows%2010/.gemini/antigravity/brain/13100573-443e-434d-8fcb-2a262043bdaa/flows_explanation.md))
+- [x] Split project flow and model documentation by microservice
+- [x] Implement Missing Flows (Pitch Approval & Auto-Meeting)
+- [x] Audit code for consistency and fix data mismatch in Meeting service
+- [/] **Unify ID Data Types to BIGINT**
+    - [ ] Update models in `startup-service`
+    - [ ] Update models in `scheduling-service`
+    - [ ] Update models in `booking-service`
+    - [ ] Update models in `funding-service`
+    - [ ] Update models in `resource-service`
+    - [ ] Update models in `notification-service`
+    - [ ] Update models in `matchmaking-service`
+    - [ ] Update SQL schema files in `schemas/`

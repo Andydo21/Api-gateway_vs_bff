@@ -1,0 +1,29 @@
+# 🔍 Matchmaking Service - Documentation
+
+## 1. Vai trò (Purpose)
+Đây là "bộ não" gợi ý của hệ thống. Giúp Nhà đầu tư tìm thấy Startup tiềm năng dựa trên sở thích và hành vi.
+
+## 2. Các luồng dữ liệu (Data Flows)
+
+### A. Luồng Thu thập hành vi (Interaction Tracking)
+- **Input:** Sự kiện `startup_viewed`, `pitch_attended`, `feedback_given`.
+- **Logic:** Tính toán trọng số quan tâm của Investor đối với các mảng (Fintech, AI, v.v.).
+
+### B. Luồng Gợi ý (Recommendation)
+- Cung cấp API để BFF lấy danh sách "Startup bạn có thể quan tâm".
+
+## 3. Sự kiện Kafka (Kafka Events)
+- **Consumer:** Nghe tất cả các sự kiện từ `startup_events`, `feedback_events` để cập nhật profile quan tâm.
+- **Producer:** `matchmaking_events`
+    - [interaction_tracked](file:///d:/Django_project/api-gateway_vs_bff/microservices/notification-service/api/management/commands/run_kafka_consumer.py#96-99): Thông báo khi có một tương tác quan trọng xảy ra.
+
+## 4. Cấu trúc Database (Models)
+
+### Bảng `user_interactions`
+Theo dõi hành vi người dùng.
+- `interaction_type`: Loại tương tác ([view](file:///d:/Django_project/api-gateway_vs_bff/microservices/startup-service/api/models.py#56-72), `click`, `like`).
+- `weight`: Trọng số của tương tác (VD: click = 1, like = 5).
+
+### Bảng `startup_similarities`
+Dữ liệu tính toán sẵn về mức độ giống nhau giữa các Startup.
+- `similarity_score`: Điểm tương đồng giữa Startup A và B.
