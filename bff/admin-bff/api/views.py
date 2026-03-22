@@ -73,17 +73,40 @@ def dashboard(request):
 @api_view(['GET', 'POST'])
 @permission_classes([AllowAny])
 def startups(request):
-    """List startups (public) or Create (Admin only)"""
+    """List startups with enriched Owner details (Aggregation)"""
     if request.method == 'POST':
-        # Apply admin check manually for POST in combined view
         role = request.META.get('HTTP_X_ROLE', 'user')
         if role != 'admin':
             return Response({'error': 'Admin only'}, status=403)
             
     try:
         if request.method == 'GET':
+            # 1. Get fundamental startup list
             res = requests.get(f'{STARTUP_SERVICE}/startups/', params=request.GET.dict(), timeout=5)
-            return Response(res.json(), status=res.status_code)
+            data = res.json()
+            
+            # 2. Aggregate: Enrich each startup with owner info from User Service
+            # In a real system, we'd use a more efficient batching approach
+            enriched_startups = []
+            startup_list = data if isinstance(data, list) else data.get('results', [])
+            
+            for startup in startup_list:
+                owner_id = startup.get('owner_id')
+                if owner_id:
+                    try:
+                        user_res = requests.get(f'{USER_SERVICE}/users/{owner_id}/', timeout=2)
+                        if user_res.status_code == 200:
+                            startup['owner_details'] = user_res.json()
+                    except:
+                        startup['owner_details'] = None
+                enriched_startups.append(startup)
+            
+            if isinstance(data, list):
+                return Response(enriched_startups)
+            else:
+                data['results'] = enriched_startups
+                return Response(data)
+                
         elif request.method == 'POST':
             res = requests.post(f'{STARTUP_SERVICE}/startups/', json=request.data, timeout=5)
             return Response(res.json(), status=res.status_code)
@@ -129,9 +152,31 @@ def pitch_slot_status(request, slot_id):
 @permission_classes([AllowAny])
 @admin_required
 def users(request):
+    """List users with aggregated Startup counts"""
     try:
         res = requests.get(f'{USER_SERVICE}/users/', params=request.GET.dict(), timeout=5)
-        return Response(res.json(), status=res.status_code)
+        users_data = res.json()
+        
+        # Aggregate: Count startups for each user
+        enriched_users = []
+        user_list = users_data if isinstance(users_data, list) else users_data.get('results', [])
+        
+        for user in user_list:
+            try:
+                # Query startups by owner_id
+                s_res = requests.get(f'{STARTUP_SERVICE}/startups/?owner_id={user["id"]}', timeout=2)
+                if s_res.status_code == 200:
+                    s_data = s_res.json()
+                    user['startup_count'] = len(s_data) if isinstance(s_data, list) else s_data.get('count', 0)
+            except:
+                user['startup_count'] = 0
+            enriched_users.append(user)
+            
+        if isinstance(users_data, list):
+            return Response(enriched_users)
+        else:
+            users_data['results'] = enriched_users
+            return Response(users_data)
     except Exception as e: return Response({'error': str(e)}, status=500)
 
 
@@ -139,9 +184,33 @@ def users(request):
 @permission_classes([AllowAny])
 @admin_required
 def user_detail(request, user_id):
+    """Aggregate User details, their Startups, and Bookings"""
     try:
-        res = requests.get(f'{USER_SERVICE}/users/{user_id}/', timeout=5)
-        return Response(res.json(), status=res.status_code)
+        # 1. Basic User Info
+        user_res = requests.get(f'{USER_SERVICE}/users/{user_id}/', timeout=5)
+        if user_res.status_code != 200:
+            return Response(user_res.json(), status=user_res.status_code)
+        
+        user_info = user_res.json()
+        
+        # 2. User's Startups
+        try:
+            startup_res = requests.get(f'{STARTUP_SERVICE}/startups/?owner_id={user_id}', timeout=5)
+            user_info['startups'] = startup_res.json() if startup_res.status_code == 200 else []
+        except:
+            user_info['startups'] = []
+            
+        # 3. User's Pitch Slots (if they are an investor or founder involved)
+        try:
+            slot_res = requests.get(f'{SCHEDULING_SERVICE}/pitch-slots/?user_id={user_id}', timeout=5)
+            user_info['pitch_slots'] = slot_res.json() if slot_res.status_code == 200 else []
+        except:
+            user_info['pitch_slots'] = []
+            
+        return Response({
+            'success': True,
+            'data': user_info
+        })
     except Exception as e: return Response({'error': str(e)}, status=500)
 
 
