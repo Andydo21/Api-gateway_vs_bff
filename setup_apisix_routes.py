@@ -9,8 +9,26 @@ headers = {
     "Content-Type": "application/json"
 }
 
-def create_route(route_id, uri, upstream_nodes, name, enable_websocket=False):
+def create_route(route_id, uri, upstream_nodes, name, enable_websocket=False, use_jwt=False):
     url = f"{APISIX_ADMIN_URL}/routes/{route_id}"
+    
+    plugins = {
+        "prometheus": {},
+        "cors": {},
+        "limit-req": {
+            "rate": 10,
+            "burst": 5,
+            "key": "remote_addr",
+            "rejected_code": 429
+        },
+        "file-logger": {
+            "path": "/usr/local/apisix/logs/access.log"
+        }
+    }
+    
+    if use_jwt:
+        plugins["jwt-auth"] = {}
+        
     data = {
         "name": name,
         "uri": uri,
@@ -18,10 +36,7 @@ def create_route(route_id, uri, upstream_nodes, name, enable_websocket=False):
             "type": "roundrobin",
             "nodes": upstream_nodes
         },
-        "plugins": {
-            "prometheus": {},
-            "cors": {}
-        },
+        "plugins": plugins,
         "enable_websocket": enable_websocket
     }
     response = requests.put(url, headers=headers, data=json.dumps(data))
@@ -31,9 +46,9 @@ def create_route(route_id, uri, upstream_nodes, name, enable_websocket=False):
         print(f"Failed to create route: {name}. Status: {response.status_code}, Error: {response.text}")
 
 if __name__ == "__main__":
-    # Routes for BFFs
-    create_route("1", "/web/*", {"web-bff:3001": 1}, "Web-BFF")
-    create_route("2", "/admin/*", {"admin-bff:3002": 1}, "Admin-BFF")
+    # Routes for BFFs (Enabling JWT Auth)
+    create_route("1", "/web/*", {"web-bff:3001": 1}, "Web-BFF", use_jwt=True)
+    create_route("2", "/admin/*", {"admin-bff:3002": 1}, "Admin-BFF", use_jwt=True)
     
     # Route for UI / Auth (Frontend Service)
     create_route("3", "/ui/*", {"frontend-service:8000": 1}, "Frontend-UI-Service")
@@ -44,7 +59,7 @@ if __name__ == "__main__":
     # Route for Notifications (WebSockets)
     create_route("5", "/ws/notifications/*", {"notification-service:4007": 1}, "Notification-Service-WS", enable_websocket=True)
     
-    # Route for Health Check (replacing Nginx healthy endpoint)
+    # Route for Health Check
     url = f"{APISIX_ADMIN_URL}/routes/6"
     data = {
         "name": "Health-Check",
@@ -55,6 +70,9 @@ if __name__ == "__main__":
                     "http_status": 200,
                     "body": "APISIX Gateway is healthy"
                 }
+            },
+            "file-logger": {
+                "path": "/usr/local/apisix/logs/access.log"
             }
         }
     }
