@@ -5,6 +5,19 @@ from rest_framework.response import Response
 from rest_framework import status
 import requests
 from decouple import config
+from functools import wraps
+
+def admin_required(f):
+    @wraps(f)
+    def decorated_function(request, *args, **kwargs):
+        role = request.META.get('HTTP_X_ROLE', 'user')
+        if role != 'admin':
+            return Response(
+                {'success': False, 'error': 'Unauthorized. Admin role required.'}, 
+                status=status.HTTP_403_FORBIDDEN
+            )
+        return f(request, *args, **kwargs)
+    return decorated_function
 
 # Microservice URLs
 # Microservice URLs
@@ -34,6 +47,7 @@ def health_check(request):
 
 @api_view(['GET'])
 @permission_classes([AllowAny])
+@admin_required
 def dashboard(request):
     """Admin dashboard statistics aggregator"""
     try:
@@ -59,6 +73,13 @@ def dashboard(request):
 @api_view(['GET', 'POST'])
 @permission_classes([AllowAny])
 def startups(request):
+    """List startups (public) or Create (Admin only)"""
+    if request.method == 'POST':
+        # Apply admin check manually for POST in combined view
+        role = request.META.get('HTTP_X_ROLE', 'user')
+        if role != 'admin':
+            return Response({'error': 'Admin only'}, status=403)
+            
     try:
         if request.method == 'GET':
             res = requests.get(f'{STARTUP_SERVICE}/startups/', params=request.GET.dict(), timeout=5)
@@ -71,6 +92,7 @@ def startups(request):
 
 @api_view(['PUT', 'DELETE'])
 @permission_classes([AllowAny])
+@admin_required
 def startup_detail(request, startup_id):
     try:
         if request.method == 'PUT':
@@ -84,6 +106,7 @@ def startup_detail(request, startup_id):
 
 @api_view(['GET'])
 @permission_classes([AllowAny])
+@admin_required
 def pitch_slots(request):
     try:
         res = requests.get(f'{SCHEDULING_SERVICE}/pitch-slots/', params=request.GET.dict(), timeout=5)
@@ -93,6 +116,7 @@ def pitch_slots(request):
 
 @api_view(['PUT', 'PATCH'])
 @permission_classes([AllowAny])
+@admin_required
 def pitch_slot_status(request, slot_id):
     """Update pitch slot status (Approve/Reject)"""
     try:
@@ -103,6 +127,7 @@ def pitch_slot_status(request, slot_id):
 
 @api_view(['GET'])
 @permission_classes([AllowAny])
+@admin_required
 def users(request):
     try:
         res = requests.get(f'{USER_SERVICE}/users/', params=request.GET.dict(), timeout=5)
@@ -112,6 +137,7 @@ def users(request):
 
 @api_view(['GET'])
 @permission_classes([AllowAny])
+@admin_required
 def user_detail(request, user_id):
     try:
         res = requests.get(f'{USER_SERVICE}/users/{user_id}/', timeout=5)
@@ -121,6 +147,7 @@ def user_detail(request, user_id):
 
 @api_view(['PUT'])
 @permission_classes([AllowAny])
+@admin_required
 def user_ban(request, user_id):
     """Generic update for user (often used for banning)"""
     try:
@@ -131,6 +158,7 @@ def user_ban(request, user_id):
 
 @api_view(['POST'])
 @permission_classes([AllowAny])
+@admin_required
 def approve_startup(request, startup_id):
     """Approve startup via Startup Service"""
     try:
@@ -141,6 +169,7 @@ def approve_startup(request, startup_id):
 
 @api_view(['POST'])
 @permission_classes([AllowAny])
+@admin_required
 def reject_startup(request, startup_id):
     """Reject startup via Startup Service"""
     try:
@@ -151,6 +180,7 @@ def reject_startup(request, startup_id):
 
 @api_view(['POST'])
 @permission_classes([AllowAny])
+@admin_required
 def block_user(request, user_id):
     """Block user (banned=True)"""
     try:
@@ -161,6 +191,7 @@ def block_user(request, user_id):
 
 @api_view(['POST'])
 @permission_classes([AllowAny])
+@admin_required
 def unblock_user(request, user_id):
     """Unblock user (banned=False)"""
     try:

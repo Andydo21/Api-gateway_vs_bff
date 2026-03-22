@@ -31,6 +31,23 @@ Mục tiêu là mở rộng khả năng quản trị của `admin-bff`, cho phé
 - **User Section**: Cập nhật hàm xử lý khóa người dùng để gọi đúng các endpoint `block`/`unblock` mới.
 - **Cleanup**: Xóa bỏ toàn bộ HTML/JS liên quan đến `inventory`.
 
+### [Component] Authorization & Security (BFF Layer)
+
+#### [MODIFY] [views.py](file:///d:/Django_project/api-gateway_vs_bff/bff/admin-bff/api/views.py)
+- **Decorator `admin_required`**: Thêm một decorator mới để kiểm tra header `X-Role`. Nếu `X-Role != 'admin'`, trả về `403 Forbidden`.
+- **Áp dụng Decorator**: Thêm `@admin_required` vào các function:
+    - `dashboard`
+    - `startups` (cho hành động POST)
+    - `startup_detail` (PUT, DELETE)
+    - `pitch_slots`
+    - `pitch_slot_status`
+    - `users`
+    - `user_detail`
+    - `approve_startup`
+    - `reject_startup`
+    - `block_user`
+    - `unblock_user`
+
 ## Verification Plan
 
 ### Automated Tests

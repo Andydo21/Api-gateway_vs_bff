@@ -1,6 +1,6 @@
 {
   "artifactType": "ARTIFACT_TYPE_IMPLEMENTATION_PLAN",
-  "summary": "Updated plan to include Frontend (UI) changes for the Admin Dashboard. This involves adding a statistics overview, implementing approval workflows for startups, and cleaning up legacy components.",
-  "updatedAt": "2026-03-22T15:56:28.070241900Z",
-  "version": "7"
+  "summary": "Added a section for Role-Based Authorization (RBAC) to ensure only users with the 'admin' role can access sensitive administrative features. This involves implementing a custom decorator in the Admin BFF and applying it to all core management endpoints.",
+  "updatedAt": "2026-03-22T15:58:59.859932700Z",
+  "version": "8"
 }
