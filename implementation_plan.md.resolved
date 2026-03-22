@@ -1,39 +1,32 @@
-# Implementation Plan - True BFF Data Aggregation for Admin
+# Implementation Plan - Prometheus & Grafana Monitoring
 
-Mục tiêu là biến `admin-bff` thành một lớp BFF thực thụ bằng cách thực hiện **Data Aggregation** (tổng hợp dữ liệu) từ nhiều microservices thay vì chỉ proxy yêu cầu.
+Mục tiêu là thiết lập hệ thống giám sát (Monitoring) hoàn chỉnh để theo dõi hiệu năng của API Gateway và các Microservices.
 
 ## Proposed Changes
 
-### [Component] Admin BFF (BFF Layer)
+### [Component] Monitoring Infrastructure
 
-#### [MODIFY] [views.py](file:///d:/Django_project/api-gateway_vs_bff/bff/admin-bff/api/views.py)
-- **Hàm [startups](file:///d:/Django_project/api-gateway_vs_bff/bff/admin-bff/api/views.py#73-114) (Aggregation)**: 
-    - Lấy danh sách startup.
-    - Duyệt qua từng startup, lấy thông tin `owner` (tên, email) từ User Service.
-    - Tổng hợp thành một response duy nhất với đầy đủ thông tin founder.
-- **Hàm [users](file:///d:/Django_project/api-gateway_vs_bff/bff/admin-bff/api/views.py#151-181) (Aggregation)**:
-    - Lấy số lượng startup mà mỗi user đang sở hữu từ Startup Service.
-    - Trả về danh sách kèm theo business summary của từng người.
-- **Hàm [user_detail](file:///d:/Django_project/api-gateway_vs_bff/bff/admin-bff/api/views.py#183-215) (Rich Profile)**:
-    - Tổng hợp thông tin cơ bản, danh sách startup thuộc quyền sở hữu, và các lịch hẹn (pitch slots) gần đây của user đó.
-- [block_user](file:///d:/Django_project/api-gateway_vs_bff/bff/admin-bff/api/views.py#250-259)
-- [unblock_user](file:///d:/Django_project/api-gateway_vs_bff/bff/admin-bff/api/views.py#261-270)
-- **Tối ưu hóa**: Sử dụng `threading` hoặc `asyncio` (nếu cần) để gọi các service song song nhằm giảm latency.
+#### [NEW] [prometheus.yml](file:///d:/Django_project/api-gateway_vs_bff/prometheus_conf/prometheus.yml)
+- Cấu hình scrape job để lấy metrics từ APISIX (port 9091).
+- Tần suất lấy mẫu: 15 giây/lần.
 
-### [Component] API Gateway Advanced Plugins (Infrastructure)
-
-#### [MODIFY] [setup_apisix_routes.py](file:///d:/Django_project/api-gateway_vs_bff/setup_apisix_routes.py)
-- **Rate Limiting (`limit-req`)**: Áp dụng giới hạn 10 request/giây, burst 5 cho toàn bộ các route để chống tấn công Brute-force/DoS.
-- **Logging (`file-logger`)**: Ghi log chi tiết các request vào file `/usr/local/apisix/logs/access.log` để phục vụ audit và debug.
-- **Authentication (`jwt-auth`)**: Kích hoạt plugin JWT cho các route `/web/*` và `/admin/*`. 
-  - *Lưu ý*: Sẽ cần tạo Consumer trong APISIX để khớp với JWT token từ Django.
-- **Monitoring (`prometheus`)**: Đảm bảo plugin này luôn được bật trên các route quan trọng.
+#### [MODIFY] [docker-compose.yml](file:///d:/Django_project/api-gateway_vs_bff/docker-compose.yml)
+- **Thêm service `prometheus`**:
+    - Image: `prom/prometheus:latest`.
+    - Port: `9090:9090`.
+    - Mount volume cấu hình `prometheus.yml`.
+- **Thêm service `grafana`**:
+    - Image: `grafana/grafana:latest`.
+    - Port: `3100:3000`.
+    - Phụ thuộc vào `prometheus`.
 
 ## Verification Plan
 
 ### Automated Tests
-- Kiểm tra kết quả JSON của `/admin/startups/`: Đảm bảo có trường `owner_details` chứa thông tin từ User Service.
-- Kiểm tra `/admin/users/`: Đảm bảo có trường `startup_count`.
+- Kiểm tra trạng thái Prometheus Target: `http://localhost:9090/targets` (phải hiển thị `apisix` là UP).
+- Kiểm tra metrics thô: `http://localhost:9091/apisix/prometheus/metrics`.
 
 ### Manual Verification
-- Kiểm tra Admin Dashboard UI: Xác nhận thông tin Founder hiển thị ngay trên bảng danh sách Startup mà không cần gọi API riêng.
+- Truy cập Grafana tại `http://localhost:3100`.
+- Thêm Data Source là Prometheus (`http://prometheus:9090`).
+- Nhập Dashboard APISIX mẫu (ID: 11495) để xem biểu đồ.
