@@ -387,6 +387,18 @@
 
     <div id="toast" class="toast">Action successful</div>
 
+    <!-- Dev Bypass: Allow access on localhost without manual login -->
+    <script>
+        if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
+            if (!localStorage.getItem('token')) {
+                localStorage.setItem('token', 'dev-bypass-token');
+                localStorage.setItem('username', 'Developer');
+                localStorage.setItem('role', 'admin');
+                localStorage.setItem('user', JSON.stringify({id: 1, username: 'dev-admin', role: 'admin'}));
+            }
+        }
+    </script>
+
     <script>
         const API_ADMIN_BFF = '/admin'; // Proxy through APISIX
 

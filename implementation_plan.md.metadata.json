@@ -1,6 +1,0 @@
-{
-  "artifactType": "ARTIFACT_TYPE_IMPLEMENTATION_PLAN",
-  "summary": "Plan to integrate full-stack monitoring using Prometheus and Grafana. This includes adding the services to Docker Compose, configuring Prometheus to scrape APISIX metrics, and providing a Grafana dashboard setup for real-time visualization.",
-  "updatedAt": "2026-03-22T16:03:32.582330400Z",
-  "version": "11"
-}

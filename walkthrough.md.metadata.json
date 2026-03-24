@@ -1,6 +1,0 @@
-{
-  "artifactType": "ARTIFACT_TYPE_WALKTHROUGH",
-  "summary": "Comprehensive walkthrough of the architectural overhaul. Highlights include the replacement of Nginx with Apache APISIX, the implementation of Prometheus and Grafana for monitoring, and the enhancement of BFFs with true data aggregation and role-based security. Also documents the cleanup of legacy code and the modernization of project bootstrap scripts.",
-  "updatedAt": "2026-03-22T16:16:15.482918500Z",
-  "version": "10"
-}

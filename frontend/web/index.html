@@ -136,7 +136,7 @@
             max-height: 400px;
             background: white;
             border-radius: 12px;
-            box-shadow: 0 8px 24px rgba(0,0,0,0.15);
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
             display: none;
             flex-direction: column;
             z-index: 1000;
@@ -213,7 +213,7 @@
             color: white;
             padding: 1rem;
             border-radius: 12px;
-            box-shadow: 0 8px 32px rgba(0,0,0,0.2);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
             display: flex;
             align-items: center;
             gap: 12px;
@@ -278,7 +278,7 @@
             background: white;
             border-radius: 16px;
             overflow: hidden;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
             transition: transform 0.3s;
             cursor: pointer;
         }
@@ -408,7 +408,7 @@
                     💼 Đơn xin Pitch
                     <span class="badge" id="pitchCount">0</span>
                 </button>
-                
+
                 <!-- Notification Bell -->
                 <div style="position: relative;">
                     <button class="notif-btn" onclick="toggleNotifPanel()">
@@ -419,7 +419,9 @@
                     <div class="notif-panel" id="notifPanel">
                         <div class="notif-header">
                             Thông báo
-                            <button onclick="clearNotifications()" style="font-size: 0.75rem; background: none; border: none; color: #667eea; cursor: pointer;">Xóa hết</button>
+                            <button onclick="clearNotifications()"
+                                style="font-size: 0.75rem; background: none; border: none; color: #667eea; cursor: pointer;">Xóa
+                                hết</button>
                         </div>
                         <div class="notif-list" id="notifList">
                             <div class="notif-empty">Không có thông báo mới</div>
@@ -489,6 +491,18 @@
         </div>
     </div>
 
+    <!-- Dev Bypass: Allow access on localhost without manual login -->
+    <script>
+        if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
+            if (!localStorage.getItem('token')) {
+                localStorage.setItem('token', 'dev-bypass-token');
+                localStorage.setItem('username', 'Developer');
+                localStorage.setItem('role', 'admin');
+                localStorage.setItem('user', JSON.stringify({ id: 1, username: 'dev-admin', role: 'admin' }));
+            }
+        }
+    </script>
+
     <script>
         const API_BASE = '';
         let allStartups = [];
@@ -526,20 +540,20 @@
 
             const wsScheme = window.location.protocol === 'https:' ? 'wss' : 'ws';
             const wsUrl = `${wsScheme}://${window.location.hostname}/ws/notifications/${userId}/`;
-            
+
             const socket = new WebSocket(wsUrl);
 
-            socket.onmessage = function(e) {
+            socket.onmessage = function (e) {
                 const data = JSON.parse(e.data);
                 addNotifToPanel(data);
                 showNotificationToast(data.message, data.notification_type);
             };
 
-            socket.onopen = function(e) {
+            socket.onopen = function (e) {
                 fetchNotifications();
             };
 
-            socket.onclose = function(e) {
+            socket.onclose = function (e) {
                 setTimeout(setupNotifications, 5000);
             };
         }
@@ -547,7 +561,7 @@
         function toggleNotifPanel() {
             const panel = document.getElementById('notifPanel');
             panel.classList.toggle('active');
-            
+
             if (panel.classList.contains('active')) {
                 const badge = document.getElementById('notifBadge');
                 badge.style.display = 'none';
@@ -571,7 +585,7 @@
                         data.data.forEach(notif => addNotifToPanel(notif, false));
                     }
                 }
-            } catch (error) {}
+            } catch (error) { }
         }
 
         function addNotifToPanel(notif, isNew = true) {
@@ -581,7 +595,7 @@
 
             const item = document.createElement('div');
             item.className = `notif-item ${notif.is_read ? '' : 'unread'}`;
-            
+
             const icon = getNotifIcon(notif.notification_type);
             const time = new Date(notif.created_at || new Date()).toLocaleTimeString();
 
@@ -592,7 +606,7 @@
                     <div class="notif-time">${time}</div>
                 </div>
             `;
-            
+
             if (isNew) {
                 list.prepend(item);
                 const panel = document.getElementById('notifPanel');
@@ -608,7 +622,7 @@
         }
 
         function getNotifIcon(type) {
-            switch(type) {
+            switch (type) {
                 case 'success': return '✅';
                 case 'warning': return '⚠️';
                 case 'error': return '❌';
@@ -668,7 +682,7 @@
         }
 
         // Close dropdown when clicking outside
-        document.addEventListener('click', function(event) {
+        document.addEventListener('click', function (event) {
             const wrapper = document.getElementById('userMenuWrapper');
             const dropdown = document.getElementById('userDropdown');
             if (wrapper && dropdown && !wrapper.contains(event.target)) {
@@ -791,7 +805,7 @@
                 const response = await fetch(`${API_BASE}/web/pitch/list/`, { headers: authHeaders() });
                 // We'll add this endpoint to BFF if missing, but for now just placeholder
                 // document.getElementById('pitchCount').textContent = ...;
-            } catch (error) {}
+            } catch (error) { }
         }
 
         function viewStartup(id) { window.location.href = `startup.html?id=${id}`; }
@@ -805,5 +819,6 @@
         }
     </script>
 </body>
+
 </html>
- Riverside
+Riverside

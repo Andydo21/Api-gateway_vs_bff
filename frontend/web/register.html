@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Đăng ký - Startup Hub</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .register-container {
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+            width: 100%;
+            max-width: 500px;
+            padding: 40px;
+        }
+
+        .logo {
+            text-align: center;
+            margin-bottom: 25px;
+        }
+
+        .logo h1 {
+            color: #667eea;
+            font-size: 2rem;
+            margin-bottom: 5px;
+        }
+
+        .logo p {
+            color: #6c757d;
+            font-size: 0.9rem;
+        }
+
+        .form-row {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+
+        .form-group {
+            flex: 1;
+            margin-bottom: 15px;
+        }
+
+        label {
+            display: block;
+            color: #333;
+            font-weight: 500;
+            margin-bottom: 8px;
+            font-size: 0.9rem;
+        }
+
+        input, select {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: border-color 0.3s;
+        }
+
+        input:focus, select:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .btn-register {
+            width: 100%;
+            padding: 14px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s;
+            margin-top: 10px;
+        }
+
+        .btn-register:hover {
+            transform: translateY(-2px);
+        }
+
+        .error {
+            background: #fee;
+            color: #c33;
+            padding: 12px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            display: none;
+            font-size: 0.9rem;
+        }
+
+        .login-link {
+            text-align: center;
+            margin-top: 20px;
+            color: #6c757d;
+        }
+
+        .login-link a {
+            color: #667eea;
+            text-decoration: none;
+            font-weight: 600;
+        }
+    </style>
+</head>
+<body>
+    <div class="register-container">
+        <div class="logo">
+            <h1>🚀 Startup Hub</h1>
+            <p>Tham gia cộng đồng để bắt đầu hành trình</p>
+        </div>
+
+        <div id="errorMsg" class="error"></div>
+
+        <form id="registerForm">
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Họ</label>
+                    <input type="text" id="last_name" required placeholder="Nguyễn">
+                </div>
+                <div class="form-group">
+                    <label>Tên</label>
+                    <input type="text" id="first_name" required placeholder="An">
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label>Tên đăng nhập</label>
+                <input type="text" id="username" required placeholder="nhap_ten_user...">
+            </div>
+
+            <div class="form-group">
+                <label>Email</label>
+                <input type="email" id="email" required placeholder="example@mail.com">
+            </div>
+
+            <div class="form-group">
+                <label>Mật khẩu</label>
+                <input type="password" id="password" required placeholder="Nhập mật khẩu...">
+            </div>
+
+            <div class="form-group">
+                <label>Vai trò của bạn</label>
+                <select id="role">
+                    <option value="user">Người khám phá (User)</option>
+                    <option value="founder">Chủ Startup (Founder)</option>
+                    <option value="investor">Nhà đầu tư (Investor)</option>
+                </select>
+            </div>
+
+            <button type="submit" class="btn-register">Tạo tài khoản</button>
+        </form>
+
+        <div class="login-link">
+            Đã có tài khoản? <a href="login.html">Đăng nhập</a>
+        </div>
+    </div>
+
+    <script>
+        const API_BASE = '';
+
+        document.getElementById('registerForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const payload = {
+                username: document.getElementById('username').value,
+                email: document.getElementById('email').value,
+                password: document.getElementById('password').value,
+                first_name: document.getElementById('first_name').value,
+                last_name: document.getElementById('last_name').value,
+                role: document.getElementById('role').value
+            };
+            
+            const errorMsg = document.getElementById('errorMsg');
+            
+            try {
+                const response = await fetch(`${API_BASE}/web/users/register/`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+                
+                const data = await response.json();
+                
+                if (response.status === 201 || (data.success)) {
+                    alert('Đăng ký thành công! Chào mừng bạn gia nhập Startup Hub.');
+                    window.location.href = 'login.html';
+                } else {
+                    // Extract error messages from DRF response
+                    let msg = '';
+                    if (typeof data === 'object') {
+                        Object.keys(data).forEach(key => {
+                            if (key !== 'success') msg += `${key}: ${data[key]}\n`;
+                        });
+                    }
+                    errorMsg.textContent = msg || data.message || 'Đăng ký thất bại. Vui lòng thử lại.';
+                    errorMsg.style.display = 'block';
+                }
+            } catch (error) {
+                errorMsg.textContent = 'Lỗi kết nối Server.';
+                errorMsg.style.display = 'block';
+            }
+        });
+    </script>
+</body>
+</html>
