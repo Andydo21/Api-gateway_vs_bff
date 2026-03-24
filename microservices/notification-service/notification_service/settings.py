@@ -16,7 +16,8 @@ INSTALLED_APPS = [
     'rest_framework',
     'corsheaders',
     'channels',
-    'api',
+    'notification_app',
+
 ]
 
 MIDDLEWARE = [

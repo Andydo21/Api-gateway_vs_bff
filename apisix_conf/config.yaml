@@ -1,14 +1,17 @@
 apisix:
   node_listen: 80              # APISIX listening port
-  admin_key:
-    - name: "admin"
-      key: edd1c9f0-3353-3901-906d-73d197c72d2f
-      role: admin
-
 deployment:
   role: traditional
   role_traditional:
     config_provider: etcd
+  admin:
+    admin_key:
+      - name: "admin"
+        key: edd1c9f0-3353-3901-906d-73d197c72d2f
+        role: admin
+    allow_admin:
+      - 0.0.0.0/0
+
   etcd:
     host:
       - "http://etcd:2379"

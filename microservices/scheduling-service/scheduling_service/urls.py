@@ -1,6 +1,7 @@
 from django.urls import path, include
 
 urlpatterns = [
-    path('api/', include('api.urls')),
-    path('', include('api.urls')), # Fallback for health check
+    path('api/', include('scheduling_app.urls')),
+    path('', include('scheduling_app.urls')),
+ # Fallback for health check
 ]

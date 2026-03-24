@@ -21,9 +21,8 @@ MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'corsheaders.middleware.CorsMiddleware',
     'django.middleware.common.CommonMiddleware',
-    # 'django.middleware.csrf.CsrfViewMiddleware',  # Disabled for REST API
-    'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'api.middleware.JWTAuthenticationMiddleware',
 ]
 
 ROOT_URLCONF = 'web_bff.urls'
@@ -36,7 +35,6 @@ TEMPLATES = [{
         'context_processors': [
             'django.template.context_processors.debug',
             'django.template.context_processors.request',
-            'django.contrib.auth.context_processors.auth',
         ],
     },
 }]
@@ -63,11 +61,10 @@ CACHES = {
             'CLIENT_CLASS': 'django_redis.client.DefaultClient',
         },
         'KEY_PREFIX': 'web_bff',
-        'TIMEOUT': 900,  # 15 minutes default for product/category data
+        'TIMEOUT': 900,
     }
 }
 
-# Cache middleware settings
 CACHE_MIDDLEWARE_ALIAS = 'default'
 CACHE_MIDDLEWARE_SECONDS = 900
 CACHE_MIDDLEWARE_KEY_PREFIX = 'web_bff'
@@ -85,17 +82,12 @@ STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 REST_FRAMEWORK = {
-    # BFF trusts API Gateway - no JWT verification needed here
-    # Gateway already validated JWT and injected user info into headers
+    # BFF is stateless - trusts API Gateway headers
+    'DEFAULT_AUTHENTICATION_CLASSES': [],
     'DEFAULT_PERMISSION_CLASSES': [
         'rest_framework.permissions.AllowAny',
     ],
 }
 
-CORS_ALLOW_ALL_ORIGINS = TrueCORS_ALLOW_CREDENTIALS = True
-
-# Session settings for cross-origin
-SESSION_COOKIE_SAMESITE = None
-SESSION_COOKIE_SECURE = False  # Set to True in production with HTTPS
-SESSION_COOKIE_HTTPONLY = True
-SESSION_COOKIE_AGE = 86400  # 1 day
+CORS_ALLOW_ALL_ORIGINS = True
+CORS_ALLOW_CREDENTIALS = True

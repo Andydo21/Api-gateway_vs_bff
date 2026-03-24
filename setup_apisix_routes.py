@@ -9,7 +9,7 @@ headers = {
     "Content-Type": "application/json"
 }
 
-def create_route(route_id, uri, upstream_nodes, name, enable_websocket=False, use_jwt=False):
+def create_route(route_id, uri, upstream_nodes, name, enable_websocket=False, use_jwt=False, priority=0):
     url = f"{APISIX_ADMIN_URL}/routes/{route_id}"
     
     plugins = {
@@ -32,6 +32,7 @@ def create_route(route_id, uri, upstream_nodes, name, enable_websocket=False, us
     data = {
         "name": name,
         "uri": uri,
+        "priority": priority,
         "upstream": {
             "type": "roundrobin",
             "nodes": upstream_nodes
@@ -46,9 +47,13 @@ def create_route(route_id, uri, upstream_nodes, name, enable_websocket=False, us
         print(f"Failed to create route: {name}. Status: {response.status_code}, Error: {response.text}")
 
 if __name__ == "__main__":
-    # Routes for BFFs (Enabling JWT Auth)
-    create_route("1", "/web/*", {"web-bff:3001": 1}, "Web-BFF", use_jwt=True)
-    create_route("2", "/admin/*", {"admin-bff:3002": 1}, "Admin-BFF", use_jwt=True)
+    # Routes for BFFs
+    # NOTE: jwt-auth disabled because APISIX's jwt-auth plugin uses its own 
+    # consumer/key/secret system which is incompatible with Django simplejwt tokens.
+    # Auth is handled by the BFF reading the Authorization header from the frontend.
+    create_route("1", "/web/*", {"web-bff:3001": 1}, "Web-BFF", use_jwt=False)
+    
+    create_route("2", "/admin/*", {"admin-bff:3002": 1}, "Admin-BFF", use_jwt=False)
     
     # Route for UI / Auth (Frontend Service)
     create_route("3", "/ui/*", {"frontend-service:8000": 1}, "Frontend-UI-Service")

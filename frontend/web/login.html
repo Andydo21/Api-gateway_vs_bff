@@ -71,6 +71,29 @@
             border-color: #667eea;
         }
 
+        .password-input-wrapper {
+            position: relative;
+            display: flex;
+            align-items: center;
+        }
+
+        .toggle-password {
+            position: absolute;
+            right: 12px;
+            background: none;
+            border: none;
+            color: #667eea;
+            font-size: 0.85rem;
+            font-weight: 600;
+            cursor: pointer;
+            padding: 5px;
+            user-select: none;
+        }
+
+        .toggle-password:hover {
+            color: #764ba2;
+        }
+
         .btn-login {
             width: 100%;
             padding: 14px;
@@ -144,7 +167,10 @@
 
             <div class="form-group">
                 <label>Mật khẩu</label>
-                <input type="password" id="password" required autocomplete="current-password" placeholder="Nhập mật khẩu...">
+                <div class="password-input-wrapper">
+                    <input type="password" id="password" required autocomplete="current-password" placeholder="Nhập mật khẩu...">
+                    <button type="button" class="toggle-password" id="togglePassword">Hiện</button>
+                </div>
             </div>
 
             <button type="submit" class="btn-login">Đăng nhập</button>
@@ -162,7 +188,7 @@
     </div>
 
     <script>
-        const API_BASE = 'http://localhost:8000';
+        const API_BASE = '';
 
         // Sync guest pitch requests to database after login
         async function syncGuestPitchToDatabase(userId, token) {
@@ -210,12 +236,14 @@
                 
                 const data = await response.json();
                 
-                if (data.success && data.token) {
-                    localStorage.setItem('token', data.token);
+                if (data.success && (data.tokens || data.token)) {
+                    const token = data.tokens ? data.tokens.access : data.token;
+                    localStorage.setItem('token', token);
                     localStorage.setItem('username', data.user?.username || username);
+                    localStorage.setItem('role', data.user?.role || 'user');
                     localStorage.setItem('user', JSON.stringify(data.user || {}));
                     
-                    await syncGuestPitchToDatabase(data.user?.id, data.token);
+                    await syncGuestPitchToDatabase(data.user?.id, token);
                     
                     const urlParams = new URLSearchParams(window.location.search);
                     const redirect = urlParams.get('redirect');
@@ -226,13 +254,23 @@
                     
                     window.location.href = targetPage;
                 } else {
-                    errorMsg.textContent = data.message || 'Đăng nhập thất bại';
+                    errorMsg.textContent = data.message || data.error || 'Đăng nhập thất bại';
                     errorMsg.style.display = 'block';
                 }
             } catch (error) {
                 errorMsg.textContent = 'Lỗi kết nối Server.';
                 errorMsg.style.display = 'block';
             }
+        });
+
+        // Toggle Password Visibility
+        const passwordInput = document.getElementById('password');
+        const toggleButton = document.getElementById('togglePassword');
+
+        toggleButton.addEventListener('click', () => {
+            const type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
+            passwordInput.setAttribute('type', type);
+            toggleButton.textContent = type === 'password' ? 'Hiện' : 'Ẩn';
         });
     </script>
 </body>

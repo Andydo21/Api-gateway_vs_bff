@@ -17,7 +17,10 @@ urlpatterns = [
     path('pitch/<int:request_id>/reject/', views.reject_pitch_request, name='reject_pitch'),
     path('slots/', views.list_pitch_slots, name='list_slots'),
     path('slots/<int:slot_id>/book/', views.book_pitch_slot, name='book_slot'),
-    path('availability-templates/', views.list_create_availability_templates, name='availability_templates'),
+    # path('availability-templates/', views.list_create_availability_templates, name='availability_templates'),
     path('meetings/', views.list_meetings, name='list_meetings'),
     path('feedback/submit/', views.submit_feedback, name='submit_feedback'),
+    path('feedbacks/', views.list_feedbacks, name='list_feedbacks'),
+    path('users/login/', views.login, name='login'),
+    path('users/register/', views.register, name='register'),
 ]

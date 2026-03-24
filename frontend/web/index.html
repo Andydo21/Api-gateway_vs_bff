@@ -427,9 +427,42 @@
                     </div>
                 </div>
 
-                <button class="user-btn" onclick="handleUserClick()">
-                    <span id="userName">Đăng nhập</span>
-                </button>
+                <!-- User Dropdown -->
+                <div style="position: relative;" id="userMenuWrapper">
+                    <button class="user-btn" onclick="toggleUserMenu()">
+                        <span id="userName">Đăng nhập</span>
+                        <span style="font-size: 0.8rem; margin-left: 4px;">▼</span>
+                    </button>
+                    <!-- User Dropdown Panel -->
+                    <div id="userDropdown" style="
+                        position: absolute; top: 50px; right: 0; width: 200px;
+                        background: white; border-radius: 12px; box-shadow: 0 8px 24px rgba(0,0,0,0.15);
+                        display: none; flex-direction: column; z-index: 1000; overflow: hidden;
+                        border: 1px solid #e0e0e0; padding: 0.5rem 0;">
+                        <button onclick="window.location.href='investor-profile.html'" style="
+                            padding: 0.75rem 1rem; width: 100%; text-align: left; background: none; border: none;
+                            cursor: pointer; font-size: 0.95rem; color: #333; transition: background 0.2s;
+                        " onmouseover="this.style.background='#f8f9fa'" onmouseout="this.style.background='none'">
+                            👤 Hồ sơ cá nhân
+                        </button>
+                        <div style="height: 1px; background: #f0f0f0; margin: 0.25rem 0;"></div>
+                        <div id="adminMenuLink" style="display: none;">
+                            <button onclick="window.location.href='admin-dashboard.html'" style="
+                                padding: 0.75rem 1rem; width: 100%; text-align: left; background: none; border: none;
+                                cursor: pointer; font-size: 0.95rem; color: #333; transition: background 0.2s;
+                            " onmouseover="this.style.background='#f8f9fa'" onmouseout="this.style.background='none'">
+                                ⚙️ Quản trị hệ thống
+                            </button>
+                            <div style="height: 1px; background: #f0f0f0; margin: 0.25rem 0;"></div>
+                        </div>
+                        <button onclick="doLogout()" style="
+                            padding: 0.75rem 1rem; width: 100%; text-align: left; background: none; border: none;
+                            cursor: pointer; font-size: 0.95rem; color: #e74c3c; font-weight: 600; transition: background 0.2s;
+                        " onmouseover="this.style.background='#fef2f2'" onmouseout="this.style.background='none'">
+                            🚪 Đăng xuất
+                        </button>
+                    </div>
+                </div>
             </div>
         </div>
     </header>
@@ -457,7 +490,7 @@
     </div>
 
     <script>
-        const API_BASE = 'http://localhost:8000';
+        const API_BASE = '';
         let allStartups = [];
         let allCategories = [];
         let currentCategory = null;
@@ -492,7 +525,7 @@
             if (!userId) return;
 
             const wsScheme = window.location.protocol === 'https:' ? 'wss' : 'ws';
-            const wsUrl = `${wsScheme}://${window.location.hostname}:8000/ws/notifications/${userId}/`;
+            const wsUrl = `${wsScheme}://${window.location.hostname}/ws/notifications/${userId}/`;
             
             const socket = new WebSocket(wsUrl);
 
@@ -527,7 +560,7 @@
             if (!userId) return;
 
             try {
-                const response = await fetch(`http://${window.location.hostname}:8000/notifications/list/?user_id=${userId}`);
+                const response = await fetch(`/api/notifications/list/?user_id=${userId}`);
                 const data = await response.json();
                 if (data.success && data.data) {
                     const list = document.getElementById('notifList');
@@ -608,6 +641,11 @@
 
             if (token && username) {
                 userNameSpan.textContent = username;
+                const role = localStorage.getItem('role');
+                if (role === 'admin') {
+                    const adminLink = document.getElementById('adminMenuLink');
+                    if (adminLink) adminLink.style.display = 'block';
+                }
                 return true;
             } else {
                 window.location.href = 'login.html';
@@ -615,16 +653,28 @@
             }
         }
 
-        function handleUserClick() {
-            if (localStorage.getItem('token')) {
-                if (confirm('Bạn muốn đăng xuất?')) {
-                    localStorage.clear();
-                    window.location.reload();
-                }
-            } else {
+        function toggleUserMenu() {
+            if (!localStorage.getItem('token')) {
                 window.location.href = 'login.html';
+                return;
             }
+            const dropdown = document.getElementById('userDropdown');
+            dropdown.style.display = dropdown.style.display === 'flex' ? 'none' : 'flex';
         }
+
+        function doLogout() {
+            localStorage.clear();
+            window.location.href = 'login.html';
+        }
+
+        // Close dropdown when clicking outside
+        document.addEventListener('click', function(event) {
+            const wrapper = document.getElementById('userMenuWrapper');
+            const dropdown = document.getElementById('userDropdown');
+            if (wrapper && dropdown && !wrapper.contains(event.target)) {
+                dropdown.style.display = 'none';
+            }
+        });
 
         async function loadStartups() {
             try {

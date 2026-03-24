@@ -7,6 +7,6 @@ RUN pip install --no-cache-dir -r requirements.txt
 
 COPY . .
 
-EXPOSE 4003
+EXPOSE 4009
 
-CMD ["python", "manage.py", "runserver", "0.0.0.0:4003"]
+CMD ["python", "manage.py", "runserver", "0.0.0.0:4009"]

@@ -1,0 +1,678 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard - Startup Hub</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: #f1f5f9;
+            color: #334155;
+            display: flex;
+            min-height: 100vh;
+        }
+
+        /* Sidebar */
+        .sidebar {
+            width: 260px;
+            background: #1e293b;
+            color: white;
+            padding: 2rem 1rem;
+            display: flex;
+            flex-direction: column;
+            position: fixed;
+            height: 100vh;
+            left: 0;
+            top: 0;
+        }
+
+        .sidebar-brand {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #818cf8;
+            margin-bottom: 2.5rem;
+            padding: 0 1rem;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .nav-menu {
+            list-style: none;
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .nav-item {
+            padding: 0.8rem 1rem;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-weight: 500;
+            color: #cbd5e1;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .nav-item:hover,
+        .nav-item.active {
+            background: #334155;
+            color: white;
+        }
+
+        .nav-item.active {
+            border-left: 4px solid #818cf8;
+        }
+
+        /* Main Content */
+        .main-content {
+            flex: 1;
+            margin-left: 260px;
+            padding: 2rem 3rem;
+            display: flex;
+            flex-direction: column;
+            gap: 2rem;
+        }
+
+        .top-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: white;
+            padding: 1rem 2rem;
+            border-radius: 12px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+        }
+
+        .welcome-text {
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: #0f172a;
+        }
+
+        .logout-btn {
+            background: #fee2e2;
+            color: #ef4444;
+            border: none;
+            padding: 0.6rem 1.2rem;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .logout-btn:hover {
+            background: #fecaca;
+        }
+
+        /* Metrics Cards */
+        .metrics-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .metric-card {
+            background: white;
+            padding: 1.5rem;
+            border-radius: 12px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+            border-left: 4px solid #818cf8;
+        }
+
+        .metric-title {
+            color: #64748b;
+            font-size: 0.9rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 0.5rem;
+        }
+
+        .metric-value {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: #0f172a;
+        }
+
+        /* Data Tables */
+        .data-section {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+            overflow: hidden;
+            display: none;
+            /* toggled via JS */
+        }
+
+        .data-section.active {
+            display: block;
+        }
+
+        .section-header {
+            padding: 1.5rem;
+            border-bottom: 1px solid #e2e8f0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .section-title {
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: #0f172a;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th,
+        td {
+            padding: 1rem 1.5rem;
+            text-align: left;
+            border-bottom: 1px solid #e2e8f0;
+        }
+
+        th {
+            background: #f8fafc;
+            color: #475569;
+            font-size: 0.85rem;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+
+        td {
+            font-size: 0.95rem;
+            color: #334155;
+        }
+
+        .badge {
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+
+        .badge-active {
+            background: #dcfce7;
+            color: #166534;
+        }
+
+        .badge-banned {
+            background: #fee2e2;
+            color: #991b1b;
+        }
+
+        .badge-pending {
+            background: #fef9c3;
+            color: #854d0e;
+        }
+
+        .btn-action {
+            padding: 0.4rem 0.8rem;
+            border: none;
+            border-radius: 6px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: opacity 0.2s;
+        }
+
+        .btn-action:hover {
+            opacity: 0.8;
+        }
+
+        .btn-danger {
+            background: #ef4444;
+            color: white;
+        }
+
+        .btn-success {
+            background: #22c55e;
+            color: white;
+        }
+
+        .btn-warning {
+            background: #f59e0b;
+            color: white;
+        }
+
+        .loading {
+            padding: 2rem;
+            text-align: center;
+            color: #64748b;
+        }
+
+        /* Toast Notification */
+        .toast {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            padding: 1rem 1.5rem;
+            background: #1e293b;
+            color: white;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            transform: translateY(100px);
+            opacity: 0;
+            transition: all 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+            z-index: 1000;
+        }
+
+        .toast.show {
+            transform: translateY(0);
+            opacity: 1;
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Sidebar -->
+    <aside class="sidebar">
+        <div class="sidebar-brand">
+            🚀 Admin Panel
+        </div>
+        <ul class="nav-menu">
+            <li class="nav-item active" onclick="switchTab('dashboard')">📊 Tóm tắt (Dashboard)</li>
+            <li class="nav-item" onclick="switchTab('users')">👥 Quản lý Người dùng</li>
+            <li class="nav-item" onclick="switchTab('startups')">🏢 Quản lý Startups</li>
+            <li class="nav-item" onclick="switchTab('pitches')">📅 Đơn xin Pitch</li>
+        </ul>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        <header class="top-header">
+            <div class="welcome-text">Xin chào, Quản trị viên</div>
+            <button class="logout-btn" onclick="doLogout()">Đăng xuất</button>
+        </header>
+
+        <!-- Tab: Dashboard -->
+        <div id="tab-dashboard" class="data-section active">
+            <div class="metrics-grid" style="padding: 1.5rem; background: transparent; box-shadow: none;">
+                <div class="metric-card">
+                    <div class="metric-title">Tổng Users</div>
+                    <div class="metric-value" id="metric-users">-</div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-title">Tổng Startups</div>
+                    <div class="metric-value" id="metric-startups">-</div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-title">Đơn xin Pitch</div>
+                    <div class="metric-value" id="metric-pitches">-</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tab: Users -->
+        <div id="tab-users" class="data-section">
+            <div class="section-header">
+                <h2 class="section-title">Quản lý Người dùng</h2>
+            </div>
+            <div id="users-loading" class="loading">Đang tải dữ liệu người dùng...</div>
+            <table id="users-table" style="display: none;">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Tên (Username)</th>
+                        <th>Email</th>
+                        <th>Vai trò (Role)</th>
+                        <th>Số Startup sở hữu</th>
+                        <th>Trạng thái</th>
+                        <th>Hành động</th>
+                    </tr>
+                </thead>
+                <tbody id="users-tbody"></tbody>
+            </table>
+        </div>
+
+        <!-- Tab: Startups -->
+        <div id="tab-startups" class="data-section">
+            <div class="section-header">
+                <h2 class="section-title">Quản lý Startups</h2>
+            </div>
+            <div id="startups-loading" class="loading">Đang tải dữ liệu startups...</div>
+            <table id="startups-table" style="display: none;">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Tên Startup</th>
+                        <th>Ngành nghề</th>
+                        <th>Giai đoạn</th>
+                        <th>Mục tiêu gọi vốn</th>
+                        <th>Chủ sở hữu (Owner)</th>
+                        <th>Trạng thái</th>
+                        <th>Hành động</th>
+                    </tr>
+                </thead>
+                <tbody id="startups-tbody"></tbody>
+            </table>
+        </div>
+
+        <!-- Tab: Pitch Requests -->
+        <div id="tab-pitches" class="data-section">
+            <div class="section-header">
+                <h2 class="section-title">Quản lý Đơn xin Pitch</h2>
+            </div>
+            <div id="pitches-loading" class="loading">Đang tải dữ liệu Đơn xin Pitch...</div>
+            <table id="pitches-table" style="display: none;">
+                <thead>
+                    <tr>
+                        <th>Mã Đơn</th>
+                        <th>Startup ID</th>
+                        <th>Tiêu đề Pitch</th>
+                        <th>Link Pitch Deck</th>
+                        <th>Trạng thái</th>
+                        <th>Hành động</th>
+                    </tr>
+                </thead>
+                <tbody id="pitches-tbody"></tbody>
+            </table>
+        </div>
+    </main>
+
+    <div id="toast" class="toast">Action successful</div>
+
+    <script>
+        const API_ADMIN_BFF = '/admin'; // Proxy through APISIX
+
+        function getToken() { return localStorage.getItem('token'); }
+        function authHeaders() {
+            return {
+                'Content-Type': 'application/json',
+                'Authorization': 'Bearer ' + getToken()
+            };
+        }
+
+        function showToast(message, isError = false) {
+            const toast = document.getElementById('toast');
+            toast.textContent = message;
+            toast.style.background = isError ? '#ef4444' : '#10b981';
+            toast.classList.add('show');
+            setTimeout(() => toast.classList.remove('show'), 3000);
+        }
+
+        window.onload = () => {
+            const token = getToken();
+            const role = localStorage.getItem('role');
+
+            if (!token || role !== 'admin') {
+                alert('Bạn không có quyền truy cập trang này.');
+                window.location.href = 'login.html';
+                return;
+            }
+
+            // Load initial data
+            loadDashboard();
+        };
+
+        function switchTab(tabId) {
+            // Update UI Sidebar
+            document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
+            event.target.classList.add('active');
+
+            // Hide all sections
+            document.querySelectorAll('.data-section').forEach(el => el.classList.remove('active'));
+            // Show target section
+            document.getElementById(`tab-${tabId}`).classList.add('active');
+
+            // Load specific data
+            if (tabId === 'dashboard') loadDashboard();
+            if (tabId === 'users') loadUsers();
+            if (tabId === 'startups') loadStartups();
+            if (tabId === 'pitches') loadPitches();
+        }
+
+        function doLogout() {
+            localStorage.clear();
+            window.location.href = 'login.html';
+        }
+
+        // ==========================================
+        // Data Fetching
+        // ==========================================
+
+        async function loadDashboard() {
+            try {
+                const res = await fetch(`${API_ADMIN_BFF}/dashboard/`, { headers: authHeaders() });
+                if (res.status === 401 || res.status === 403) {
+                    doLogout(); return;
+                }
+                const data = await res.json();
+
+                if (data.success) {
+                    const d = data.data;
+                    document.getElementById('metric-users').innerText = d.users.total_users || 0;
+                    document.getElementById('metric-startups').innerText = d.startups.total_startups || d.startups.count || 0;
+                    document.getElementById('metric-pitches').innerText = d.pitches.total_pitch_requests || 0;
+                }
+            } catch (e) {
+                console.error('Failed to load dashboard', e);
+            }
+        }
+
+        // --- USERS ---
+        async function loadUsers() {
+            document.getElementById('users-loading').style.display = 'block';
+            document.getElementById('users-table').style.display = 'none';
+
+            try {
+                const res = await fetch(`${API_ADMIN_BFF}/users/`, { headers: authHeaders() });
+                const data = await res.json();
+
+                const users = data.results || data; // Handle pagination if needed
+                renderUsers(users);
+
+                document.getElementById('users-loading').style.display = 'none';
+                document.getElementById('users-table').style.display = 'table';
+            } catch (e) {
+                document.getElementById('users-loading').innerText = 'Lỗi tải người dùng.';
+            }
+        }
+
+        function renderUsers(users) {
+            const tbody = document.getElementById('users-tbody');
+            tbody.innerHTML = users.map(u => {
+                const statusBadge = u.banned
+                    ? `<span class="badge badge-banned">Đã khóa</span>`
+                    : `<span class="badge badge-active">Hoạt động</span>`;
+
+                const actionBtn = u.banned
+                    ? `<button class="btn-action btn-success" onclick="toggleBan(${u.id}, false)">Mở khóa</button>`
+                    : `<button class="btn-action btn-danger" onclick="toggleBan(${u.id}, true)">Khóa C.Khoản</button>`;
+
+                return `
+                <tr>
+                    <td>#${u.id}</td>
+                    <td><strong>${u.username}</strong></td>
+                    <td>${u.email}</td>
+                    <td><span class="badge" style="background:#e2e8f0; color:#334155">${u.role.toUpperCase()}</span></td>
+                    <td>${u.startup_count !== undefined ? u.startup_count : '-'}</td>
+                    <td>${statusBadge}</td>
+                    <td>${actionBtn}</td>
+                </tr>`;
+            }).join('');
+        }
+
+        async function toggleBan(userId, isBan) {
+            if (!confirm(`Bạn chắc chắn muốn ${isBan ? 'khóa' : 'mở khóa'} người dùng #${userId}?`)) return;
+            try {
+                const actionUrl = isBan ? `${API_ADMIN_BFF}/users/${userId}/block/` : `${API_ADMIN_BFF}/users/${userId}/unblock/`;
+                const res = await fetch(actionUrl, {
+                    method: 'POST',
+                    headers: authHeaders()
+                });
+                if (res.ok) {
+                    showToast(`Đã ${isBan ? 'khóa' : 'mở khóa'} thành công!`);
+                    loadUsers(); // reload list
+                } else {
+                    showToast('Lỗi khi thực hiện', true);
+                }
+            } catch (e) { showToast('Lỗi kết nối', true); }
+        }
+
+        // --- STARTUPS ---
+        async function loadStartups() {
+            document.getElementById('startups-loading').style.display = 'block';
+            document.getElementById('startups-table').style.display = 'none';
+
+            try {
+                const res = await fetch(`${API_ADMIN_BFF}/startups/`, { headers: authHeaders() });
+                const data = await res.json();
+
+                const startups = data.results || data;
+                renderStartups(startups);
+
+                document.getElementById('startups-loading').style.display = 'none';
+                document.getElementById('startups-table').style.display = 'table';
+            } catch (e) {
+                document.getElementById('startups-loading').innerText = 'Lỗi tải startups.';
+            }
+        }
+
+        function renderStartups(startups) {
+            const tbody = document.getElementById('startups-tbody');
+            tbody.innerHTML = startups.map(s => {
+                const ownerName = s.owner_details ? s.owner_details.username : `ID: #${s.user_id || 'N/A'}`;
+
+                let statusBadge = '<span class="badge badge-pending">Chờ duyệt</span>';
+                if (s.status === 'APPROVED') statusBadge = '<span class="badge badge-active">Đã duyệt</span>';
+                if (s.status === 'REJECTED') statusBadge = '<span class="badge badge-banned">Từ chối</span>';
+
+                let actionBtns = '';
+                if (s.status !== 'APPROVED') {
+                    actionBtns += `<button class="btn-action btn-success" style="margin-right: 5px" onclick="updateStartupStatus(${s.id}, 'approve')">Duyệt</button>`;
+                }
+                if (s.status !== 'REJECTED') {
+                    actionBtns += `<button class="btn-action btn-warning" style="margin-right: 5px" onclick="updateStartupStatus(${s.id}, 'reject')">Từ chối</button>`;
+                }
+                actionBtns += `<button class="btn-action btn-danger" onclick="deleteStartup(${s.id})">Xóa</button>`;
+
+                return `
+                <tr>
+                    <td>#${s.id}</td>
+                    <td><strong>${s.company_name || s.name || 'Startup'}</strong></td>
+                    <td>${s.industry || '-'}</td>
+                    <td>${s.stage || '-'}</td>
+                    <td>${new Intl.NumberFormat('vi-VN').format(s.funding_goal || 0)} ₫</td>
+                    <td>👤 ${ownerName}</td>
+                    <td>${statusBadge}</td>
+                    <td>${actionBtns}</td>
+                </tr>`;
+            }).join('');
+        }
+
+        async function updateStartupStatus(startupId, action) {
+            if (!confirm(`Bạn chắc chắn muốn ${action === 'approve' ? 'duyệt' : 'từ chối'} Startup #${startupId}?`)) return;
+            try {
+                const res = await fetch(`${API_ADMIN_BFF}/startups/${startupId}/${action}/`, {
+                    method: 'POST',
+                    headers: authHeaders()
+                });
+                if (res.ok) {
+                    showToast(`Đã ${action === 'approve' ? 'duyệt' : 'từ chối'} thành công!`);
+                    loadStartups();
+                } else {
+                    showToast('Lỗi khi cập nhật trạng thái!', true);
+                }
+            } catch (e) { showToast('Lỗi kết nối', true); }
+        }
+
+        async function deleteStartup(startupId) {
+            if (!confirm(`Bạn chắc chắn muốn xóa Startup #${startupId}? Hành động này KHÔNG THỂ hoàn tác.`)) return;
+            try {
+                const res = await fetch(`${API_ADMIN_BFF}/startups/${startupId}/`, {
+                    method: 'DELETE',
+                    headers: authHeaders()
+                });
+                if (res.ok) {
+                    showToast('Xóa startup thành công');
+                    loadStartups(); // reload
+                    loadDashboard(); // update metrics
+                } else {
+                    showToast('Lỗi xóa!', true);
+                }
+            } catch (e) { showToast('Lỗi kết nối', true); }
+        }
+
+        // --- PITCH REQUESTS ---
+        async function loadPitches() {
+            document.getElementById('pitches-loading').style.display = 'block';
+            document.getElementById('pitches-table').style.display = 'none';
+
+            try {
+                const res = await fetch(`${API_ADMIN_BFF}/pitch-requests/`, { headers: authHeaders() });
+                const data = await res.json();
+
+                const pitches = data.results || data;
+                renderPitches(pitches);
+
+                document.getElementById('pitches-loading').style.display = 'none';
+                document.getElementById('pitches-table').style.display = 'table';
+            } catch (e) {
+                document.getElementById('pitches-loading').innerText = 'Lỗi tải danh sách Pitch.';
+            }
+        }
+
+        function renderPitches(pitches) {
+            const tbody = document.getElementById('pitches-tbody');
+            tbody.innerHTML = pitches.map(p => {
+                let statusBadge = '<span class="badge badge-pending">PENDING</span>';
+                if (p.status === 'APPROVED') statusBadge = '<span class="badge badge-active">ACCEPTED</span>';
+                if (p.status === 'REJECTED') statusBadge = '<span class="badge badge-banned">DECLINED</span>';
+                if (p.status === 'REGISTERED') statusBadge = '<span class="badge badge-pending" style="background: #e0e7ff; color: #4338ca;">REGISTERED</span>';
+                if (p.status === 'SCHEDULED') statusBadge = '<span class="badge badge-pending" style="background: #fef9c3; color: #854d0e;">SCHEDULED</span>';
+                if (p.status === 'COMPLETED') statusBadge = '<span class="badge" style="background: #f3f4f6; color: #374151;">COMPLETED</span>';
+
+                let actionBtns = '';
+                if (p.status === 'REGISTERED' || p.status === 'PENDING') {
+                    actionBtns += `<button class="btn-action btn-success" style="margin-right: 5px" onclick="updatePitchStatus(${p.id}, 'approve')">Duyệt</button>`;
+                    actionBtns += `<button class="btn-action btn-warning" onclick="updatePitchStatus(${p.id}, 'reject')">Từ chối</button>`;
+                }
+
+                return `
+                <tr>
+                    <td>#${p.id}</td>
+                    <td><strong>Startup #${p.startup_id}</strong></td>
+                    <td>${p.title || '-'}</td>
+                    <td>${p.pitch_deck_url ? `<a href="${p.pitch_deck_url}" target="_blank">Xem Link</a>` : '-'}</td>
+                    <td>${statusBadge}</td>
+                    <td>${actionBtns}</td>
+                </tr>`;
+            }).join('');
+        }
+
+        async function updatePitchStatus(pitchId, action) {
+            if (!confirm(`Xác nhận ${action === 'approve' ? 'duyệt' : 'từ chối'} Đơn xin Pitch #${pitchId}?`)) return;
+            try {
+                const res = await fetch(`${API_ADMIN_BFF}/pitch-requests/${pitchId}/${action}/`, {
+                    method: 'POST',
+                    headers: authHeaders()
+                });
+                if (res.ok) {
+                    showToast(`Đã thao tác thành công!`);
+                    loadPitches();
+                } else {
+                    showToast('Lỗi khi cập nhật trạng thái!', true);
+                }
+            } catch (e) { showToast('Lỗi kết nối', true); }
+        }
+
+    </script>
+</body>
+
+</html>

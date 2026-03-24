@@ -44,6 +44,16 @@ def get_user_from_gateway(request):
 def health_check(request):
     return Response({'status': 'healthy', 'service': 'admin-bff'})
 
+@api_view(['GET'])
+@permission_classes([AllowAny])
+def debug_meta(request):
+    return Response({
+        'HTTP_X_ROLE': request.META.get('HTTP_X_ROLE'),
+        'HTTP_AUTHORIZATION': request.META.get('HTTP_AUTHORIZATION'),
+        'ALL_HEADERS': {k: str(v) for k, v in request.META.items() if k.startswith('HTTP_')},
+    })
+
+
 
 @api_view(['GET'])
 @permission_classes([AllowAny])
@@ -55,14 +65,24 @@ def dashboard(request):
         users_stats = requests.get(f'{USER_SERVICE}/users/stats/', timeout=5).json()
         startup_stats = requests.get(f'{STARTUP_SERVICE}/startups/stats/', timeout=5).json()
         
-        # We can also add count for bookings if needed
-        # booking_stats = requests.get(f'{BOOKING_SERVICE}/pitch-requests/stats/', timeout=5).json()
+        # Get counts for bookings/pitches
+        try:
+            booking_res = requests.get(f'{BOOKING_SERVICE}/api/pitch-requests/', timeout=5)
+            if booking_res.status_code == 200:
+                booking_data = booking_res.json()
+                pitch_count = len(booking_data) if isinstance(booking_data, list) else booking_data.get('count', len(booking_data.get('results', [])))
+                booking_stats = {'total_pitch_requests': pitch_count}
+            else:
+                booking_stats = {'total_pitch_requests': 0}
+        except Exception:
+            booking_stats = {'total_pitch_requests': 0}
         
         return Response({
             'success': True,
             'data': {
                 'users': users_stats,
                 'startups': startup_stats,
+                'pitches': booking_stats,
                 'system_health': 'All services online'
             }
         })
@@ -127,6 +147,26 @@ def startup_detail(request, startup_id):
     except Exception as e: return Response({'error': str(e)}, status=500)
 
 
+@api_view(['POST'])
+@permission_classes([AllowAny])
+@admin_required
+def approve_startup(request, startup_id):
+    try:
+        res = requests.post(f'{STARTUP_SERVICE}/startups/{startup_id}/approve/', timeout=5)
+        return Response(res.json(), status=res.status_code)
+    except Exception as e: return Response({'error': str(e)}, status=500)
+
+
+@api_view(['POST'])
+@permission_classes([AllowAny])
+@admin_required
+def reject_startup(request, startup_id):
+    try:
+        res = requests.post(f'{STARTUP_SERVICE}/startups/{startup_id}/reject/', timeout=5)
+        return Response(res.json(), status=res.status_code)
+    except Exception as e: return Response({'error': str(e)}, status=500)
+
+
 @api_view(['GET'])
 @permission_classes([AllowAny])
 @admin_required
@@ -147,6 +187,34 @@ def pitch_slot_status(request, slot_id):
         return Response(res.json(), status=res.status_code)
     except Exception as e: return Response({'error': str(e)}, status=500)
 
+
+@api_view(['GET'])
+@permission_classes([AllowAny])
+@admin_required
+def pitch_requests(request):
+    """Fetch pitch requests from Booking Service"""
+    try:
+        res = requests.get(f'{BOOKING_SERVICE}/api/pitch-requests/', params=request.GET.dict(), timeout=5)
+        return Response(res.json(), status=res.status_code)
+    except Exception as e: return Response({'error': str(e)}, status=500)
+
+@api_view(['POST'])
+@permission_classes([AllowAny])
+@admin_required
+def approve_pitch(request, pitch_id):
+    try:
+        res = requests.post(f'{BOOKING_SERVICE}/api/pitch-requests/{pitch_id}/approve/', timeout=5)
+        return Response(res.json(), status=res.status_code)
+    except Exception as e: return Response({'error': str(e)}, status=500)
+
+@api_view(['POST'])
+@permission_classes([AllowAny])
+@admin_required
+def reject_pitch(request, pitch_id):
+    try:
+        res = requests.post(f'{BOOKING_SERVICE}/api/pitch-requests/{pitch_id}/reject/', timeout=5)
+        return Response(res.json(), status=res.status_code)
+    except Exception as e: return Response({'error': str(e)}, status=500)
 
 @api_view(['GET'])
 @permission_classes([AllowAny])

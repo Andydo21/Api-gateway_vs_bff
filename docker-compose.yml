@@ -3,36 +3,34 @@ version: '3.8'
 services:
   # Kafka Message Broker
   zookeeper:
-    image: bitnami/zookeeper:3.9.1
+    image: confluentinc/cp-zookeeper:7.4.0
     ports:
       - "2181:2181"
     environment:
-      - ALLOW_ANONYMOUS_LOGIN=yes
+      - ZOOKEEPER_CLIENT_PORT=2181
+      - ZOOKEEPER_TICK_TIME=2000
     healthcheck:
-      test: ["CMD", "nk", "-z", "localhost", "2181"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
+      test: ["CMD", "bash", "-c", "echo stat | nc localhost 2181"]
+
 
   kafka:
-    image: bitnami/kafka:3.6.1
+    image: confluentinc/cp-kafka:7.4.0
     ports:
       - "9092:9092"
+      - "9094:9094"
     environment:
-      - KAFKA_CFG_ZOOKEEPER_CONNECT=zookeeper:2181
-      - ALLOW_PLAINTEXT_LISTENER=yes
-      - KAFKA_CFG_ADVERTISED_LISTENERS=PLAINTEXT://kafka:9092,EXTERNAL://localhost:9094
-      - KAFKA_CFG_LISTENER_SECURITY_PROTOCOL_MAP=PLAINTEXT:PLAINTEXT,EXTERNAL:PLAINTEXT
-      - KAFKA_CFG_LISTENERS=PLAINTEXT://:9092,EXTERNAL://:9094
-      - KAFKA_CFG_INTER_BROKER_LISTENER_NAME=PLAINTEXT
+      - KAFKA_BROKER_ID=1
+      - KAFKA_ZOOKEEPER_CONNECT=zookeeper:2181
+      - KAFKA_ADVERTISED_LISTENERS=PLAINTEXT://kafka:9092,EXTERNAL://localhost:9094
+      - KAFKA_LISTENER_SECURITY_PROTOCOL_MAP=PLAINTEXT:PLAINTEXT,EXTERNAL:PLAINTEXT
+      - KAFKA_INTER_BROKER_LISTENER_NAME=PLAINTEXT
+      - KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR=1
     depends_on:
       zookeeper:
         condition: service_healthy
     healthcheck:
-      test: ["CMD-SHELL", "kafka-topics.sh --bootstrap-server localhost:9092 --list"]
-      interval: 15s
-      timeout: 10s
-      retries: 5
+      test: ["CMD", "kafka-topics", "--bootstrap-server", "localhost:9092", "--list"]
+
 
   postgres:
     image: postgres:15-alpine
@@ -50,8 +48,6 @@ services:
       timeout: 5s
       retries: 5
 
-      retries: 5
-
   redis:
     image: redis:7-alpine
     ports:
@@ -63,25 +59,28 @@ services:
       retries: 5
 
   etcd:
-    image: bitnami/etcd:3.5.0
+    image: quay.io/coreos/etcd:v3.5.0
     environment:
       - ALLOW_NONE_AUTHENTICATION=yes
       - ETCD_ADVERTISED_LISTEN_ADDRESS=http://etcd:2379
+      - ETCD_LISTEN_CLIENT_URLS=http://0.0.0.0:2379
+      - ETCD_ADVERTISE_CLIENT_URLS=http://etcd:2379
     ports:
       - "2379:2379"
     healthcheck:
-      test: ["CMD", "etcdctl", "endpoint", "health"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
+      test: ["CMD", "/usr/local/bin/etcdctl", "endpoint", "health"]
 
   # Frontend Service (UI Server)
   frontend-service:
     build: ./frontend-service
     environment:
       - DEBUG=True
+      - DB_NAME=microservices
+      - DB_USER=user
+      - DB_PASSWORD=password
       - DB_HOST=postgres
       - REDIS_HOST=redis
+
     deploy:
       replicas: 1
     depends_on:
@@ -98,6 +97,9 @@ services:
     build: ./bff/web-bff
     environment:
       - DEBUG=True
+      - DB_NAME=microservices
+      - DB_USER=user
+      - DB_PASSWORD=password
       - DB_HOST=postgres
       - REDIS_HOST=redis
       - USER_SERVICE_URL=http://user-service:4001
@@ -110,6 +112,7 @@ services:
       - RESOURCE_SERVICE_URL=http://resource-service:4005
       - MATCHMAKING_SERVICE_URL=http://matchmaking-service:4006
       - KAFKA_BOOTSTRAP_SERVERS=kafka:9092
+
     deploy:
       replicas: 2
     depends_on:
@@ -127,6 +130,9 @@ services:
       - "3002:3002"
     environment:
       - DEBUG=True
+      - DB_NAME=microservices
+      - DB_USER=user
+      - DB_PASSWORD=password
       - DB_HOST=postgres
       - USER_SERVICE_URL=http://user-service:4001
       - STARTUP_SERVICE_URL=http://startup-service:4002
@@ -135,6 +141,7 @@ services:
       - MEETING_SERVICE_URL=http://meeting-service:4010
       - FEEDBACK_SERVICE_URL=http://feedback-service:4011
       - KAFKA_BOOTSTRAP_SERVERS=kafka:9092
+
     depends_on:
       postgres:
         condition: service_healthy
@@ -150,8 +157,12 @@ services:
       - "4001:4001"
     environment:
       - DEBUG=True
+      - DB_NAME=microservices
+      - DB_USER=user
+      - DB_PASSWORD=password
       - DB_HOST=postgres
       - KAFKA_BOOTSTRAP_SERVERS=kafka:9092
+
     depends_on:
       postgres:
         condition: service_healthy
@@ -167,8 +178,12 @@ services:
       - "4002:4002"
     environment:
       - DEBUG=True
+      - DB_NAME=microservices
+      - DB_USER=user
+      - DB_PASSWORD=password
       - DB_HOST=postgres
       - KAFKA_BOOTSTRAP_SERVERS=kafka:9092
+
     depends_on:
       postgres:
         condition: service_healthy
@@ -184,9 +199,13 @@ services:
       - "4008:4008"
     environment:
       - DEBUG=True
+      - DB_NAME=microservices
+      - DB_USER=user
+      - DB_PASSWORD=password
       - DB_HOST=postgres
       - REDIS_HOST=redis
       - KAFKA_BOOTSTRAP_SERVERS=kafka:9092
+
     depends_on:
       postgres:
         condition: service_healthy
@@ -201,9 +220,13 @@ services:
       - "4009:4009"
     environment:
       - DEBUG=True
+      - DB_NAME=microservices
+      - DB_USER=user
+      - DB_PASSWORD=password
       - DB_HOST=postgres
       - REDIS_HOST=redis
       - KAFKA_BOOTSTRAP_SERVERS=kafka:9092
+
     depends_on:
       postgres:
         condition: service_healthy
@@ -218,9 +241,13 @@ services:
       - "4010:4010"
     environment:
       - DEBUG=True
+      - DB_NAME=microservices
+      - DB_USER=user
+      - DB_PASSWORD=password
       - DB_HOST=postgres
       - REDIS_HOST=redis
       - KAFKA_BOOTSTRAP_SERVERS=kafka:9092
+
     depends_on:
       postgres:
         condition: service_healthy
@@ -235,9 +262,13 @@ services:
       - "4011:4011"
     environment:
       - DEBUG=True
+      - DB_NAME=microservices
+      - DB_USER=user
+      - DB_PASSWORD=password
       - DB_HOST=postgres
       - REDIS_HOST=redis
       - KAFKA_BOOTSTRAP_SERVERS=kafka:9092
+
     depends_on:
       postgres:
         condition: service_healthy
@@ -253,8 +284,12 @@ services:
       - "4004:4004"
     environment:
       - DEBUG=True
+      - DB_NAME=microservices
+      - DB_USER=user
+      - DB_PASSWORD=password
       - DB_HOST=postgres
       - KAFKA_BOOTSTRAP_SERVERS=kafka:9092
+
     depends_on:
       postgres:
         condition: service_healthy
@@ -270,8 +305,12 @@ services:
       - "4005:4005"
     environment:
       - DEBUG=True
+      - DB_NAME=microservices
+      - DB_USER=user
+      - DB_PASSWORD=password
       - DB_HOST=postgres
       - KAFKA_BOOTSTRAP_SERVERS=kafka:9092
+
     depends_on:
       postgres:
         condition: service_healthy
@@ -287,8 +326,12 @@ services:
       - "4006:4006"
     environment:
       - DEBUG=True
+      - DB_NAME=microservices
+      - DB_USER=user
+      - DB_PASSWORD=password
       - DB_HOST=postgres
       - KAFKA_BOOTSTRAP_SERVERS=kafka:9092
+
     depends_on:
       postgres:
         condition: service_healthy
@@ -304,9 +347,13 @@ services:
       - "4007:4007"
     environment:
       - DEBUG=True
+      - DB_NAME=microservices
+      - DB_USER=user
+      - DB_PASSWORD=password
       - DB_HOST=postgres
       - REDIS_HOST=redis
       - KAFKA_BOOTSTRAP_SERVERS=kafka:9092
+
     depends_on:
       postgres:
         condition: service_healthy

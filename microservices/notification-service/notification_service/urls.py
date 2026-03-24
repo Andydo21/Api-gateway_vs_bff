@@ -1,5 +1,6 @@
 from django.urls import path, include
 
 urlpatterns = [
-    path('api/', include('api.urls')),
+    path('api/notifications/', include('notification_app.urls')),
+
 ]
