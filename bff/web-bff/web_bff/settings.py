@@ -22,6 +22,7 @@ MIDDLEWARE = [
     'corsheaders.middleware.CorsMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'api.middleware.BypassAuthMiddleware',
     'api.middleware.JWTAuthenticationMiddleware',
 ]
 

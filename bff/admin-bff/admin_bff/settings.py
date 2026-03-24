@@ -26,6 +26,7 @@ MIDDLEWARE = [
     # 'django.middleware.csrf.CsrfViewMiddleware',  # Disabled for REST API
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'api.middleware.BypassAuthMiddleware',
     'api.middleware.JWTAuthenticationMiddleware',
 ]
 
