@@ -1,3 +1,4 @@
+# [SCRUM-6] Event Bus: Kafka Producer for Saga Choreography Pattern
 import json
 import logging
 from confluent_kafka import Producer
