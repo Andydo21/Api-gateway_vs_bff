@@ -31,4 +31,4 @@ git commit -m "$fullMessage"
 $branch = git branch --show-current
 git push origin $branch
 
-Write-Host "`n--- Hoàn tất! Đã đồng bộ với Jira: $jiraId ---" -ForegroundColor Green
+Write-Host "`n--- Done! Synced with Jira: $jiraId ---" -ForegroundColor Green

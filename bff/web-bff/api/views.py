@@ -73,12 +73,25 @@ def home_page(request):
             seen.add(cat)
             categories.append({'id': cat, 'name': cat})
 
+    # Aggregate health from User Service as well
+    user_service_status = "healthy"
+    try:
+        user_res = requests.get(f'{USER_SERVICE}/health/', timeout=2)
+        if user_res.status_code != 200:
+            user_service_status = "unhealthy"
+    except:
+        user_service_status = "unavailable"
+
     return Response({
         'success': True,
         'data': {
             'featuredStartups': startups,
             'categories': categories,
-            'service_status': service_status
+            'service_status': {
+                'startup_service': service_status,
+                'user_service': user_service_status,
+                'overall': "healthy" if service_status == "healthy" and user_service_status == "healthy" else "degraded"
+            }
         },
         'featured_startups': startups,
     })
