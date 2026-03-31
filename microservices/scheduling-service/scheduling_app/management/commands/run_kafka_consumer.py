@@ -3,8 +3,8 @@ import logging
 from django.core.management.base import BaseCommand
 from django.conf import settings
 from confluent_kafka import Consumer, KafkaError
-from scheduling_app.models import PitchSlot, SchedulingOutboxEvent
-from django.db import transaction
+from scheduling_app.models import PitchSlot, SchedulingOutboxEvent, ProcessedMessage
+from django.db import transaction, IntegrityError
 
 logger = logging.getLogger(__name__)
 
@@ -41,12 +41,27 @@ class Command(BaseCommand):
                 try:
                     payload = json.loads(msg.value().decode('utf-8'))
                     event_type = payload.get('event_type')
+                    message_id = payload.get('message_id')
                     data = payload.get('data')
 
-                    if event_type == 'pitch_booking_initiated':
-                        self.handle_booking_initiated(data)
-                    elif event_type == 'meeting_failed':
-                        self.handle_compensation(data)
+                    if message_id:
+                        if ProcessedMessage.objects.filter(message_id=message_id).exists():
+                            self.stdout.write(f"Skipping already processed message: {message_id}")
+                            continue
+
+                    with transaction.atomic():
+                        # Save message_id to prevent re-processing
+                        if message_id:
+                            try:
+                                ProcessedMessage.objects.create(message_id=message_id)
+                            except IntegrityError:
+                                self.stdout.write(f"Skipping already processed message: {message_id}")
+                                continue
+
+                        if event_type == 'pitch_booking_initiated':
+                            self.handle_booking_initiated(data)
+                        elif event_type == 'meeting_failed':
+                            self.handle_compensation(data)
                 except Exception as e:
                     logger.error(f"Error processing message: {e}")
 

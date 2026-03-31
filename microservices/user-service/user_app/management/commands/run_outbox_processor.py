@@ -30,7 +30,8 @@ class Command(BaseCommand):
                     producer.publish_event(
                         topic='identity_events',
                         event_type=event.event_type,
-                        data=event.payload
+                        data=event.payload,
+                        message_id=f"user_outbox_{event.id}"
                     )
                     
                     # Mark as processed

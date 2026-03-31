@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="vi">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -24,7 +25,7 @@
         .register-container {
             background: white;
             border-radius: 16px;
-            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
             width: 100%;
             max-width: 500px;
             padding: 40px;
@@ -65,7 +66,8 @@
             font-size: 0.9rem;
         }
 
-        input, select {
+        input,
+        select {
             width: 100%;
             padding: 12px;
             border: 2px solid #e0e0e0;
@@ -74,7 +76,8 @@
             transition: border-color 0.3s;
         }
 
-        input:focus, select:focus {
+        input:focus,
+        select:focus {
             outline: none;
             border-color: #667eea;
         }
@@ -120,6 +123,7 @@
         }
     </style>
 </head>
+
 <body>
     <div class="register-container">
         <div class="logo">
@@ -178,7 +182,7 @@
 
         document.getElementById('registerForm').addEventListener('submit', async (e) => {
             e.preventDefault();
-            
+
             const payload = {
                 username: document.getElementById('username').value,
                 email: document.getElementById('email').value,
@@ -187,18 +191,18 @@
                 last_name: document.getElementById('last_name').value,
                 role: document.getElementById('role').value
             };
-            
+
             const errorMsg = document.getElementById('errorMsg');
-            
+
             try {
                 const response = await fetch(`${API_BASE}/web/users/register/`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(payload)
                 });
-                
+
                 const data = await response.json();
-                
+
                 if (response.status === 201 || (data.success)) {
                     alert('Đăng ký thành công! Chào mừng bạn gia nhập Startup Hub.');
                     window.location.href = 'login.html';
@@ -220,4 +224,5 @@
         });
     </script>
 </body>
+
 </html>

@@ -3,8 +3,8 @@ import logging
 from django.core.management.base import BaseCommand
 from django.conf import settings
 from confluent_kafka import Consumer, KafkaError
-from meeting_app.models import Meeting, MeetingOutboxEvent
-from django.db import transaction
+from meeting_app.models import Meeting, MeetingOutboxEvent, ProcessedMessage
+from django.db import transaction, IntegrityError
 
 logger = logging.getLogger(__name__)
 
@@ -41,10 +41,25 @@ class Command(BaseCommand):
                 try:
                     payload = json.loads(msg.value().decode('utf-8'))
                     event_type = payload.get('event_type')
+                    message_id = payload.get('message_id')
                     data = payload.get('data')
 
-                    if event_type == 'slot_confirmed':
-                        self.auto_create_meeting(data)
+                    if message_id:
+                        if ProcessedMessage.objects.filter(message_id=message_id).exists():
+                            self.stdout.write(f"Skipping already processed message: {message_id}")
+                            continue
+
+                    with transaction.atomic():
+                        # Save message_id to prevent re-processing
+                        if message_id:
+                            try:
+                                ProcessedMessage.objects.create(message_id=message_id)
+                            except IntegrityError:
+                                self.stdout.write(f"Skipping already processed message: {message_id}")
+                                continue
+
+                        if event_type == 'slot_confirmed':
+                            self.auto_create_meeting(data)
                 except Exception as e:
                     logger.error(f"Error processing message: {e}")
 
@@ -58,7 +73,7 @@ class Command(BaseCommand):
         import requests
         from django.utils.dateparse import parse_datetime
 
-        booking_id = booking_data.get('id')
+        booking_id = booking_data.get('booking_id')
         pitch_slot_id = booking_data.get('pitch_slot_id')
         
         self.stdout.write(self.style.NOTICE(f" [KAFKA] Nhận sự kiện Booking #{booking_id}. Đang lấy thông tin lịch trình..."))

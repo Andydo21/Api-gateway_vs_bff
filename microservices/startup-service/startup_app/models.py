@@ -27,6 +27,20 @@ class Startup(models.Model):
     category = models.ForeignKey(Category, on_delete=models.SET_NULL, null=True, related_name='startups')
     image_url = models.URLField(blank=True)
     featured = models.BooleanField(default=False)
+    
+    # New specialized fields
+    FUNDING_STAGES = [
+        ('PRE_SEED', 'Pre-Seed'),
+        ('SEED', 'Seed'),
+        ('SERIES_A', 'Series A'),
+        ('SERIES_B', 'Series B'),
+        ('LATE_STAGE', 'Late Stage'),
+    ]
+    funding_stage = models.CharField(max_length=20, choices=FUNDING_STAGES, default='SEED')
+    funding_goal = models.DecimalField(max_digits=15, decimal_places=2, default=0.00)
+    team_size = models.IntegerField(default=1)
+    location = models.CharField(max_length=255, blank=True, null=True)
+    
     STATUS_CHOICES = [
         ('PENDING', 'Pending'),
         ('APPROVED', 'Approved'),
@@ -91,3 +105,14 @@ class StartupOutboxEvent(models.Model):
 
     def __str__(self):
         return f"{self.event_type} - {self.processed}"
+
+
+class ProcessedMessage(models.Model):
+    message_id = models.CharField(max_length=255, unique=True)
+    processed_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        db_table = 'processed_messages'
+
+    def __str__(self):
+        return self.message_id

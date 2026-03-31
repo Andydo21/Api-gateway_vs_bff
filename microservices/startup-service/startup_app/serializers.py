@@ -24,8 +24,9 @@ class StartupSerializer(serializers.ModelSerializer):
     class Meta:
         model = Startup
         fields = ['id', 'user_id', 'company_name', 'description', 'industry', 'website', 
-                  'category', 'category_name', 'image_url', 'featured', 'status',
-                  'created_at', 'updated_at']
+                  'category', 'category_name', 'image_url', 'featured', 
+                  'funding_stage', 'funding_goal', 'team_size', 'location',
+                  'status', 'created_at', 'updated_at']
         read_only_fields = ['id', 'created_at', 'updated_at']
 
 

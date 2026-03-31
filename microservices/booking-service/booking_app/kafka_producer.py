@@ -10,7 +10,10 @@ class KafkaProducer:
         self.bootstrap_servers = getattr(settings, 'KAFKA_BOOTSTRAP_SERVERS', 'localhost:9092')
         self.conf = {
             'bootstrap.servers': self.bootstrap_servers,
-            'client.id': 'pitching-service-producer'
+            'client.id': 'booking-service-producer',
+            'enable.idempotence': True,
+            'acks': 'all',
+            'retries': 5
         }
         try:
             self.producer = Producer(self.conf)
@@ -24,13 +27,14 @@ class KafkaProducer:
         else:
             logger.info(f"Message delivered to {msg.topic()} [{msg.partition()}]")
 
-    def publish_event(self, topic, event_type, data):
+    def publish_event(self, topic, event_type, data, message_id=None):
         if not self.producer:
             logger.warning("Kafka producer not initialized. Skipping event.")
             return
 
         message = {
             'event_type': event_type,
+            'message_id': message_id,
             'data': data
         }
         

@@ -30,7 +30,8 @@ class Command(BaseCommand):
                     producer.publish_event(
                         topic='pitching_events',
                         event_type=event.event_type,
-                        data=event.payload
+                        data=event.payload,
+                        message_id=f"scheduling_outbox_{event.id}"
                     )
                     
                     # Mark as processed

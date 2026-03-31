@@ -40,3 +40,14 @@ class UserOutboxEvent(models.Model):
 
     def __str__(self):
         return f"{self.event_type} - {self.id} (Processed: {self.processed})"
+
+
+class ProcessedMessage(models.Model):
+    message_id = models.CharField(max_length=255, unique=True)
+    processed_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        db_table = 'processed_messages'
+
+    def __str__(self):
+        return self.message_id

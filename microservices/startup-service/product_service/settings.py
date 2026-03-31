@@ -1,6 +1,9 @@
 from pathlib import Path
 from decouple import config
 import os
+from .tracing import initialize_tracing
+
+initialize_tracing("startup-service")
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 

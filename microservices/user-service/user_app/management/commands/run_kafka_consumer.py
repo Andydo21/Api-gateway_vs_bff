@@ -3,8 +3,8 @@ import logging
 from django.core.management.base import BaseCommand
 from django.conf import settings
 from confluent_kafka import Consumer, KafkaError
-from user_app.models import User, UserOutboxEvent
-from django.db import transaction
+from user_app.models import User, UserOutboxEvent, ProcessedMessage
+from django.db import transaction, IntegrityError
 
 logger = logging.getLogger(__name__)
 
@@ -37,10 +37,37 @@ class Command(BaseCommand):
                 try:
                     payload = json.loads(msg.value().decode('utf-8'))
                     event_type = payload.get('event_type')
+                    message_id = payload.get('message_id')
                     data = payload.get('data')
 
-                    if event_type == 'startup_registration_initiated':
-                        self.handle_startup_registration(data)
+                    if message_id:
+                        if ProcessedMessage.objects.filter(message_id=message_id).exists():
+                            self.stdout.write(f"Skipping already processed message: {message_id}")
+                            continue
+
+                    with transaction.atomic():
+                        # Save message_id to prevent re-processing
+                        if message_id:
+                            try:
+                                ProcessedMessage.objects.create(message_id=message_id)
+                            except IntegrityError:
+                                self.stdout.write(f"Skipping already processed message: {message_id}")
+                                continue
+
+                        if event_type == 'pitch_booking_created':
+                            self.process_pitch_booking_created(data)
+                        elif event_type == 'startup_created':
+                            self.process_startup_created(data)
+                        elif event_type == 'user_role_updated':
+                            self.process_user_role_updated(data)
+                        elif event_type == 'investment_linked':
+                            self.process_investment_linked(data)
+                        elif event_type == 'payment_completed':
+                            self.process_payment_completed(data)
+                        elif event_type == 'payment_failed':
+                            self.process_payment_failed(data)
+                        elif event_type == 'interaction_tracked':
+                            self.process_interaction_tracked(data)
                 except Exception as e:
                     logger.error(f"Error processing message: {e}")
 

@@ -69,6 +69,119 @@
             gap: 1.5rem;
         }
 
+        .btn-launch {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 0.75rem 1.5rem;
+            border-radius: 24px;
+            font-weight: 600;
+            text-decoration: none;
+            transition: transform 0.2s;
+            cursor: pointer;
+            border: none;
+            display: none; /* Shown for founders/users */
+        }
+
+        .btn-launch:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+        }
+
+        /* Modal Styles */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(4px);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background: white;
+            padding: 2.5rem;
+            border-radius: 16px;
+            width: 100%;
+            max-width: 600px;
+            max-height: 90vh;
+            overflow-y: auto;
+            position: relative;
+        }
+
+        .modal-header {
+            margin-bottom: 2rem;
+            text-align: center;
+        }
+
+        .modal-header h2 {
+            color: #1e293b;
+            font-size: 1.5rem;
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1.5rem;
+        }
+
+        .form-group-full {
+            grid-column: span 2;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+            color: #475569;
+        }
+
+        .form-group input, .form-group select, .form-group textarea {
+            width: 100%;
+            padding: 0.75rem;
+            border: 2px solid #e2e8f0;
+            border-radius: 8px;
+            font-size: 0.95rem;
+        }
+
+        .form-group select {
+            background: white;
+        }
+
+        .modal-actions {
+            margin-top: 2rem;
+            display: flex;
+            gap: 1rem;
+            justify-content: flex-end;
+        }
+
+        .btn-cancel {
+            padding: 0.75rem 1.5rem;
+            border: none;
+            background: #f1f5f9;
+            color: #475569;
+            border-radius: 8px;
+            cursor: pointer;
+        }
+
+        .btn-submit {
+            padding: 0.75rem 1.5rem;
+            border: none;
+            background: #667eea;
+            color: white;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+        }
+
         .cart-btn,
         .user-btn {
             display: flex;
@@ -401,6 +514,7 @@
             </div>
 
             <div class="header-actions">
+                <button id="launchBtn" class="btn-launch" onclick="openModal()">🚀 Đăng ký Startup</button>
                 <button class="cart-btn" onclick="window.location.href='pitch-slots.html'">
                     📋 Lịch sử Slot
                 </button>
@@ -532,7 +646,57 @@
             loadStartups();
             updatePitchCount();
             setupNotifications();
+            checkRoleForLaunchBtn();
         };
+
+        function checkRoleForLaunchBtn() {
+            const role = localStorage.getItem('role');
+            if (role === 'founder' || role === 'user' || role === 'admin') {
+                document.getElementById('launchBtn').style.display = 'block';
+            }
+        }
+
+        function openModal() {
+            document.getElementById('startupModal').classList.add('active');
+        }
+
+        function closeModal() {
+            document.getElementById('startupModal').classList.remove('active');
+        }
+
+        async function handleStartupSubmit(e) {
+            e.preventDefault();
+            const payload = {
+                company_name: document.getElementById('company_name').value,
+                description: document.getElementById('description').value,
+                industry: document.getElementById('industry').value,
+                website: document.getElementById('website').value,
+                funding_stage: document.getElementById('funding_stage').value,
+                funding_goal: parseFloat(document.getElementById('funding_goal').value),
+                team_size: parseInt(document.getElementById('team_size').value),
+                location: document.getElementById('location').value,
+                image_url: document.getElementById('image_url').value
+            };
+
+            try {
+                const res = await fetch(`${API_BASE}/web/startups/create/`, {
+                    method: 'POST',
+                    headers: authHeaders(),
+                    body: JSON.stringify(payload)
+                });
+                
+                if (res.ok) {
+                    alert('🎉 Đăng ký Startup thành công! Chờ Admin phê duyệt nhé.');
+                    closeModal();
+                    loadStartups();
+                } else {
+                    const error = await res.json();
+                    alert('Lỗi: ' + JSON.stringify(error));
+                }
+            } catch (err) {
+                alert('Lỗi kết nối Server: ' + err.message);
+            }
+        }
 
         function setupNotifications() {
             const userId = JSON.parse(localStorage.getItem('user') || '{}').id;
@@ -784,7 +948,7 @@
             if (!pdfUrl) return;
 
             try {
-                const response = await fetch(`${API_BASE}/web/pitch/submit/`, {
+                const response = await fetch(`${API_BASE}/api/v1/pitch-requests/`, {
                     method: 'POST',
                     headers: authHeaders(),
                     body: JSON.stringify({ startup_id: id, title: title, pitch_deck_url: pdfUrl })
@@ -802,7 +966,7 @@
         async function updatePitchCount() {
             // Updated to list pitch requests for the user
             try {
-                const response = await fetch(`${API_BASE}/web/pitch/list/`, { headers: authHeaders() });
+                const response = await fetch(`${API_BASE}/api/v1/pitch-requests/`, { headers: authHeaders() });
                 // We'll add this endpoint to BFF if missing, but for now just placeholder
                 // document.getElementById('pitchCount').textContent = ...;
             } catch (error) { }
@@ -818,6 +982,65 @@
             setTimeout(() => toast.remove(), 3000);
         }
     </script>
+    <!-- Startup Creation Modal -->
+    <div id="startupModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>🚀 Đăng ký dự án Startup của bạn</h2>
+                <p style="color: #64748b; font-size: 0.9rem;">Cung cấp đầy đủ thông tin để nhà đầu tư có thể tìm thấy bạn</p>
+            </div>
+            <form id="startupForm" onsubmit="handleStartupSubmit(event)">
+                <div class="form-grid">
+                    <div class="form-group-full">
+                        <label>Tên Startup *</label>
+                        <input type="text" id="company_name" required placeholder="Ví dụ: TechHub Solutions">
+                    </div>
+                    <div class="form-group-full">
+                        <label>Mô tả ngắn *</label>
+                        <textarea id="description" rows="3" required placeholder="Tóm tắt về ý tưởng và sản phẩm của bạn..." style="width: 100%; padding: 0.75rem; border: 2px solid #e2e8f0; border-radius: 8px;"></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label>Ngành nghề / Lĩnh vực *</label>
+                        <input type="text" id="industry" required placeholder="Ví dụ: AI, Fintech, EduTech">
+                    </div>
+                    <div class="form-group">
+                        <label>Website</label>
+                        <input type="url" id="website" placeholder="https://yourstartup.com">
+                    </div>
+                    <div class="form-group">
+                        <label>Giai đoạn gọi vốn *</label>
+                        <select id="funding_stage" required>
+                            <option value="PRE_SEED">Pre-Seed</option>
+                            <option value="SEED" selected>Seed (Hạt giống)</option>
+                            <option value="SERIES_A">Series A</option>
+                            <option value="SERIES_B">Series B</option>
+                            <option value="LATE_STAGE">Late Stage (Giai đoạn muộn)</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Mục tiêu gọi vốn (VNĐ) *</label>
+                        <input type="number" id="funding_goal" required value="0">
+                    </div>
+                    <div class="form-group">
+                        <label>Quy mô đội ngũ *</label>
+                        <input type="number" id="team_size" required value="1">
+                    </div>
+                    <div class="form-group">
+                        <label>Địa điểm *</label>
+                        <input type="text" id="location" required placeholder="Ví dụ: Hà Nội, TP.HCM">
+                    </div>
+                    <div class="form-group-full">
+                        <label>Link ảnh đại diện</label>
+                        <input type="url" id="image_url" placeholder="https://image-url.com/logo.png">
+                    </div>
+                </div>
+                <div class="modal-actions">
+                    <button type="button" class="btn-cancel" onclick="closeModal()">Hủy</button>
+                    <button type="submit" class="btn-submit">Gửi đăng ký</button>
+                </div>
+            </form>
+        </div>
+    </div>
 </body>
 
 </html>

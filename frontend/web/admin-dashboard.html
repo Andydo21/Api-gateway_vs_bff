@@ -394,7 +394,7 @@
                 localStorage.setItem('token', 'dev-bypass-token');
                 localStorage.setItem('username', 'Developer');
                 localStorage.setItem('role', 'admin');
-                localStorage.setItem('user', JSON.stringify({id: 1, username: 'dev-admin', role: 'admin'}));
+                localStorage.setItem('user', JSON.stringify({ id: 1, username: 'dev-admin', role: 'admin' }));
             }
         }
     </script>
@@ -579,7 +579,7 @@
                     <td>#${s.id}</td>
                     <td><strong>${s.company_name || s.name || 'Startup'}</strong></td>
                     <td>${s.industry || '-'}</td>
-                    <td>${s.stage || '-'}</td>
+                    <td>${s.funding_stage || '-'}</td>
                     <td>${new Intl.NumberFormat('vi-VN').format(s.funding_goal || 0)} ₫</td>
                     <td>👤 ${ownerName}</td>
                     <td>${statusBadge}</td>

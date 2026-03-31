@@ -125,10 +125,22 @@
             font-weight: 600;
         }
 
-        .status-available { background: #dcfce7; color: #15803d; }
-        .status-booked { background: #fee2e2; color: #b91c1c; }
-        .status-blocked { background: #f3f4f6; color: #4b5563; }
-        .meeting-tag { 
+        .status-available {
+            background: #dcfce7;
+            color: #15803d;
+        }
+
+        .status-booked {
+            background: #fee2e2;
+            color: #b91c1c;
+        }
+
+        .status-blocked {
+            background: #f3f4f6;
+            color: #4b5563;
+        }
+
+        .meeting-tag {
             display: inline-block;
             margin-top: 5px;
             padding: 2px 8px;
@@ -138,109 +150,324 @@
             font-size: 0.75rem;
             font-weight: 600;
         }
+
         .feedback-btn {
             background: #10b981;
             margin-top: 10px;
         }
-        .feedback-btn:hover { background: #059669; }
 
-        .order-items { margin: 1rem 0; }
-        .order-item { display: flex; justify-content: space-between; padding: 0.75rem 0; border-bottom: 1px solid #f7fafc; }
-        .item-info { display: flex; gap: 1rem; flex: 1; }
-        .item-name { font-weight: 500; color: #2d3748; }
-        .item-quantity { color: #718096; font-size: 0.9rem; }
-        .item-price { font-weight: 600; color: #667eea; }
+        .feedback-btn:hover {
+            background: #059669;
+        }
+
+        .order-items {
+            margin: 1rem 0;
+        }
+
+        .order-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 0.75rem 0;
+            border-bottom: 1px solid #f7fafc;
+        }
+
+        .item-info {
+            display: flex;
+            gap: 1rem;
+            flex: 1;
+        }
+
+        .item-name {
+            font-weight: 500;
+            color: #2d3748;
+        }
+
+        .item-quantity {
+            color: #718096;
+            font-size: 0.9rem;
+        }
+
+        .item-price {
+            font-weight: 600;
+            color: #667eea;
+        }
 
         .order-footer {
-            display: flex; justify-content: space-between; align-items: center;
-            margin-top: 1rem; padding-top: 1rem; border-top: 2px solid #e2e8f0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 1rem;
+            padding-top: 1rem;
+            border-top: 2px solid #e2e8f0;
         }
-        .order-total { font-size: 1.1rem; font-weight: 700; color: #2d3748; }
-        .order-address { color: #718096; font-size: 0.9rem; margin-top: 0.5rem; }
 
-        .empty-orders { text-align: center; padding: 4rem 2rem; background: white; border-radius: 12px; }
-        .empty-orders h3 { font-size: 1.5rem; color: #718096; margin-bottom: 1rem; }
-        .empty-orders p { color: #a0aec0; margin-bottom: 1.5rem; }
+        .order-total {
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: #2d3748;
+        }
+
+        .order-address {
+            color: #718096;
+            font-size: 0.9rem;
+            margin-top: 0.5rem;
+        }
+
+        .empty-orders {
+            text-align: center;
+            padding: 4rem 2rem;
+            background: white;
+            border-radius: 12px;
+        }
+
+        .empty-orders h3 {
+            font-size: 1.5rem;
+            color: #718096;
+            margin-bottom: 1rem;
+        }
+
+        .empty-orders p {
+            color: #a0aec0;
+            margin-bottom: 1.5rem;
+        }
 
         .shop-btn {
-            padding: 0.8rem 2rem; background: #667eea; color: white; border: none;
-            border-radius: 8px; cursor: pointer; font-size: 1rem; text-decoration: none; display: inline-block;
+            padding: 0.8rem 2rem;
+            background: #667eea;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1rem;
+            text-decoration: none;
+            display: inline-block;
         }
-        .shop-btn:hover { background: #5568d3; }
-        .loading { text-align: center; padding: 3rem; color: #718096; }
+
+        .shop-btn:hover {
+            background: #5568d3;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 3rem;
+            color: #718096;
+        }
 
         /* Modal Overlay */
         .modal-overlay {
-            display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.5); z-index: 9999;
-            justify-content: center; align-items: center;
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 9999;
+            justify-content: center;
+            align-items: center;
             animation: fadeIn 0.2s ease;
         }
-        .modal-overlay.active { display: flex; }
-        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+        .modal-overlay.active {
+            display: flex;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+            }
+
+            to {
+                opacity: 1;
+            }
+        }
 
         .modal {
-            background: white; border-radius: 16px; padding: 2rem; width: 90%; max-width: 480px;
-            box-shadow: 0 20px 60px rgba(0,0,0,0.2); animation: slideUp 0.3s ease;
+            background: white;
+            border-radius: 16px;
+            padding: 2rem;
+            width: 90%;
+            max-width: 480px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.2);
+            animation: slideUp 0.3s ease;
         }
-        @keyframes slideUp { from { transform: translateY(30px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
 
-        .modal h2 { font-size: 1.4rem; color: #2d3748; margin-bottom: 0.5rem; }
-        .modal p.subtitle { color: #718096; font-size: 0.9rem; margin-bottom: 1.5rem; }
+        @keyframes slideUp {
+            from {
+                transform: translateY(30px);
+                opacity: 0;
+            }
+
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        .modal h2 {
+            font-size: 1.4rem;
+            color: #2d3748;
+            margin-bottom: 0.5rem;
+        }
+
+        .modal p.subtitle {
+            color: #718096;
+            font-size: 0.9rem;
+            margin-bottom: 1.5rem;
+        }
 
         /* Star Rating */
-        .star-rating { display: flex; gap: 8px; margin-bottom: 1.5rem; }
+        .star-rating {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 1.5rem;
+        }
+
         .star-rating .star {
-            font-size: 2.2rem; cursor: pointer; color: #e2e8f0;
+            font-size: 2.2rem;
+            cursor: pointer;
+            color: #e2e8f0;
             transition: color 0.15s, transform 0.15s;
         }
-        .star-rating .star:hover { transform: scale(1.2); }
-        .star-rating .star.active { color: #f59e0b; }
-        .star-rating .star.hover-active { color: #fbbf24; }
 
-        .rating-label { font-size: 0.9rem; color: #667eea; font-weight: 600; margin-bottom: 1rem; min-height: 1.2em; }
+        .star-rating .star:hover {
+            transform: scale(1.2);
+        }
+
+        .star-rating .star.active {
+            color: #f59e0b;
+        }
+
+        .star-rating .star.hover-active {
+            color: #fbbf24;
+        }
+
+        .rating-label {
+            font-size: 0.9rem;
+            color: #667eea;
+            font-weight: 600;
+            margin-bottom: 1rem;
+            min-height: 1.2em;
+        }
 
         /* Textarea */
         .modal textarea {
-            width: 100%; min-height: 100px; padding: 0.8rem; border: 2px solid #e2e8f0;
-            border-radius: 10px; font-size: 0.95rem; font-family: inherit; resize: vertical;
+            width: 100%;
+            min-height: 100px;
+            padding: 0.8rem;
+            border: 2px solid #e2e8f0;
+            border-radius: 10px;
+            font-size: 0.95rem;
+            font-family: inherit;
+            resize: vertical;
             transition: border-color 0.2s;
         }
-        .modal textarea:focus { outline: none; border-color: #667eea; }
-        .modal textarea::placeholder { color: #a0aec0; }
 
-        .modal-actions { display: flex; gap: 1rem; margin-top: 1.5rem; justify-content: flex-end; }
+        .modal textarea:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .modal textarea::placeholder {
+            color: #a0aec0;
+        }
+
+        .modal-actions {
+            display: flex;
+            gap: 1rem;
+            margin-top: 1.5rem;
+            justify-content: flex-end;
+        }
+
         .modal-actions .btn-cancel {
-            padding: 0.7rem 1.5rem; background: #f3f4f6; color: #4b5563; border: none;
-            border-radius: 8px; cursor: pointer; font-size: 0.95rem; font-weight: 600;
+            padding: 0.7rem 1.5rem;
+            background: #f3f4f6;
+            color: #4b5563;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 0.95rem;
+            font-weight: 600;
         }
-        .modal-actions .btn-cancel:hover { background: #e5e7eb; }
+
+        .modal-actions .btn-cancel:hover {
+            background: #e5e7eb;
+        }
+
         .modal-actions .btn-submit {
-            padding: 0.7rem 1.5rem; background: #10b981; color: white; border: none;
-            border-radius: 8px; cursor: pointer; font-size: 0.95rem; font-weight: 600;
+            padding: 0.7rem 1.5rem;
+            background: #10b981;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 0.95rem;
+            font-weight: 600;
         }
-        .modal-actions .btn-submit:hover { background: #059669; }
-        .modal-actions .btn-submit:disabled { background: #a7f3d0; cursor: not-allowed; }
+
+        .modal-actions .btn-submit:hover {
+            background: #059669;
+        }
+
+        .modal-actions .btn-submit:disabled {
+            background: #a7f3d0;
+            cursor: not-allowed;
+        }
+
         .modal-actions .btn-book {
-            padding: 0.7rem 1.5rem; background: #667eea; color: white; border: none;
-            border-radius: 8px; cursor: pointer; font-size: 0.95rem; font-weight: 600;
+            padding: 0.7rem 1.5rem;
+            background: #667eea;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 0.95rem;
+            font-weight: 600;
         }
-        .modal-actions .btn-book:hover { background: #5568d3; }
+
+        .modal-actions .btn-book:hover {
+            background: #5568d3;
+        }
 
         /* Booking modal */
-        .booking-info { background: #f8fafc; border-radius: 10px; padding: 1rem; margin-bottom: 1rem; }
-        .booking-info p { color: #4b5563; margin-bottom: 0.3rem; font-size: 0.95rem; }
-        .booking-info strong { color: #2d3748; }
+        .booking-info {
+            background: #f8fafc;
+            border-radius: 10px;
+            padding: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .booking-info p {
+            color: #4b5563;
+            margin-bottom: 0.3rem;
+            font-size: 0.95rem;
+        }
+
+        .booking-info strong {
+            color: #2d3748;
+        }
 
         /* Toast */
         .toast-msg {
-            position: fixed; bottom: 2rem; right: 2rem; padding: 1rem 1.5rem;
-            border-radius: 12px; color: white; font-weight: 600;
-            box-shadow: 0 8px 24px rgba(0,0,0,0.15); z-index: 10000;
+            position: fixed;
+            bottom: 2rem;
+            right: 2rem;
+            padding: 1rem 1.5rem;
+            border-radius: 12px;
+            color: white;
+            font-weight: 600;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+            z-index: 10000;
             animation: slideUp 0.3s ease;
         }
-        .toast-msg.success { background: #10b981; }
-        .toast-msg.error { background: #ef4444; }
+
+        .toast-msg.success {
+            background: #10b981;
+        }
+
+        .toast-msg.error {
+            background: #ef4444;
+        }
     </style>
 </head>
 
@@ -249,7 +476,8 @@
         <div class="header-content">
             <a href="index.html" class="logo">🚀 Startup Hub</a>
             <div class="nav-buttons">
-                <button class="back-btn" onclick="window.location.href='index.html'">← Tiếp tục tìm kiếm Startup</button>
+                <button class="back-btn" onclick="window.location.href='index.html'">← Tiếp tục tìm kiếm
+                    Startup</button>
                 <a href="pitch-requests.html" class="nav-btn">💼 Giỏ hàng Pitch</a>
             </div>
         </div>
@@ -278,12 +506,14 @@
             </div>
             <div class="rating-label" id="ratingLabel">Chọn số sao đánh giá</div>
 
-            <label style="font-weight:600; color:#2d3748; display:block; margin-bottom:0.5rem;">Nhận xét chi tiết</label>
+            <label style="font-weight:600; color:#2d3748; display:block; margin-bottom:0.5rem;">Nhận xét chi
+                tiết</label>
             <textarea id="feedbackComment" placeholder="Chia sẻ nhận xét của bạn về buổi Pitching..."></textarea>
 
             <div class="modal-actions">
                 <button class="btn-cancel" onclick="closeFeedbackModal()">Hủy</button>
-                <button class="btn-submit" id="btnSubmitFeedback" disabled onclick="doSubmitFeedback()">Gửi đánh giá</button>
+                <button class="btn-submit" id="btnSubmitFeedback" disabled onclick="doSubmitFeedback()">Gửi đánh
+                    giá</button>
             </div>
         </div>
     </div>
@@ -462,7 +692,7 @@
                 const response = await fetch(`${API_BASE}/web/slots/`, { headers: authHeaders() });
                 const slots = await response.json();
                 if (!response.ok) throw new Error(slots.error || `Slots API failed: ${response.status}`);
-                
+
                 const mRes = await fetch(`${API_BASE}/web/meetings/`, { headers: authHeaders() });
                 const meetings = mRes.ok ? await mRes.json() : [];
 
@@ -516,7 +746,7 @@
                     </div>
                     <div class="order-footer">
                         <button class="shop-btn" 
-                                onclick="openBookingModal(${slot.id}, JSON.parse(decodeURIComponent('${encodeURIComponent(JSON.stringify({investor_id: slot.investor_id, start_time: slot.start_time, end_time: slot.end_time}))}'))) "
+                                onclick="openBookingModal(${slot.id}, JSON.parse(decodeURIComponent('${encodeURIComponent(JSON.stringify({ investor_id: slot.investor_id, start_time: slot.start_time, end_time: slot.end_time }))}'))) "
                                 ${slot.status !== 'AVAILABLE' ? 'disabled style="background:#ccc; cursor:not-allowed;"' : ''}>
                             ĐẶT LỊCH PITCH
                         </button>
@@ -539,4 +769,5 @@
         window.onload = loadSlots;
     </script>
 </body>
+
 </html>

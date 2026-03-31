@@ -23,6 +23,18 @@ def create_route(route_id, uri, upstream_nodes, name, enable_websocket=False, us
         },
         "file-logger": {
             "path": "/usr/local/apisix/logs/access.log"
+        },
+        "api-breaker": {
+            "break_response_code": 502,
+            "max_breaker_sec": 30,
+            "unhealthy": {
+                "http_statuses": [500, 503, 504],
+                "failures": 3
+            },
+            "healthy": {
+                "http_statuses": [200, 201],
+                "successes": 3
+            }
         }
     }
     
