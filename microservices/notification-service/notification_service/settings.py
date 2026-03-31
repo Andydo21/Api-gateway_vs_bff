@@ -1,3 +1,4 @@
+# [SCRUM-7] Real-time: WebSocket Notification Service (Channels + Redis)
 from pathlib import Path
 from decouple import config
 import os
