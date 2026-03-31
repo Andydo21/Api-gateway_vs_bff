@@ -1,3 +1,4 @@
+# [SCRUM-3] Core Microservice: User Service (Identity, Authentication, Roles)
 from pathlib import Path
 from decouple import config
 import os
