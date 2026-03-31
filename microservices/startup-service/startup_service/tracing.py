@@ -1,3 +1,4 @@
+# [SCRUM-9] Observability: OpenTelemetry Distributed Tracing & Prometheus Metrics
 import os
 from opentelemetry import trace
 from opentelemetry.sdk.trace import TracerProvider
