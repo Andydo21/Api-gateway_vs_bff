@@ -313,11 +313,15 @@ def book_pitch_slot(request, slot_id):
 @api_view(['GET'])
 @permission_classes([AllowAny])
 def list_meetings(request):
+    """
+    Proxy to meeting-service to list upcoming pitch sessions.
+    Standardized timeout applied for reliability.
+    """
     try:
         res = requests.get(
             f'{MEETING_SERVICE}/meetings/',
             headers={'Accept': 'application/json'},
-            timeout=5,
+            timeout=5, # Standardized timeout
         )
         try:
             payload = res.json()
