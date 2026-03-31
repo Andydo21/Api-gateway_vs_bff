@@ -1,3 +1,4 @@
+# [SCRUM-5] BFF Layer: Admin Backend-for-Frontend (Aggregation & Auth Proxy)
 from pathlib import Path
 from decouple import config
 import os
