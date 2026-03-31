@@ -3,6 +3,9 @@
 > [!TIP]
 > **Jira Tracking:** [SCRUM-1](https://andydo21.atlassian.net/browse/SCRUM-1) | [SCRUM-2](https://andydo21.atlassian.net/browse/SCRUM-2)
 
+> [!IMPORTANT]
+> **Quy trình chuyên nghiệp:** Để làm việc hiệu quả với Jira, hãy tham khảo [JIRA_WORKFLOW.md](file:///d:/Django_project/api-gateway_vs_bff/JIRA_WORKFLOW.md).
+
 Một hệ thống quản trị hệ sinh thái Startup và điều phối Pitching chuyên nghiệp, được xây dựng trên nền tảng **Microservices** tiên tiến, sử dụng **Django**, **Kafka**, **APISIX**, và kiến trúc **BFF**.
 
 ---
