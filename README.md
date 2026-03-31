@@ -1,5 +1,8 @@
 # Microservices Architecture: Pitch-Booking & Startup Ecosystem
 
+> [!TIP]
+> **Jira Tracking:** [SCRUM-1](https://andydo21.atlassian.net/browse/SCRUM-1) | [SCRUM-2](https://andydo21.atlassian.net/browse/SCRUM-2)
+
 Một hệ thống quản trị hệ sinh thái Startup và điều phối Pitching chuyên nghiệp, được xây dựng trên nền tảng **Microservices** tiên tiến, sử dụng **Django**, **Kafka**, **APISIX**, và kiến trúc **BFF**.
 
 ---
