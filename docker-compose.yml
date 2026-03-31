@@ -1,3 +1,4 @@
+# [SCRUM-10] DevOps: Docker Compose Orchestration & Production Deployment
 version: '3.8'
 
 services:
