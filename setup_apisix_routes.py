@@ -23,6 +23,18 @@ def create_route(route_id, uri, upstream_nodes, name, enable_websocket=False, us
         },
         "file-logger": {
             "path": "/usr/local/apisix/logs/access.log"
+        },
+        "api-breaker": {
+            "break_response_code": 502,
+            "max_breaker_sec": 30,
+            "unhealthy": {
+                "http_statuses": [500, 503, 504],
+                "failures": 3
+            },
+            "healthy": {
+                "http_statuses": [200, 201],
+                "successes": 3
+            }
         }
     }
     
@@ -52,6 +64,7 @@ if __name__ == "__main__":
     # consumer/key/secret system which is incompatible with Django simplejwt tokens.
     # Auth is handled by the BFF reading the Authorization header from the frontend.
     create_route("1", "/web/*", {"web-bff:3001": 1}, "Web-BFF", use_jwt=False)
+    create_route("7", "/api/v1/*", {"web-bff:3001": 1}, "Web-BFF-Legacy-v1", use_jwt=False, priority=1)
     
     create_route("2", "/admin/*", {"admin-bff:3002": 1}, "Admin-BFF", use_jwt=False)
     
