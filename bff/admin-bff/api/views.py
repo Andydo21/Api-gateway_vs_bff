@@ -133,37 +133,37 @@ def startups(request):
     except Exception as e: return Response({'error': str(e)}, status=500)
 
 
-@api_view(['PUT', 'DELETE'])
+@api_view(['GET', 'PUT', 'DELETE'])
 @permission_classes([AllowAny])
 @admin_required
 def startup_detail(request, startup_id):
+    """BFF for startup retrieval (Aggregated), update, and deletion"""
     try:
-        if request.method == 'PUT':
+        if request.method == 'GET':
+            # 1. Basic Startup Info
+            res = requests.get(f'{STARTUP_SERVICE}/startups/{startup_id}/', timeout=5)
+            if res.status_code != 200:
+                return Response(res.json(), status=res.status_code)
+            
+            startup_data = res.json()
+            
+            # 2. Aggregate Owner details
+            owner_id = startup_data.get('user_id') or startup_data.get('owner_id')
+            if owner_id:
+                try:
+                    user_res = requests.get(f'{USER_SERVICE}/users/{owner_id}/', timeout=2)
+                    if user_res.status_code == 200:
+                        startup_data['owner_details'] = user_res.json()
+                except: pass
+                
+            return Response({'success': True, 'startup': startup_data})
+
+        elif request.method == 'PUT':
             res = requests.put(f'{STARTUP_SERVICE}/startups/{startup_id}/', json=request.data, timeout=5)
             return Response(res.json(), status=res.status_code)
         elif request.method == 'DELETE':
             res = requests.delete(f'{STARTUP_SERVICE}/startups/{startup_id}/', timeout=5)
             return Response(res.json() if res.content else {'success': True}, status=res.status_code)
-    except Exception as e: return Response({'error': str(e)}, status=500)
-
-
-@api_view(['POST'])
-@permission_classes([AllowAny])
-@admin_required
-def approve_startup(request, startup_id):
-    try:
-        res = requests.post(f'{STARTUP_SERVICE}/startups/{startup_id}/approve/', timeout=5)
-        return Response(res.json(), status=res.status_code)
-    except Exception as e: return Response({'error': str(e)}, status=500)
-
-
-@api_view(['POST'])
-@permission_classes([AllowAny])
-@admin_required
-def reject_startup(request, startup_id):
-    try:
-        res = requests.post(f'{STARTUP_SERVICE}/startups/{startup_id}/reject/', timeout=5)
-        return Response(res.json(), status=res.status_code)
     except Exception as e: return Response({'error': str(e)}, status=500)
 
 
@@ -248,48 +248,44 @@ def users(request):
     except Exception as e: return Response({'error': str(e)}, status=500)
 
 
-@api_view(['GET'])
+@api_view(['GET', 'PUT', 'DELETE'])
 @permission_classes([AllowAny])
 @admin_required
 def user_detail(request, user_id):
-    """Aggregate User details, their Startups, and Bookings"""
+    """Aggregate User details or proxy Update/Delete to User Service"""
     try:
-        # 1. Basic User Info
-        user_res = requests.get(f'{USER_SERVICE}/users/{user_id}/', timeout=5)
-        if user_res.status_code != 200:
-            return Response(user_res.json(), status=user_res.status_code)
-        
-        user_info = user_res.json()
-        
-        # 2. User's Startups
-        try:
-            startup_res = requests.get(f'{STARTUP_SERVICE}/startups/?owner_id={user_id}', timeout=5)
-            user_info['startups'] = startup_res.json() if startup_res.status_code == 200 else []
-        except:
-            user_info['startups'] = []
+        if request.method == 'GET':
+            # 1. Basic User Info
+            user_res = requests.get(f'{USER_SERVICE}/users/{user_id}/', timeout=5)
+            if user_res.status_code != 200:
+                return Response(user_res.json(), status=user_res.status_code)
             
-        # 3. User's Pitch Slots (if they are an investor or founder involved)
-        try:
-            slot_res = requests.get(f'{SCHEDULING_SERVICE}/pitch-slots/?user_id={user_id}', timeout=5)
-            user_info['pitch_slots'] = slot_res.json() if slot_res.status_code == 200 else []
-        except:
-            user_info['pitch_slots'] = []
+            user_info = user_res.json()
             
-        return Response({
-            'success': True,
-            'data': user_info
-        })
-    except Exception as e: return Response({'error': str(e)}, status=500)
+            # 2. User's Startups
+            try:
+                startup_res = requests.get(f'{STARTUP_SERVICE}/startups/?owner_id={user_id}', timeout=5)
+                user_info['startups'] = startup_res.json() if startup_res.status_code == 200 else []
+            except:
+                user_info['startups'] = []
+                
+            # 3. User's Pitch Slots (if they are an investor or founder involved)
+            try:
+                slot_res = requests.get(f'{SCHEDULING_SERVICE}/pitch-slots/?user_id={user_id}', timeout=5)
+                user_info['pitch_slots'] = slot_res.json() if slot_res.status_code == 200 else []
+            except:
+                user_info['pitch_slots'] = []
+                
+            return Response({'success': True, 'data': user_info})
 
+        elif request.method == 'PUT':
+            res = requests.put(f'{USER_SERVICE}/users/{user_id}/', json=request.data, timeout=5)
+            return Response(res.json(), status=res.status_code)
 
-@api_view(['PUT'])
-@permission_classes([AllowAny])
-@admin_required
-def user_ban(request, user_id):
-    """Generic update for user (often used for banning)"""
-    try:
-        res = requests.put(f'{USER_SERVICE}/users/{user_id}/', json=request.data, timeout=5)
-        return Response(res.json(), status=res.status_code)
+        elif request.method == 'DELETE':
+            res = requests.delete(f'{USER_SERVICE}/users/{user_id}/', timeout=5)
+            return Response(res.json() if res.content else {'success': True}, status=res.status_code)
+
     except Exception as e: return Response({'error': str(e)}, status=500)
 
 

@@ -1,4 +1,3 @@
-"""Web BFF Views - Aggregates data from multiple microservices"""
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
@@ -6,6 +5,8 @@ from rest_framework import status
 import requests
 from functools import wraps
 from decouple import config
+from .utils import startup_breaker, user_breaker, booking_breaker
+import pybreaker
 
 # Microservice URLs
 USER_SERVICE = config('USER_SERVICE_URL', default='http://user-service:4001')
@@ -35,38 +36,52 @@ def role_required(allowed_roles):
 @api_view(['GET'])
 @permission_classes([AllowAny])
 def home_page(request):
-    """Aggregate homepage data"""
+    """Aggregate homepage data with Circuit Breaker and Fallback"""
+    startups = []
+    service_status = "healthy"
+
     try:
-        startups_res = requests.get(
+        # Use breaker.call() for maximum reliability across versions
+        res = startup_breaker.call(
+            requests.get,
             f'{STARTUP_SERVICE}/startups/',
             headers={'Accept': 'application/json'},
-            timeout=5,
+            timeout=3
         )
-        startups = startups_res.json() if startups_res.status_code == 200 else []
+        
+        if res.status_code == 200:
+            startups = res.json()
+            if isinstance(startups, dict) and 'results' in startups:
+                startups = startups['results']
+        else:
+            startups = []
 
-        # Handle paginated response
-        if isinstance(startups, dict) and 'results' in startups:
-            startups = startups['results']
+    except (pybreaker.CircuitBreakerError, requests.RequestException) as e:
+        # Fallback: Return empty list instead of 500
+        startups = []
+        service_status = "degraded"
+        print(f"DEBUG: Startup Service Breaker tripped or Error: {str(e)}")
 
-        # Extract unique categories from startup data
-        seen = set()
-        categories = []
-        for s in startups:
-            cat = s.get('industry') or s.get('category_name')
-            if cat and cat not in seen:
-                seen.add(cat)
-                categories.append({'id': cat, 'name': cat})
+    # Extract unique categories from startup data
+    seen = set()
+    categories = []
+    for s in startups:
+        # Safety check if startups is not a list of dicts
+        if not isinstance(s, dict): continue
+        cat = s.get('industry') or s.get('category_name')
+        if cat and cat not in seen:
+            seen.add(cat)
+            categories.append({'id': cat, 'name': cat})
 
-        return Response({
-            'success': True,
-            'data': {
-                'featuredStartups': startups,
-                'categories': categories,
-            },
-            'featured_startups': startups,
-        })
-    except Exception as e:
-        return Response({'success': False, 'error': str(e)}, status=500)
+    return Response({
+        'success': True,
+        'data': {
+            'featuredStartups': startups,
+            'categories': categories,
+            'service_status': service_status
+        },
+        'featured_startups': startups,
+    })
 
 @api_view(['POST'])
 @permission_classes([AllowAny])
@@ -98,29 +113,74 @@ def register(request):
 @api_view(['GET'])
 @permission_classes([AllowAny])
 def startup_detail(request, startup_id):
-    """Proxy startup detail request"""
+    """BFF for single startup detail aggregation (Startup + Owner + Reviews)"""
     try:
+        # 1. Fetch startup basic info
         res = requests.get(f'{STARTUP_SERVICE}/startups/{startup_id}/', timeout=5)
+        if res.status_code != 200:
+            return Response(res.json(), status=res.status_code)
+        
+        startup_data = res.json()
+        
+        # 2. Aggregate: Fetch Owner info from User Service
+        owner_id = startup_data.get('user_id') or startup_data.get('owner_id')
+        if owner_id:
+            try:
+                user_res = requests.get(f'{USER_SERVICE}/users/{owner_id}/', timeout=2)
+                if user_res.status_code == 200:
+                    startup_data['owner_details'] = user_res.json()
+            except:
+                startup_data['owner_details'] = None
+        
+        # 3. Aggregate: Fetch Reviews
+        reviews = []
+        try:
+            rev_res = requests.get(f'{STARTUP_SERVICE}/startups/{startup_id}/reviews/', timeout=2)
+            if rev_res.status_code == 200:
+                reviews = rev_res.json()
+        except:
+            pass
+
+        return Response({
+            'success': True,
+            'startup': startup_data,
+            'reviews': reviews
+        })
+    except Exception as e: return Response({'error': str(e)}, status=500)
+
+@api_view(['GET'])
+@permission_classes([AllowAny])
+def startup_reviews(request, startup_id):
+    """Proxy startup reviews request"""
+    try:
+        res = requests.get(f'{STARTUP_SERVICE}/startups/{startup_id}/reviews/', timeout=5)
+        return Response(res.json(), status=res.status_code)
+    except Exception as e: return Response({'error': str(e)}, status=500)
+
+@api_view(['GET'])
+@permission_classes([AllowAny])
+def startup_reviews_summary(request, startup_id):
+    """Proxy startup reviews summary request"""
+    try:
+        res = requests.get(f'{STARTUP_SERVICE}/startups/{startup_id}/reviews/summary/', timeout=5)
         return Response(res.json(), status=res.status_code)
     except Exception as e: return Response({'error': str(e)}, status=500)
 
 @api_view(['POST'])
-@permission_classes([AllowAny])
-@role_required(['admin'])
-def approve_startup(request, startup_id):
+@role_required(['founder', 'admin', 'user'])  # Basic user can also register a startup to become a founder
+def create_startup(request):
+    """Proxy startup creation request to Startup Service"""
     try:
-        res = requests.post(f'{STARTUP_SERVICE}/startups/{startup_id}/approve/', timeout=5)
+        payload = request.data.copy()
+        # Automatically set user_id from Gateway headers
+        user_id = request.META.get('HTTP_X_USER_ID')
+        if user_id:
+            payload['user_id'] = user_id
+            
+        res = requests.post(f'{STARTUP_SERVICE}/startups/', json=payload, timeout=5)
         return Response(res.json(), status=res.status_code)
     except Exception as e: return Response({'error': str(e)}, status=500)
 
-@api_view(['POST'])
-@permission_classes([AllowAny])
-@role_required(['admin'])
-def reject_startup(request, startup_id):
-    try:
-        res = requests.post(f'{STARTUP_SERVICE}/startups/{startup_id}/reject/', timeout=5)
-        return Response(res.json(), status=res.status_code)
-    except Exception as e: return Response({'error': str(e)}, status=500)
 
 @api_view(['GET'])
 @permission_classes([AllowAny])
@@ -154,6 +214,14 @@ def list_pitch_requests(request):
         return Response({'success': True, 'data': results})
     except requests.exceptions.RequestException as e:
         return Response({'success': False, 'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+@api_view(['GET', 'POST'])
+@permission_classes([AllowAny])
+def legacy_pitch_requests(request):
+    """Backward-compatible endpoint for legacy frontend /api/v1/pitch-requests/."""
+    if request.method == 'GET':
+        return list_pitch_requests(request)
+    return submit_pitch_request(request)
 
 @api_view(['POST'])
 @role_required(['admin', 'investor'])
@@ -200,36 +268,40 @@ def list_pitch_slots(request):
     except Exception as e:
         return Response({'error': str(e)}, status=500)
 
-@api_view(['POST', 'PATCH'])
-@permission_classes([AllowAny])
+@api_view(['POST'])
+@role_required(['admin', 'investor'])
 def book_pitch_slot(request, slot_id):
+    """
+    Orchestrate pitch booking using booking-service (Saga entry).
+    This creates a PitchBooking record which then triggers a Saga event to:
+    1. Reserve the slot in scheduling-service
+    2. (Optional) Notify the founder
+    """
     try:
-        payload = {'status': 'BOOKED'}
-        if isinstance(getattr(request, 'data', None), dict):
-            payload.update({k: v for k, v in request.data.items() if k != 'status'})
+        # Expecting pitch_request_id in payload
+        pitch_request_id = request.data.get('pitch_request_id')
+        if not pitch_request_id:
+            return Response({'error': 'pitch_request_id is required'}, status=400)
+            
+        payload = {
+            'pitch_request': pitch_request_id,
+            'pitch_slot_id': slot_id,
+            'status': 'INITIALIZED' # Triggers Saga
+        }
 
-        # scheduling-service exposes DRF action: /pitch-slots/{id}/update_status/
-        res = requests.patch(
-            f'{SCHEDULING_SERVICE}/pitch-slots/{slot_id}/update_status/',
-            headers={'Accept': 'application/json'},
-            json=payload,
-            timeout=5,
-        )
-
-        try:
-            body = res.json()
-        except ValueError:
-            body = {
-                'error': 'Invalid upstream response from scheduling-service',
-                'upstream_status': res.status_code,
-                'upstream_body': res.text[:500],
-            }
-            return Response(body, status=502)
-
-        if res.status_code in (200, 202):
-            return Response({'success': True, 'slot_id': slot_id, 'result': body}, status=200)
-
-        return Response(body, status=res.status_code)
+        # Create booking in booking-service
+        # booking-service is on 8002
+        res = requests.post(f'{BOOKING_SERVICE}/api/pitch-bookings/', json=payload, timeout=5)
+        
+        if res.status_code == 201:
+            return Response({
+                'success': True, 
+                'message': 'Booking initiated. The slot will be reserved shortly via Saga.',
+                'data': res.json()
+            }, status=201)
+            
+        return Response(res.json(), status=res.status_code)
+        
     except Exception as e:
         return Response({'error': str(e)}, status=500)
 
@@ -321,5 +393,31 @@ def list_feedbacks(request):
             return Response(body, status=502)
 
         return Response(body, status=res.status_code)
+    except Exception as e:
+        return Response({'error': str(e)}, status=500)
+
+@api_view(['GET', 'POST'])
+@role_required(['investor', 'admin'])
+def list_create_availability_templates(request):
+    """Proxy to scheduling-service for investor availability templates"""
+    try:
+        # Resolve investor_id (priority: query_param > header_x_user_id)
+        investor_id = request.query_params.get('investor_id')
+        if not investor_id:
+            investor_id = request.META.get('HTTP_X_USER_ID')
+            
+        if request.method == 'GET':
+            res = requests.get(f'{SCHEDULING_SERVICE}/availability-templates/by_investor/?investor_id={investor_id}', timeout=5)
+            return Response(res.json(), status=res.status_code)
+            
+        elif request.method == 'POST':
+            payload = request.data.copy()
+            # Ensure investor is set to the current user if not explicitly provided
+            if 'investor' not in payload:
+                payload['investor'] = investor_id
+                
+            res = requests.post(f'{SCHEDULING_SERVICE}/availability-templates/', json=payload, timeout=5)
+            return Response(res.json(), status=res.status_code)
+            
     except Exception as e:
         return Response({'error': str(e)}, status=500)

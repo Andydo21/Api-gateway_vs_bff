@@ -31,11 +31,12 @@ class JWTAuthenticationMiddleware:
                 request.META['HTTP_X_ROLE'] = payload.get('role', 'user')
                 request.META['HTTP_X_USERNAME'] = payload.get('username', '')
                 
-            except jwt.ExpiredSignatureError:
-                return JsonResponse({'success': False, 'error': 'Token has expired'}, status=401)
-            except jwt.DecodeError:
-                return JsonResponse({'success': False, 'error': 'Invalid token'}, status=401)
-                return JsonResponse({'success': False, 'error': f'Authentication error: {str(e)}'}, status=401)
+            except (jwt.ExpiredSignatureError, jwt.DecodeError, jwt.InvalidTokenError):
+                # Only return 401 if the token clearly looks like a JWT but is failed.
+                # If it's a simple bypass string like 'dev-bypass-token', just let it pass
+                # and let BypassAuthMiddleware or AllowAny handle it downstream.
+                if token.count('.') == 2:
+                    return JsonResponse({'success': False, 'error': 'Invalid or expired token'}, status=401)
                 
         return self.get_response(request)
 
@@ -48,7 +49,8 @@ class BypassAuthMiddleware:
         self.get_response = get_response
 
     def __call__(self, request):
-        if not request.META.get('HTTP_AUTHORIZATION'):
+        auth_header = request.META.get('HTTP_AUTHORIZATION')
+        if not auth_header or 'dev-bypass-token' in auth_header:
             request.META['HTTP_X_ROLE'] = 'admin'
             request.META['HTTP_X_USER_ID'] = '1'
             request.META['HTTP_X_USERNAME'] = 'dev_user'
