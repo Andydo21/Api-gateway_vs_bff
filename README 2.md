@@ -2,16 +2,95 @@
 
 Một hệ thống quản trị hệ sinh thái Startup và điều phối Pitching chuyên nghiệp, được xây dựng trên nền tảng **Microservices** tiên tiến, sử dụng **Django**, **Kafka**, **APISIX**, và kiến trúc **BFF**.
 
+
 ---
 
-## 🚀 Hướng dẫn Khởi động Nhanh
+## 👥 Team Members
 
-### 1. Yêu cầu Hệ thống
+| Name | Student ID | Role | Contribution |
+|------|------------|------|-------------|
+| Phan Hoàng An  |         | ...  | ...         |
+| Đỗ Đăng An  |         | ...  | ...         |
+| Phạm Thành Hùng | B22DCAT139        | ...  | ...         |
+
+---
+
+## 📂 Project Structure
+
+---
+
+## 📁 Project Structure
+
+```
+microservices-assignment-starter/
+├── README.md                       # This file — project overview
+├── .env.example                    # Environment variable template
+├── docker-compose.yml              # Multi-container orchestration
+├── Makefile                        # Common development commands
+│
+├── docs/                           # 📖 Documentation
+│   ├── analysis-and-design.md      # System analysis & service design
+│   ├── architecture.md             # Architecture overview & diagrams
+│   ├── asset/                      # Images, diagrams, visual assets
+│   └── api-specs/                  # OpenAPI 3.0 specifications
+│       ├── service-a.yaml
+│       └── service-b.yaml
+│
+├── frontend/                       # 🖥️ Frontend application
+│   ├── Dockerfile
+│   ├── readme.md
+│   └── src/
+│
+├── gateway/                        # 🚪 API Gateway / reverse proxy
+│   ├── Dockerfile
+│   ├── readme.md
+│   └── src/
+│
+├── services/                       # ⚙️ Backend microservices
+│   ├── service-a/
+│   │   ├── Dockerfile
+│   │   ├── readme.md
+│   │   └── src/
+│   └── service-b/
+│       ├── Dockerfile
+│       ├── readme.md
+│       └── src/
+│
+├── scripts/                        # 🔧 Utility scripts
+│   └── snyk-scan.sh
+│
+├── .ai/                            # 🤖 AI-assisted development
+│   ├── AGENTS.md                   # Agent instructions (source of truth)
+│   ├── vibe-coding-guide.md        # Hướng dẫn vibe coding
+│   └── prompts/                    # Reusable prompt templates
+│       ├── new-service.md
+│       ├── api-endpoint.md
+│       ├── create-dockerfile.md
+│       ├── testing.md
+│       └── debugging.md
+│
+├── .github/copilot-instructions.md # GitHub Copilot instructions
+├── .cursorrules                    # Cursor AI instructions
+├── .windsurfrules                  # Windsurf AI instructions
+└── CLAUDE.md                       # Claude Code instructions
+```
+
+---
+
+## 🚀 Getting Started
+
+### Prerequisites
 - Docker & Docker Compose
 - Python 3.11+
 - Git
 
-### 2. Khởi động Toàn bộ Hệ thống
+### Quick Start
+
+```bash
+# 1. Clone this repository
+git clone https://github.com/hungdn1701/microservices-assignment-starter.git
+cd microservices-assignment-starter
+
 ```bat
 # Trên Windows
 start.bat
@@ -34,7 +113,7 @@ python setup_apisix_routes.py
 
 ---
 
-## 🏗 Kiến trúc Tổng thể (Architecture)
+## 🏗️ Architecture
 
 ### Sơ đồ Điều hướng Request
 ```mermaid
@@ -66,30 +145,7 @@ graph TD
 
 ---
 
-## 📂 Giải thích Cấu trúc Thư mục
 
-```text
-.
-├── apisix_conf/            # Cấu hình APISIX & Dashboard
-├── bff/                    # Lớp Backend for Frontend (BFF)
-│   ├── web-bff/           # API tổng hợp cho người dùng cuối
-│   └── admin-bff/         # API tổng hợp cho quản trị viên
-├── microservices/          # Các dịch vụ hạt nhân (Core logic)
-│   ├── user-service/      # Identity, Profile, Roles
-│   ├── startup-service/   # Quy trình đăng ký & duyệt Startup
-│   ├── scheduling-service/# Quản lý Slot & Availability
-│   ├── booking-service/   # Quy trình Pitching Booking
-│   ├── meeting-service/   # Tích hợp Zoom/Meet/Logic họp
-│   ├── notification-service/ # WebSockets & Real-time Alerts
-│   └── feedback-service/  # Đánh giá & Phản hồi sau pitch
-├── frontend/               # Mã nguồn giao diện (HTML/JS/CSS)
-├── frontend-service/      # Django UI Server (chỉ phục vụ file tĩnh)
-├── scripts/                # Các script tiện ích, tạo data mẫu
-├── docker-compose.yml      # File điều phối toàn bộ Docker
-└── setup_apisix_routes.py  # Script cấu hình Route động
-```
-
----
 
 ## 🔄 Luồng Nghiệp vụ (Saga Pattern)
 
@@ -131,6 +187,23 @@ Các biến quan trọng trong `docker-compose.yml`:
 
 ---
 
-## 📝 License & Author
-- **Author:** Andy Do
-- **License:** MIT
+
+---
+
+## 🤖 AI-Assisted Development (Vibe Coding)
+
+This repo is pre-configured for **AI-powered development**. Each AI tool auto-loads its instruction file:
+
+| Tool | Config File |
+|------|-------------|
+| GitHub Copilot | `.github/copilot-instructions.md` |
+| Cursor | `.cursorrules` |
+| Claude Code | `CLAUDE.md` |
+| Windsurf | `.windsurfrules` |
+
+All instruction files point to [`.ai/AGENTS.md`](.ai/AGENTS.md) as the single source of truth.
+Ready-to-use prompt templates are in [`.ai/prompts/`](.ai/prompts/).
+
+> 📖 Full guide (Vietnamese): [`.ai/vibe-coding-guide.md`](.ai/vibe-coding-guide.md)
+
+---
