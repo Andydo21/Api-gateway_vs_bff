@@ -216,7 +216,7 @@
 
             try {
                 for (const item of guestPitch) {
-                    await fetch(`${API_BASE}/web/pitch-requests/add/`, {
+                    await fetch(`${API_BASE}/web/pitch/submit/`, {
                         method: 'POST',
                         headers: {
                             'Content-Type': 'application/json',
@@ -292,3 +292,4 @@
 </body>
 </html>
  Riverside
+

@@ -447,6 +447,26 @@
                         <div class="product-description">
                             ${startup.description || 'Không có mô tả chi tiết'}
                         </div>
+
+                        <!-- New Business Details Grid -->
+                        <div class="business-details-grid" style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-top: 1.5rem; padding: 1.5rem; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px; box-shadow: inset 0 2px 4px rgba(0,0,0,0.02);">
+                            <div class="detail-item">
+                                <span style="display: block; font-size: 0.8rem; color: #64748b; margin-bottom: 2px;">Giai đoạn gọi vốn</span>
+                                <strong style="color: #1e293b; font-size: 1.1rem;">${startup.funding_stage || 'SEED'}</strong>
+                            </div>
+                            <div class="detail-item">
+                                <span style="display: block; font-size: 0.8rem; color: #64748b; margin-bottom: 2px;">Mục tiêu gọi vốn</span>
+                                <strong style="color: #667eea; font-size: 1.1rem;">${new Intl.NumberFormat('vi-VN').format(startup.funding_goal || 0)} ₫</strong>
+                            </div>
+                            <div class="detail-item">
+                                <span style="display: block; font-size: 0.8rem; color: #64748b; margin-bottom: 2px;">Quy mô đội ngũ</span>
+                                <strong style="color: #1e293b; font-size: 1.1rem;">${startup.team_size || 1} người</strong>
+                            </div>
+                            <div class="detail-item">
+                                <span style="display: block; font-size: 0.8rem; color: #64748b; margin-bottom: 2px;">Địa điểm</span>
+                                <strong style="color: #1e293b; font-size: 1.1rem;">${startup.location || 'Chưa cập nhật'}</strong>
+                            </div>
+                        </div>
                         
                         <div class="product-actions">
                             <button class="add-to-pitch-btn" onclick="openPitchModal()">
@@ -588,5 +608,6 @@
         }
     </script>
 </body>
+
 </html>
- Riverside
+Riverside
